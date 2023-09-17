@@ -1,0 +1,35 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/next_p.png</file>
+        <file>assets/next.png</file>
+        <file>assets/open_p.png</file>
+        <file>assets/open.png</file>
+        <file>assets/pause_p.png</file>
+        <file>assets/pause.png</file>
+        <file>assets/play_p.png</file>
+        <file>assets/play.png</file>
+        <file>assets/prev_p.png</file>
+        <file>assets/prev.png</file>
+        <file>assets/stop_p.png</file>
+        <file>assets/stop.png</file>
+        <file>assets/background.png</file>
+        <file>assets/posHandle_p.png</file>
+        <file>assets/posHandle.png</file>
+        <file>assets/eq_off_p.png</file>
+        <file>assets/eq_off.png</file>
+        <file>assets/eq_on_p.png</file>
+        <file>assets/eq_on.png</file>
+        <file>assets/pl_off_p.png</file>
+        <file>assets/pl_off.png</file>
+        <file>assets/pl_on_p.png</file>
+        <file>assets/pl_on.png</file>
+        <file>assets/repeat_off_p.png</file>
+        <file>assets/repeat_off.png</file>
+        <file>assets/repeat_on_p.png</file>
+        <file>assets/repeat_on.png</file>
+        <file>assets/shuffle_off_p.png</file>
+        <file>assets/shuffle_off.png</file>
+        <file>assets/shuffle_on_p.png</file>
+        <file>assets/shuffle_on.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,760 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>825</width>
+    <height>348</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="minimumSize">
+    <size>
+     <width>825</width>
+     <height>348</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>825</width>
+     <height>348</height>
+    </size>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">#centralwidget {
+	background-color: transparent;
+	border-image: url(:assets/background.png);
+	background: none;
+	background-repeat: none;
+}</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <spacer name="titleBarSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>24</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>300</width>
+          <height>200</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Visualization</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QFrame" name="songInfoContainer">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>22</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="songInfoLabel">
+             <property name="text">
+              <string>Song info</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="horizontalWidget" native="true">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>32</height>
+           </size>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QFrame" name="frame_3">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>128</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Kbps</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="frame_4">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>44</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Khz</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Mono</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Stereo</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="horizontalWidget_2" native="true">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>36</height>
+           </size>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QSlider" name="volumeSlider">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="balanceSlider">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="eqButton">
+             <property name="minimumSize">
+              <size>
+               <width>69</width>
+               <height>36</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>69</width>
+               <height>36</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#eqButton {
+	background-color: transparent;
+	border-image: url(:assets/eq_off.png);
+	background: none;
+	background-repeat: none;
+}
+
+#eqButton:pressed {
+	border-image: url(:assets/eq_off_p.png);
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="playlistButton">
+             <property name="minimumSize">
+              <size>
+               <width>69</width>
+               <height>36</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>69</width>
+               <height>36</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#playlistButton {
+	background-color: transparent;
+	border-image: url(:assets/pl_off.png);
+	background: none;
+	background-repeat: none;
+}
+
+#playlistButton:pressed {
+	border-image: url(:assets/pl_off_p.png);
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="posBarContainer">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>40</number>
+      </property>
+      <property name="rightMargin">
+       <number>22</number>
+      </property>
+      <property name="bottomMargin">
+       <number>17</number>
+      </property>
+      <item>
+       <widget class="QSlider" name="posBar">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>27</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>27</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QSlider::handle:horizontal {
+	width: 84px;
+	height: 27px;
+	background-color: transparent;
+	border-image: url(:assets/posHandle.png);
+	background: none;
+	background-repeat: none;
+}
+
+QSlider::handle:horizontal:pressed {
+	border-image: url(:assets/posHandle_p.png);
+}
+
+QSlider::groove:horizontal {
+	background: transparent;
+}</string>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QWidget" name="playButtonsContainer" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>70</height>
+       </size>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <property name="leftMargin">
+        <number>38</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>38</number>
+       </property>
+       <property name="bottomMargin">
+        <number>16</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="backButton">
+         <property name="minimumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#backButton {
+	background-color: transparent;
+	border-image: url(:assets/prev.png);
+	background: none;
+	background-repeat: none;
+}
+
+#backButton:pressed {
+	border-image: url(:assets/prev_p.png);
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="playButton">
+         <property name="minimumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#playButton {
+	background-color: transparent;
+	border-image: url(:assets/play.png);
+	background: none;
+	background-repeat: none;
+}
+
+#playButton:pressed {
+	border-image: url(:assets/play_p.png);
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pauseButton">
+         <property name="minimumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#pauseButton {
+	background-color: transparent;
+	border-image: url(:assets/pause.png);
+	background: none;
+	background-repeat: none;
+}
+
+#pauseButton:pressed {
+	border-image: url(:assets/pause_p.png);
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="stopButton">
+         <property name="minimumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#stopButton {
+	background-color: transparent;
+	border-image: url(:assets/stop.png);
+	background: none;
+	background-repeat: none;
+}
+
+#stopButton:pressed {
+	border-image: url(:assets/stop_p.png);
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="nextButton">
+         <property name="minimumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>66</width>
+           <height>54</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#nextButton {
+	background-color: transparent;
+	border-image: url(:assets/next.png);
+	background: none;
+	background-repeat: none;
+}
+
+#nextButton:pressed {
+	border-image: url(:assets/next_p.png);
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="openButton">
+         <property name="minimumSize">
+          <size>
+           <width>66</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>66</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#openButton {
+	background-color: transparent;
+	border-image: url(:assets/open.png);
+	background: none;
+	background-repeat: none;
+}
+
+#openButton:pressed {
+	border-image: url(:assets/open_p.png);
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="shuffleButton">
+         <property name="minimumSize">
+          <size>
+           <width>141</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>141</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#shuffleButton {
+	background-color: transparent;
+	border-image: url(:assets/shuffle_off.png);
+	background: none;
+	background-repeat: none;
+}
+
+#shuffleButton:pressed {
+	border-image: url(:assets/shuffle_off_p.png);
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="repeatButton">
+         <property name="minimumSize">
+          <size>
+           <width>84</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>64</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#repeatButton {
+	background-color: transparent;
+	border-image: url(:assets/repeat_off.png);
+	background: none;
+	background-repeat: none;
+}
+
+#repeatButton:pressed {
+	border-image: url(:assets/repeat_off_p.png);
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>100</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
