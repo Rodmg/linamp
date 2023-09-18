@@ -31,5 +31,9 @@
         <file>assets/shuffle_off.png</file>
         <file>assets/shuffle_on_p.png</file>
         <file>assets/shuffle_on.png</file>
+        <file>assets/balanceHandle_p.png</file>
+        <file>assets/balanceHandle.png</file>
+        <file>assets/volumeHandle_p.png</file>
+        <file>assets/volumeHandle.png</file>
     </qresource>
 </RCC>

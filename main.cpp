@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("url", "The URL(s) to open.");
     parser.process(app);
 
-    Player player;
+    /*Player player;
 
     if (!parser.positionalArguments().isEmpty() && player.isPlayerAvailable()) {
         QList<QUrl> urls;
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
         player.addToPlaylist(urls);
     }
 
-    player.show();
+    player.show();*/
 
     MainWindow window;
     window.show();
