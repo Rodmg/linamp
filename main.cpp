@@ -26,14 +26,14 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("url", "The URL(s) to open.");
     parser.process(app);
 
-    MainWindow player;
-    if (!parser.positionalArguments().isEmpty() && player.isPlayerAvailable()) {
+    MainWindow window;
+    if (!parser.positionalArguments().isEmpty() && window.player->isPlayerAvailable()) {
         QList<QUrl> urls;
         for (auto &a : parser.positionalArguments())
             urls.append(QUrl::fromUserInput(a, QDir::currentPath()));
-        player.addToPlaylist(urls);
+        window.player->addToPlaylist(urls);
     }
-    player.show();
+    window.show();
 
     return app.exec();
 }

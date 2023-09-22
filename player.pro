@@ -8,6 +8,7 @@ QT += network \
 
 HEADERS = \
     mainwindow.h \
+    playerview.h \
     playlistmodel.h \
     scrolltext.h \
     qmediaplaylist.h \
@@ -16,6 +17,7 @@ HEADERS = \
 
 SOURCES = main.cpp \
     mainwindow.cpp \
+    playerview.cpp \
     playlistmodel.cpp \
     scrolltext.cpp \
     qmediaplaylist.cpp \
@@ -26,7 +28,7 @@ target.path = $$[QT_INSTALL_EXAMPLES]/multimedia/player
 INSTALLS += target
 
 FORMS += \
-    mainwindow.ui
+    playerview.ui
 
 RESOURCES += \
     uiassets.qrc
