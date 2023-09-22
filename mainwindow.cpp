@@ -14,11 +14,17 @@
 #include <QMediaMetaData>
 #include <QMessageBox>
 #include <QStandardPaths>
+#include <QFontDatabase>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    // Load custom fonts
+    QFontDatabase::addApplicationFont(":/assets/Minecraft.ttf");
+    QFontDatabase::addApplicationFont(":/assets/Winamp.ttf");
+
+    // Setup UI
     ui->setupUi(this);
 
     //! [create-objs]
@@ -118,7 +124,7 @@ bool MainWindow::isPlayerAvailable() const
 void MainWindow::open()
 {
     QFileDialog fileDialog(this);
-    fileDialog.setNameFilter(tr("Audio (*.mp3 *.flac *.wav *.ogg *wma)"));
+    fileDialog.setNameFilter(tr("Audio (*.mp3 *.flac *.m4a *.ogg *.wma *.wav *.m3u)"));
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog.setFileMode(QFileDialog::ExistingFiles);
     fileDialog.setWindowTitle(tr("Open Files"));
@@ -171,9 +177,39 @@ void MainWindow::positionChanged(qint64 progress)
 void MainWindow::metaDataChanged()
 {
     auto metaData = m_player->metaData();
-    setTrackInfo(QString("%1 - %2")
-                     .arg(metaData.value(QMediaMetaData::AlbumArtist).toString())
-                     .arg(metaData.value(QMediaMetaData::Title).toString()));
+
+    // Generate track info string
+
+    QString artist = metaData.value(QMediaMetaData::AlbumArtist).toString().toUpper();
+    QString album = metaData.value(QMediaMetaData::AlbumTitle).toString().toUpper();
+    QString title = metaData.value(QMediaMetaData::Title).toString().toUpper();
+
+    //  Calculate duration
+    qint64 duration = metaData.value(QMediaMetaData::Duration).toLongLong()/1000;
+    QTime totalTime((duration / 3600) % 60, (duration / 60) % 60, duration % 60,
+                    (duration * 1000) % 1000);
+    QString format = "mm:ss";
+    if (duration > 3600)
+        format = "hh:mm:ss";
+    QString durationStr = totalTime.toString(format);
+
+    QString trackInfo = "";
+
+    if(artist.length()) trackInfo.append(QString("%1 - ").arg(artist));
+    if(album.length()) trackInfo.append(QString("%1 - ").arg(album));
+    if(title.length()) trackInfo.append(title);
+    if(totalTime > QTime(0, 0, 0)) trackInfo.append(QString(" (%1)").arg(durationStr));
+    if(trackInfo.length()) trackInfo.append(" --- ");
+
+    setTrackInfo(trackInfo);
+
+    // Set kbps
+    int bitrate = metaData.value(QMediaMetaData::AudioBitRate).toInt()/1000;
+    ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
+
+    // Set kHz
+    QString khz = metaData.value(QMediaMetaData::AudioCodec).toString();
+    ui->khzValueLabel->setText(khz);
 
     /*
     for (int i = 0; i < QMediaMetaData::NumMetaData; i++) {
@@ -325,6 +361,8 @@ void MainWindow::bufferingProgress(float progress)
 void MainWindow::setTrackInfo(const QString &info)
 {
     m_trackInfo = info;
+
+    ui->songInfoLabel->setText(info);
 
     /*if (m_statusBar) {
         m_statusBar->showMessage(m_trackInfo);

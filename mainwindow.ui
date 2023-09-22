@@ -34,10 +34,10 @@
    </property>
    <property name="styleSheet">
     <string notr="true">#centralwidget {
-	background-color: transparent;
-	border-image: url(:assets/background.png);
+	background-color: #2f2f4a;
+	/*border-image: url(:assets/background.png);
 	background: none;
-	background-repeat: none;
+	background-repeat: none;*/
 }</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -80,7 +80,7 @@
          <number>8</number>
         </property>
         <item>
-         <widget class="QFrame" name="frame">
+         <widget class="QFrame" name="visualizationFrame">
           <property name="minimumSize">
            <size>
             <width>278</width>
@@ -93,11 +93,14 @@
             <height>128</height>
            </size>
           </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+          <property name="styleSheet">
+           <string notr="true">#visualizationFrame {
+	background-color: #000000;
+	border-top: 3px solid #26253c;
+	border-right: 3px solid #6d6d7f;
+	border-bottom: 3px solid #6d6d7f;
+	border-left: 3px solid #26253c;
+}</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
@@ -150,11 +153,14 @@
             <height>22</height>
            </size>
           </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+          <property name="styleSheet">
+           <string notr="true">#songInfoContainer {
+	background-color: #000000;
+	border-top: 3px solid #26253c;
+	border-right: 3px solid #6d6d7f;
+	border-bottom: 3px solid #6d6d7f;
+	border-left: 3px solid #26253c;
+}</string>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <property name="leftMargin">
@@ -200,12 +206,20 @@
              </property>
              <property name="font">
               <font>
-               <family>Noto Sans</family>
+               <family>Bitstream Vera Sans Mono</family>
                <pointsize>14</pointsize>
+               <bold>false</bold>
+               <stylestrategy>NoAntialias</stylestrategy>
+               <kerning>true</kerning>
               </font>
              </property>
+             <property name="styleSheet">
+              <string notr="true">#songInfoLabel {
+
+}</string>
+             </property>
              <property name="text">
-              <string>Song info</string>
+              <string>ARTIST - ALBUM - SONG (0:00) ---</string>
              </property>
             </widget>
            </item>
@@ -247,11 +261,14 @@
                <height>16777215</height>
               </size>
              </property>
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+             <property name="styleSheet">
+              <string notr="true">#kbpsFrame {
+	background-color: #000000;
+	border-top: 3px solid #26253c;
+	border-right: 3px solid #6d6d7f;
+	border-bottom: 3px solid #6d6d7f;
+	border-left: 3px solid #26253c;
+}</string>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <property name="leftMargin">
@@ -297,8 +314,9 @@
                 </property>
                 <property name="font">
                  <font>
-                  <family>Noto Sans</family>
+                  <family>Bitstream Vera Sans Mono</family>
                   <pointsize>14</pointsize>
+                  <stylestrategy>NoAntialias</stylestrategy>
                  </font>
                 </property>
                 <property name="text">
@@ -349,13 +367,13 @@
              </property>
              <property name="font">
               <font>
-               <family>Noto Sans</family>
-               <pointsize>14</pointsize>
+               <family>Bitstream Vera Sans Mono</family>
+               <pointsize>16</pointsize>
                <bold>true</bold>
               </font>
              </property>
              <property name="text">
-              <string>Kbps</string>
+              <string>kbps</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -372,7 +390,7 @@
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>12</width>
+               <width>8</width>
                <height>20</height>
               </size>
              </property>
@@ -392,11 +410,14 @@
                <height>16777215</height>
               </size>
              </property>
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
+             <property name="styleSheet">
+              <string notr="true">#khzFrame {
+	background-color: #000000;
+	border-top: 3px solid #26253c;
+	border-right: 3px solid #6d6d7f;
+	border-bottom: 3px solid #6d6d7f;
+	border-left: 3px solid #26253c;
+}</string>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <property name="leftMargin">
@@ -442,7 +463,9 @@
                 </property>
                 <property name="font">
                  <font>
+                  <family>Bitstream Vera Sans Mono</family>
                   <pointsize>14</pointsize>
+                  <stylestrategy>NoAntialias</stylestrategy>
                  </font>
                 </property>
                 <property name="text">
@@ -493,8 +516,8 @@
              </property>
              <property name="font">
               <font>
-               <family>Noto Sans</family>
-               <pointsize>14</pointsize>
+               <family>Bitstream Vera Sans Mono</family>
+               <pointsize>16</pointsize>
                <bold>true</bold>
               </font>
              </property>
@@ -855,6 +878,15 @@ QSlider::handle:horizontal:pressed {
 
 QSlider::groove:horizontal {
 	background: transparent;
+}
+
+#posBar {
+	background-color: #2c2b43;
+	border-top: 3px solid #26253c;
+	border-right: 3px solid #6d6d7f;
+	border-bottom: 3px solid #6d6d7f;
+	border-left: 3px solid #26253c;
+	padding: -3px;
 }</string>
         </property>
         <property name="orientation">

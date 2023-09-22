@@ -34,3 +34,6 @@ FORMS += \
 
 RESOURCES += \
     uiassets.qrc
+
+DISTFILES += \
+    scale-skin.sh

@@ -35,5 +35,7 @@
         <file>assets/balanceHandle.png</file>
         <file>assets/volumeHandle_p.png</file>
         <file>assets/volumeHandle.png</file>
+        <file>assets/Minecraft.ttf</file>
+        <file>assets/Winamp.ttf</file>
     </qresource>
 </RCC>
