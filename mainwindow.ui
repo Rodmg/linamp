@@ -257,7 +257,7 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QLabel" name="songInfoLabel">
+            <widget class="ScrollText" name="songInfoLabel">
              <property name="palette">
               <palette>
                <active>
@@ -1366,6 +1366,13 @@ QSlider::groove:horizontal {
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ScrollText</class>
+   <extends>QLabel</extends>
+   <header>scrolltext.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

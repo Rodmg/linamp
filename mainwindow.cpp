@@ -207,7 +207,6 @@ void MainWindow::metaDataChanged()
     if(album.length()) trackInfo.append(QString("%1 - ").arg(album));
     if(title.length()) trackInfo.append(title);
     if(totalTime > QTime(0, 0, 0)) trackInfo.append(QString(" (%1)").arg(durationStr));
-    if(trackInfo.length()) trackInfo.append(" --- ");
 
     setTrackInfo(trackInfo);
 

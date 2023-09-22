@@ -11,6 +11,7 @@ HEADERS = \
     player.h \
     playercontrols.h \
     playlistmodel.h \
+    scrolltext.h \
     videowidget.h \
     qmediaplaylist.h \
     qmediaplaylist_p.h \
@@ -21,6 +22,7 @@ SOURCES = main.cpp \
     player.cpp \
     playercontrols.cpp \
     playlistmodel.cpp \
+    scrolltext.cpp \
     videowidget.cpp \
     qmediaplaylist.cpp \
     qmediaplaylist_p.cpp \
