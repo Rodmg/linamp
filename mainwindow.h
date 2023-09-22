@@ -62,6 +62,7 @@ private:
     Ui::MainWindow *ui;
     void setTrackInfo(const QString &info);
     void setStatusInfo(const QString &info);
+    void setPlaybackState(QMediaPlayer::PlaybackState state);
     void handleCursor(QMediaPlayer::MediaStatus status);
     void updateDurationInfo(qint64 currentInfo);
     void volumeChanged();
@@ -75,8 +76,6 @@ private:
     QString m_trackInfo;
     QString m_statusInfo;
     qint64 m_duration;
-
-    QLabel *m_metaDataLabels[QMediaMetaData::NumMetaData] = {};
 };
 
 #endif // MAINWINDOW_H

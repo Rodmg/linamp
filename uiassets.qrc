@@ -39,5 +39,8 @@
         <file>assets/Winamp.ttf</file>
         <file>assets/visualizationBackground.png</file>
         <file>assets/LED_LCD_123.ttf</file>
+        <file>assets/status_paused.png</file>
+        <file>assets/status_stopped.png</file>
+        <file>assets/status_playing.png</file>
     </qresource>
 </RCC>

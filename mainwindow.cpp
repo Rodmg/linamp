@@ -69,10 +69,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // Reset time counter
     ui->progressTimeLabel->setText("");
 
-    //PlayerControls *controls = new PlayerControls();
-    //controls->setState(m_player->playbackState());
-    //controls->setVolume(m_audioOutput->volume());
-    //controls->setMuted(controls->isMuted());
+    // Set play status icon
+    setPlaybackState(m_player->playbackState());
 
     connect(ui->playButton, &QPushButton::clicked, m_player, &QMediaPlayer::play);
     connect(ui->pauseButton, &QPushButton::clicked, m_player, &QMediaPlayer::pause);
@@ -80,34 +78,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->nextButton, &QPushButton::clicked, m_playlist, &QMediaPlaylist::next);
     connect(ui->backButton, &QPushButton::clicked, this, &MainWindow::previousClicked);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeChanged);
-    //connect(controls, &PlayerControls::changeMuting, m_audioOutput, &QAudioOutput::setMuted);
-    //connect(controls, &PlayerControls::changeRate, m_player, &QMediaPlayer::setPlaybackRate);
 
-    //connect(m_player, &QMediaPlayer::playbackStateChanged, controls, &PlayerControls::setState);
+    connect(m_player, &QMediaPlayer::playbackStateChanged, this, &MainWindow::setPlaybackState);
     connect(m_audioOutput, &QAudioOutput::volumeChanged, this, &MainWindow::setVolumeSlider);
     //connect(m_audioOutput, &QAudioOutput::mutedChanged, controls, &PlayerControls::setMuted);
-
-    // metadata
-    /*
-    QGridLayout *metaDataLayout = new QGridLayout;
-    int key = QMediaMetaData::Title;
-    for (int i = 0; i < (QMediaMetaData::NumMetaData + 2) / 3; i++) {
-        for (int j = 0; j < 6; j += 2) {
-            m_metaDataLabels[key] = new QLabel(
-                QMediaMetaData::metaDataKeyToString(static_cast<QMediaMetaData::Key>(key)));
-            if (key == QMediaMetaData::ThumbnailImage || key == QMediaMetaData::CoverArtImage)
-                m_metaDataFields[key] = new QLabel;
-            else
-                m_metaDataFields[key] = new QLineEdit;
-            m_metaDataLabels[key]->setDisabled(true);
-            m_metaDataFields[key]->setDisabled(true);
-            metaDataLayout->addWidget(m_metaDataLabels[key], i, j);
-            metaDataLayout->addWidget(m_metaDataFields[key], i, j + 1);
-            key++;
-            if (key == QMediaMetaData::NumMetaData)
-                break;
-        }
-    }*/
 
     if (!isPlayerAvailable()) {
         QMessageBox::warning(this, tr("Service not available"),
@@ -217,40 +191,6 @@ void MainWindow::metaDataChanged()
     // Set kHz
     QString khz = metaData.value(QMediaMetaData::AudioCodec).toString();
     ui->khzValueLabel->setText(khz);
-
-    /*
-    for (int i = 0; i < QMediaMetaData::NumMetaData; i++) {
-        if (QLineEdit *field = qobject_cast<QLineEdit *>(m_metaDataFields[i]))
-            field->clear();
-        else if (QLabel *label = qobject_cast<QLabel *>(m_metaDataFields[i]))
-            label->clear();
-        m_metaDataFields[i]->setDisabled(true);
-        m_metaDataLabels[i]->setDisabled(true);
-    }
-
-
-    for (auto &key : metaData.keys()) {
-        int i = int(key);
-        if (key == QMediaMetaData::CoverArtImage) {
-            QVariant v = metaData.value(key);
-            if (QLabel *cover = qobject_cast<QLabel *>(m_metaDataFields[key])) {
-                QImage coverImage = v.value<QImage>();
-                cover->setPixmap(QPixmap::fromImage(coverImage));
-            }
-        } else if (key == QMediaMetaData::ThumbnailImage) {
-            QVariant v = metaData.value(key);
-            if (QLabel *thumbnail = qobject_cast<QLabel *>(m_metaDataFields[key])) {
-                QImage thumbnailImage = v.value<QImage>();
-                thumbnail->setPixmap(QPixmap::fromImage(thumbnailImage));
-            }
-        } else if (QLineEdit *field = qobject_cast<QLineEdit *>(m_metaDataFields[key])) {
-            QString stringValue = metaData.stringValue(key);
-            field->setText(stringValue);
-        }
-        m_metaDataFields[i]->setDisabled(false);
-        m_metaDataLabels[i]->setDisabled(false);
-    }
-    */
 }
 
 QString MainWindow::trackName(const QMediaMetaData &metaData, int index)
@@ -437,4 +377,28 @@ void MainWindow::volumeChanged()
                               QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
 
     m_audioOutput->setVolume(linearVolume);
+}
+
+void MainWindow::setPlaybackState(QMediaPlayer::PlaybackState state)
+{
+    QString imageSrc;
+    switch(state) {
+    case QMediaPlayer::StoppedState:
+        imageSrc = ":/assets/status_stopped.png";
+        break;
+    case QMediaPlayer::PlayingState:
+        imageSrc = ":/assets/status_playing.png";
+        break;
+    case QMediaPlayer::PausedState:
+        imageSrc = ":/assets/status_paused.png";
+        break;
+    }
+
+    // Set play status icon
+    QPixmap image;
+    image.load(imageSrc);
+    QGraphicsScene *scene = new QGraphicsScene(this);
+    scene->addPixmap(image);
+    scene->setSceneRect(image.rect());
+    ui->playStatusIcon->setScene(scene);
 }
