@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QFontDatabase::addApplicationFont(":/assets/Minecraft.ttf");
     QFontDatabase::addApplicationFont(":/assets/Winamp.ttf");
     QFontDatabase::addApplicationFont(":/assets/LED_LCD_123.ttf");
+    QFontDatabase::addApplicationFont(":/assets/bignumbers.ttf");
 
     // Setup UI
     ui->setupUi(this);

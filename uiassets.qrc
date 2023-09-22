@@ -42,5 +42,6 @@
         <file>assets/status_paused.png</file>
         <file>assets/status_stopped.png</file>
         <file>assets/status_playing.png</file>
+        <file>assets/bignumbers.ttf</file>
     </qresource>
 </RCC>

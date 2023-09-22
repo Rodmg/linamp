@@ -131,9 +131,9 @@
              <widget class="QLabel" name="progressTimeLabel">
               <property name="geometry">
                <rect>
-                <x>149</x>
+                <x>118</x>
                 <y>9</y>
-                <width>101</width>
+                <width>150</width>
                 <height>61</height>
                </rect>
               </property>
@@ -143,6 +143,33 @@
                  <colorrole role="WindowText">
                   <brush brushstyle="SolidPattern">
                    <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="PlaceholderText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="128">
                     <red>0</red>
                     <green>248</green>
                     <blue>0</blue>
@@ -160,20 +187,86 @@
                    </color>
                   </brush>
                  </colorrole>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="PlaceholderText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="128">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="PlaceholderText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="128">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
                <font>
-                <family>LED LCD 123</family>
-                <pointsize>32</pointsize>
+                <family>bignumbers</family>
+                <pointsize>29</pointsize>
                 <stylestrategy>NoAntialias</stylestrategy>
                </font>
               </property>
               <property name="styleSheet">
                <string notr="true">#progressTimeLabel {
-	font-family: &quot;LED LCD 123&quot;;
+	font-family: &quot;bignumbers&quot;;
+	letter-spacing: 8px;
+	color: #00f800;
 }</string>
               </property>
               <property name="text">
@@ -213,66 +306,98 @@
               <property name="palette">
                <palette>
                 <active>
-                 <colorrole role="Base">
+                 <colorrole role="Button">
                   <brush brushstyle="SolidPattern">
                    <color alpha="0">
-                    <red>252</red>
-                    <green>252</green>
-                    <blue>252</blue>
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Base">
+                  <brush brushstyle="NoBrush">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
                    </color>
                   </brush>
                  </colorrole>
                  <colorrole role="Window">
                   <brush brushstyle="SolidPattern">
                    <color alpha="0">
-                    <red>239</red>
-                    <green>240</green>
-                    <blue>241</blue>
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
                    </color>
                   </brush>
                  </colorrole>
                 </active>
                 <inactive>
-                 <colorrole role="Base">
+                 <colorrole role="Button">
                   <brush brushstyle="SolidPattern">
                    <color alpha="0">
-                    <red>252</red>
-                    <green>252</green>
-                    <blue>252</blue>
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Base">
+                  <brush brushstyle="NoBrush">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
                    </color>
                   </brush>
                  </colorrole>
                  <colorrole role="Window">
                   <brush brushstyle="SolidPattern">
                    <color alpha="0">
-                    <red>239</red>
-                    <green>240</green>
-                    <blue>241</blue>
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
                    </color>
                   </brush>
                  </colorrole>
                 </inactive>
                 <disabled>
-                 <colorrole role="Base">
+                 <colorrole role="Button">
                   <brush brushstyle="SolidPattern">
                    <color alpha="0">
-                    <red>239</red>
-                    <green>240</green>
-                    <blue>241</blue>
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Base">
+                  <brush brushstyle="NoBrush">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
                    </color>
                   </brush>
                  </colorrole>
                  <colorrole role="Window">
                   <brush brushstyle="SolidPattern">
                    <color alpha="0">
-                    <red>239</red>
-                    <green>240</green>
-                    <blue>241</blue>
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
                    </color>
                   </brush>
                  </colorrole>
                 </disabled>
                </palette>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">#playStatusIcon {
+	background: transparent;
+}</string>
               </property>
               <property name="frameShape">
                <enum>QFrame::NoFrame</enum>
