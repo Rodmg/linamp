@@ -83,19 +83,19 @@
          <widget class="QFrame" name="visualizationFrame">
           <property name="minimumSize">
            <size>
-            <width>278</width>
-            <height>128</height>
+            <width>279</width>
+            <height>129</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>278</width>
-            <height>128</height>
+            <width>279</width>
+            <height>129</height>
            </size>
           </property>
           <property name="styleSheet">
            <string notr="true">#visualizationFrame {
-	background-color: #000000;
+	background-color: #000;
 	border-top: 3px solid #26253c;
 	border-right: 3px solid #6d6d7f;
 	border-bottom: 3px solid #6d6d7f;
@@ -103,11 +103,92 @@
 }</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Visualization</string>
+            <widget class="QWidget" name="visualizationBackground" native="true">
+             <property name="styleSheet">
+              <string notr="true">#visualizationBackground {
+	background-color: transparent;
+	border-image: url(:assets/visualizationBackground.png);
+	background: none;
+	background-repeat: none;
+}</string>
              </property>
+             <widget class="QLabel" name="progressTimeLabel">
+              <property name="geometry">
+               <rect>
+                <x>149</x>
+                <y>9</y>
+                <width>101</width>
+                <height>61</height>
+               </rect>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>248</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled/>
+               </palette>
+              </property>
+              <property name="font">
+               <font>
+                <family>LED LCD 123</family>
+                <pointsize>32</pointsize>
+                <stylestrategy>NoAntialias</stylestrategy>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">#progressTimeLabel {
+	font-family: &quot;LED LCD 123&quot;;
+}</string>
+              </property>
+              <property name="text">
+               <string>12 00</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+              </property>
+             </widget>
             </widget>
            </item>
           </layout>
@@ -674,6 +755,8 @@
 	border-image: url(:assets/volumeHandle.png);
 	background: none;
 	background-repeat: none;
+	margin-top: -7.5px;
+	margin-bottom: -7.5px;
 }
 
 QSlider::handle:horizontal:pressed {
@@ -682,6 +765,26 @@ QSlider::handle:horizontal:pressed {
 
 QSlider::groove:horizontal {
 	background: transparent;
+	height: 18px;
+}
+
+QSlider::sub-page:horizontal {
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #9f161b, stop: 1 #e11f26);
+	border-top: 3px solid #161623;
+	border-left: 3px solid #161623;
+	border-bottom: 3px solid #7d7d92;
+	border-right: 3px solid #7d7d92;
+	border-radius: 8px;
+}
+
+QSlider::add-page:horizontal {
+	height: 18px;
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
+	border-top: 3px solid #161623;
+	border-left: 3px solid #161623;
+	border-bottom: 3px solid #7d7d92;
+	border-right: 3px solid #7d7d92;
+	border-radius: 8px;
 }</string>
              </property>
              <property name="orientation">
@@ -721,6 +824,8 @@ QSlider::groove:horizontal {
 	border-image: url(:assets/balanceHandle.png);
 	background: none;
 	background-repeat: none;
+	margin-top: -7.5px;
+	margin-bottom: -7.5px;
 }
 
 QSlider::handle:horizontal:pressed {
@@ -729,6 +834,26 @@ QSlider::handle:horizontal:pressed {
 
 QSlider::groove:horizontal {
 	background: transparent;
+	height: 18px;
+}
+
+QSlider::sub-page:horizontal {
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
+	border-top: 3px solid #161623;
+	border-left: 3px solid #161623;
+	border-bottom: 3px solid #7d7d92;
+	border-right: 3px solid #7d7d92;
+	border-radius: 8px;
+}
+
+QSlider::add-page:horizontal {
+	height: 18px;
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
+	border-top: 3px solid #161623;
+	border-left: 3px solid #161623;
+	border-bottom: 3px solid #7d7d92;
+	border-right: 3px solid #7d7d92;
+	border-radius: 8px;
 }</string>
              </property>
              <property name="orientation">

@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Load custom fonts
     QFontDatabase::addApplicationFont(":/assets/Minecraft.ttf");
     QFontDatabase::addApplicationFont(":/assets/Winamp.ttf");
+    QFontDatabase::addApplicationFont(":/assets/LED_LCD_123.ttf");
 
     // Setup UI
     ui->setupUi(this);
@@ -60,6 +61,13 @@ MainWindow::MainWindow(QWidget *parent) :
     // Set volume slider
     ui->volumeSlider->setRange(0, 100);
     this->setVolumeSlider(m_audioOutput->volume());
+
+    // Set Balance Slider
+    ui->balanceSlider->setRange(0, 100);
+    ui->balanceSlider->setValue(50);
+
+    // Reset time counter
+    ui->progressTimeLabel->setText("");
 
     //PlayerControls *controls = new PlayerControls();
     //controls->setState(m_player->playbackState());
@@ -399,7 +407,7 @@ void MainWindow::displayErrorMessage()
 
 void MainWindow::updateDurationInfo(qint64 currentInfo)
 {
-    QString tStr;
+    QString tStr, tDisplayStr;
     if (currentInfo || m_duration) {
         QTime currentTime((currentInfo / 3600) % 60, (currentInfo / 60) % 60, currentInfo % 60,
                           (currentInfo * 1000) % 1000);
@@ -409,8 +417,10 @@ void MainWindow::updateDurationInfo(qint64 currentInfo)
         if (m_duration > 3600)
             format = "hh:mm:ss";
         tStr = currentTime.toString(format) + " / " + totalTime.toString(format);
+        format = "m ss";
+        tDisplayStr = currentTime.toString(format);
     }
-    //m_labelDuration->setText(tStr);
+    ui->progressTimeLabel->setText(tDisplayStr);
 }
 
 void MainWindow::setVolumeSlider(float volume)

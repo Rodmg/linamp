@@ -37,5 +37,7 @@
         <file>assets/volumeHandle.png</file>
         <file>assets/Minecraft.ttf</file>
         <file>assets/Winamp.ttf</file>
+        <file>assets/visualizationBackground.png</file>
+        <file>assets/LED_LCD_123.ttf</file>
     </qresource>
 </RCC>
