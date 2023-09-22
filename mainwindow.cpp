@@ -48,8 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this,
             &MainWindow::playlistPositionChanged);
 
-
-
     // duration slider and label
 
     ui->posBar->setRange(0, m_player->duration());
@@ -73,9 +71,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // Set play status icon
     setPlaybackState(m_player->playbackState());
 
-    connect(ui->playButton, &QPushButton::clicked, m_player, &QMediaPlayer::play);
-    connect(ui->pauseButton, &QPushButton::clicked, m_player, &QMediaPlayer::pause);
-    connect(ui->stopButton, &QPushButton::clicked, m_player, &QMediaPlayer::stop);
+    connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::playClicked);
+    connect(ui->pauseButton, &QPushButton::clicked, this, &MainWindow::pauseClicked);
+    connect(ui->stopButton, &QPushButton::clicked, this, &MainWindow::stopClicked);
     connect(ui->nextButton, &QPushButton::clicked, m_playlist, &QMediaPlaylist::next);
     connect(ui->backButton, &QPushButton::clicked, this, &MainWindow::previousClicked);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeChanged);
@@ -225,6 +223,24 @@ void MainWindow::previousClicked()
     }
 }
 
+void MainWindow::playClicked()
+{
+    shouldBePlaying = true;
+    m_player->play();
+}
+
+void MainWindow::pauseClicked()
+{
+    shouldBePlaying = false;
+    m_player->pause();
+}
+
+void MainWindow::stopClicked()
+{
+    shouldBePlaying = false;
+    m_player->stop();
+}
+
 void MainWindow::jump(const QModelIndex &index)
 {
     if (index.isValid()) {
@@ -237,19 +253,11 @@ void MainWindow::playlistPositionChanged(int currentItem)
     //if (m_playlistView)
     //    m_playlistView->setCurrentIndex(m_playlistModel->index(currentItem, 0));
 
-    QMediaPlayer::PlaybackState prevState = m_player->playbackState();
-
     m_player->setSource(m_playlist->currentMedia());
 
-    switch (prevState) {
-    case QMediaPlayer::PlayingState:
+    if (shouldBePlaying) {
         m_player->play();
-        break;
-    case QMediaPlayer::StoppedState:
-    case QMediaPlayer::PausedState:
-        break;
     }
-
 }
 
 void MainWindow::seek(int mseconds)

@@ -1095,7 +1095,7 @@ QSlider::add-page:horizontal {
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="eqButton">
+            <widget class="QCheckBox" name="eqButton">
              <property name="minimumSize">
               <size>
                <width>69</width>
@@ -1109,15 +1109,45 @@ QSlider::add-page:horizontal {
               </size>
              </property>
              <property name="styleSheet">
-              <string notr="true">#eqButton {
-	background-color: transparent;
-	border-image: url(:assets/eq_off.png);
-	background: none;
-	background-repeat: none;
+              <string notr="true">QCheckBox {
+    spacing: 0px;
 }
 
-#eqButton:pressed {
-	border-image: url(:assets/eq_off_p.png);
+QCheckBox::indicator {
+    width: 69px;
+    height: 36px;
+}
+
+QCheckBox::indicator:unchecked {
+    image: url(:assets/eq_off.png);
+}
+
+QCheckBox::indicator:unchecked:hover {
+    image: url(:assets/eq_off.png);
+}
+
+QCheckBox::indicator:unchecked:pressed {
+    image: url(:assets/eq_off_p.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:assets/eq_on.png);
+}
+
+QCheckBox::indicator:checked:hover {
+    image: url(:assets/eq_on.png);
+}
+
+QCheckBox::indicator:checked:pressed {
+    image: url(:assets/eq_on_p.png);
+}
+
+QCheckBox::indicator:indeterminate:hover {
+    image:  url(:assets/eq_off.png);
+}
+
+QCheckBox::indicator:indeterminate:pressed {
+    image:  url(:assets/eq_off_p.png);
 }</string>
              </property>
              <property name="text">
@@ -1126,7 +1156,7 @@ QSlider::add-page:horizontal {
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="playlistButton">
+            <widget class="QCheckBox" name="playlistButton">
              <property name="minimumSize">
               <size>
                <width>69</width>
@@ -1140,15 +1170,45 @@ QSlider::add-page:horizontal {
               </size>
              </property>
              <property name="styleSheet">
-              <string notr="true">#playlistButton {
-	background-color: transparent;
-	border-image: url(:assets/pl_off.png);
-	background: none;
-	background-repeat: none;
+              <string notr="true">QCheckBox {
+    spacing: 0px;
 }
 
-#playlistButton:pressed {
-	border-image: url(:assets/pl_off_p.png);
+QCheckBox::indicator {
+    width: 69px;
+    height: 36px;
+}
+
+QCheckBox::indicator:unchecked {
+    image: url(:assets/pl_off.png);
+}
+
+QCheckBox::indicator:unchecked:hover {
+    image: url(:assets/pl_off.png);
+}
+
+QCheckBox::indicator:unchecked:pressed {
+    image: url(:assets/pl_off_p.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:assets/pl_on.png);
+}
+
+QCheckBox::indicator:checked:hover {
+    image: url(:assets/pl_on.png);
+}
+
+QCheckBox::indicator:checked:pressed {
+    image: url(:assets/pl_on_p.png);
+}
+
+QCheckBox::indicator:indeterminate:hover {
+    image:  url(:assets/pl_off.png);
+}
+
+QCheckBox::indicator:indeterminate:pressed {
+    image:  url(:assets/pl_off_p.png);
 }</string>
              </property>
              <property name="text">
@@ -1490,7 +1550,7 @@ QSlider::groove:horizontal {
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="shuffleButton">
+        <widget class="QCheckBox" name="shuffleButton">
          <property name="minimumSize">
           <size>
            <width>141</width>
@@ -1504,15 +1564,45 @@ QSlider::groove:horizontal {
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">#shuffleButton {
-	background-color: transparent;
-	border-image: url(:assets/shuffle_off.png);
-	background: none;
-	background-repeat: none;
+          <string notr="true">QCheckBox {
+    spacing: 0px;
 }
 
-#shuffleButton:pressed {
-	border-image: url(:assets/shuffle_off_p.png);
+QCheckBox::indicator {
+    width: 141px;
+    height: 45px;
+}
+
+QCheckBox::indicator:unchecked {
+    image: url(:assets/shuffle_off.png);
+}
+
+QCheckBox::indicator:unchecked:hover {
+    image: url(:assets/shuffle_off.png);
+}
+
+QCheckBox::indicator:unchecked:pressed {
+    image: url(:assets/shuffle_off_p.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:assets/shuffle_on.png);
+}
+
+QCheckBox::indicator:checked:hover {
+    image: url(:assets/shuffle_on.png);
+}
+
+QCheckBox::indicator:checked:pressed {
+    image: url(:assets/shuffle_on_p.png);
+}
+
+QCheckBox::indicator:indeterminate:hover {
+    image:  url(:assets/shuffle_off.png);
+}
+
+QCheckBox::indicator:indeterminate:pressed {
+    image:  url(:assets/shuffle_off_p.png);
 }</string>
          </property>
          <property name="text">
@@ -1521,7 +1611,7 @@ QSlider::groove:horizontal {
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="repeatButton">
+        <widget class="QCheckBox" name="repeatButton">
          <property name="minimumSize">
           <size>
            <width>84</width>
@@ -1535,15 +1625,45 @@ QSlider::groove:horizontal {
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">#repeatButton {
-	background-color: transparent;
-	border-image: url(:assets/repeat_off.png);
-	background: none;
-	background-repeat: none;
+          <string notr="true">QCheckBox {
+    spacing: 0px;
 }
 
-#repeatButton:pressed {
-	border-image: url(:assets/repeat_off_p.png);
+QCheckBox::indicator {
+    width: 85px;
+    height: 45px;
+}
+
+QCheckBox::indicator:unchecked {
+    image: url(:assets/repeat_off.png);
+}
+
+QCheckBox::indicator:unchecked:hover {
+    image: url(:assets/repeat_off.png);
+}
+
+QCheckBox::indicator:unchecked:pressed {
+    image: url(:assets/repeat_off_p.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:assets/repeat_on.png);
+}
+
+QCheckBox::indicator:checked:hover {
+    image: url(:assets/repeat_on.png);
+}
+
+QCheckBox::indicator:checked:pressed {
+    image: url(:assets/repeat_on_p.png);
+}
+
+QCheckBox::indicator:indeterminate:hover {
+    image:  url(:assets/repeat_off.png);
+}
+
+QCheckBox::indicator:indeterminate:pressed {
+    image:  url(:assets/repeat_off_p.png);
 }</string>
          </property>
          <property name="text">

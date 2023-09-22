@@ -48,6 +48,9 @@ private slots:
     void metaDataChanged();
 
     void previousClicked();
+    void playClicked();
+    void pauseClicked();
+    void stopClicked();
 
     void seek(int mseconds);
     void jump(const QModelIndex &index);
@@ -76,6 +79,10 @@ private:
     QString m_trackInfo;
     QString m_statusInfo;
     qint64 m_duration;
+
+    bool shuffleEnabled = false;
+    bool repeatEnabled = false;
+    bool shouldBePlaying = false;
 };
 
 #endif // MAINWINDOW_H
