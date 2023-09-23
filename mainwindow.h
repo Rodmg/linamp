@@ -2,7 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStackedLayout>
 #include "playerview.h"
+#include "playlistview.h"
+#include "qmediaplaylist.h"
+#include "playlistmodel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -10,13 +14,19 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    PlayerView *player;
 
-private:
+    QStackedLayout *viewStack;
+
+    PlayerView *player;
+    PlaylistView *playlist;
 
 public slots:
+    void showPlayer();
+    void showPlaylist();
 
-private slots:
+private:
+    QMediaPlaylist *m_playlist = nullptr;
+    PlaylistModel *m_playlistModel = nullptr;
 
 };
 

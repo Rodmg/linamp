@@ -10,6 +10,7 @@ HEADERS = \
     mainwindow.h \
     playerview.h \
     playlistmodel.h \
+    playlistview.h \
     scrolltext.h \
     qmediaplaylist.h \
     qmediaplaylist_p.h \
@@ -19,6 +20,7 @@ SOURCES = main.cpp \
     mainwindow.cpp \
     playerview.cpp \
     playlistmodel.cpp \
+    playlistview.cpp \
     scrolltext.cpp \
     qmediaplaylist.cpp \
     qmediaplaylist_p.cpp \
@@ -28,7 +30,8 @@ target.path = $$[QT_INSTALL_EXAMPLES]/multimedia/player
 INSTALLS += target
 
 FORMS += \
-    playerview.ui
+    playerview.ui \
+    playlistview.ui
 
 RESOURCES += \
     uiassets.qrc

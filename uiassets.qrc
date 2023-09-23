@@ -43,5 +43,11 @@
         <file>assets/status_stopped.png</file>
         <file>assets/status_playing.png</file>
         <file>assets/bignumbers.ttf</file>
+        <file>assets/pl_add_p.png</file>
+        <file>assets/pl_add.png</file>
+        <file>assets/pl_close_p.png</file>
+        <file>assets/pl_close.png</file>
+        <file>assets/scroll_handle_p.png</file>
+        <file>assets/scroll_handle.png</file>
     </qresource>
 </RCC>

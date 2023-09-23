@@ -16,7 +16,7 @@
 #include <QStandardPaths>
 #include <QFontDatabase>
 
-PlayerView::PlayerView(QWidget *parent) :
+PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     QWidget(parent),
     ui(new Ui::PlayerView)
 {
@@ -42,7 +42,7 @@ PlayerView::PlayerView(QWidget *parent) :
     connect(m_player, &QMediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
     connect(m_player, &QMediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
 
-    m_playlistModel = new PlaylistModel(this);
+    m_playlistModel = playlistModel;
     m_playlist = m_playlistModel->playlist();
     //! [2]
     connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this,
@@ -77,10 +77,10 @@ PlayerView::PlayerView(QWidget *parent) :
     connect(ui->nextButton, &QPushButton::clicked, m_playlist, &QMediaPlaylist::next);
     connect(ui->backButton, &QPushButton::clicked, this, &PlayerView::previousClicked);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
+    connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
 
     connect(m_player, &QMediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
     connect(m_audioOutput, &QAudioOutput::volumeChanged, this, &PlayerView::setVolumeSlider);
-    //connect(m_audioOutput, &QAudioOutput::mutedChanged, controls, &PlayerControls::setMuted);
 
     if (!isPlayerAvailable()) {
         QMessageBox::warning(this, tr("Service not available"),
@@ -135,8 +135,6 @@ void PlayerView::addToPlaylist(const QList<QUrl> &urls)
     }
     if (m_playlist->mediaCount() > previousMediaCount) {
         auto index = m_playlistModel->index(previousMediaCount, 0);
-        //if (m_playlistView)
-        //    m_playlistView->setCurrentIndex(index);
         jump(index);
     }
 }
@@ -160,7 +158,6 @@ void PlayerView::metaDataChanged()
     auto metaData = m_player->metaData();
 
     // Generate track info string
-
     QString artist = metaData.value(QMediaMetaData::AlbumArtist).toString().toUpper();
     QString album = metaData.value(QMediaMetaData::AlbumTitle).toString().toUpper();
     QString title = metaData.value(QMediaMetaData::Title).toString().toUpper();
@@ -187,7 +184,7 @@ void PlayerView::metaDataChanged()
     int bitrate = metaData.value(QMediaMetaData::AudioBitRate).toInt()/1000;
     ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
 
-    // Set kHz
+    // Set kHz TODO
     QString khz = metaData.value(QMediaMetaData::AudioCodec).toString();
     ui->khzValueLabel->setText(khz);
 }
@@ -245,14 +242,13 @@ void PlayerView::jump(const QModelIndex &index)
 {
     if (index.isValid()) {
         m_playlist->setCurrentIndex(index.row());
+        shouldBePlaying = true;
+        m_player->play();
     }
 }
 
 void PlayerView::playlistPositionChanged(int currentItem)
 {
-    //if (m_playlistView)
-    //    m_playlistView->setCurrentIndex(m_playlistModel->index(currentItem, 0));
-
     m_player->setSource(m_playlist->currentMedia());
 
     if (shouldBePlaying) {
@@ -320,30 +316,20 @@ void PlayerView::setTrackInfo(const QString &info)
 
     ui->songInfoLabel->setText(info);
 
-    /*if (m_statusBar) {
-        m_statusBar->showMessage(m_trackInfo);
-        m_statusLabel->setText(m_statusInfo);
-    } else {*/
     if (!m_statusInfo.isEmpty())
         setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
     else
         setWindowTitle(m_trackInfo);
-    //}
 }
 
 void PlayerView::setStatusInfo(const QString &info)
 {
     m_statusInfo = info;
 
-    /*if (m_statusBar) {
-        m_statusBar->showMessage(m_trackInfo);
-        m_statusLabel->setText(m_statusInfo);
-    } else {*/
     if (!m_statusInfo.isEmpty())
         setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
     else
         setWindowTitle(m_trackInfo);
-    //}
 }
 
 void PlayerView::displayErrorMessage()

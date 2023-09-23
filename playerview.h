@@ -2,6 +2,7 @@
 #define PLAYERVIEW_H
 
 #include "qmediaplaylist.h"
+#include "playlistmodel.h"
 
 #include <QMediaMetaData>
 #include <QMediaPlayer>
@@ -18,8 +19,6 @@ class QSlider;
 class QStatusBar;
 QT_END_NAMESPACE
 
-class PlaylistModel;
-
 namespace Ui {
 class PlayerView;
 }
@@ -29,7 +28,7 @@ class PlayerView : public QWidget
     Q_OBJECT
 
 public:
-    explicit PlayerView(QWidget *parent = nullptr);
+    explicit PlayerView(QWidget *parent = nullptr, PlaylistModel *playlistModel = nullptr);
     ~PlayerView();
 
     bool isPlayerAvailable() const;
@@ -38,9 +37,10 @@ public:
 
 public slots:
     void setVolumeSlider(float volume);
+    void jump(const QModelIndex &index);
+    void open();
 
 private slots:
-    void open();
     void durationChanged(qint64 duration);
     void positionChanged(qint64 progress);
     void metaDataChanged();
@@ -51,13 +51,15 @@ private slots:
     void stopClicked();
 
     void seek(int mseconds);
-    void jump(const QModelIndex &index);
     void playlistPositionChanged(int);
 
     void statusChanged(QMediaPlayer::MediaStatus status);
     void bufferingProgress(float progress);
 
     void displayErrorMessage();
+
+signals:
+    void showPlaylistClicked();
 
 private:
     Ui::PlayerView *ui;
