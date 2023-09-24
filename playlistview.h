@@ -22,6 +22,8 @@ private:
     QMediaPlaylist *m_playlist = nullptr;
     PlaylistModel *m_playlistModel = nullptr;
 
+    void setupPlayListUi();
+
 private slots:
     void playlistPositionChanged(int);
 

@@ -29,6 +29,7 @@
 	border-right: 3px solid #6d6d7f;
 	border-bottom: 3px solid #6d6d7f;
 	border-left: 3px solid #26253c;
+    alternate-background-color: #10101a;
 }
 
 QListView::item {
@@ -50,6 +51,42 @@ QListView::item:selected:active {
     background-color: #0000c6;
 }
 
+QScrollBar:vertical {
+	background-color: #191926;
+}
+
+QScrollBar::handle:vertical {
+	background-color: #b0995e;
+}
+
+ QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+	height: 0px;
+	width: 0px;
+	background-color: transparent;
+	background: none;
+	border: none;
+}
+
+ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+	background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
+
+ QScrollBar::add-line:vertical {
+    background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
+
+ QScrollBar::sub-line:vertical {
+    background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
 
 /*QScrollBar:vertical {
     background-color: #2c2b43;
@@ -98,10 +135,16 @@ QScrollBar::handle:vertical:pressed {
  }*/</string>
      </property>
      <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
+      <enum>Qt::ScrollBarAsNeeded</enum>
      </property>
      <property name="editTriggers">
       <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="verticalScrollMode">
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
      </property>
     </widget>
    </item>
