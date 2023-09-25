@@ -3,15 +3,17 @@
 
 #include "qmediaplaylist.h"
 #include "playlistmodel.h"
+#include "mediaplayer.h"
 
 #include <QMediaMetaData>
-#include <QMediaPlayer>
+#include <QAudioOutput>
+//#include <QMediaPlayer>
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
 class QAbstractItemView;
 class QLabel;
-class QMediaPlayer;
+//class QMediaPlayer;
 class QModelIndex;
 class QPushButton;
 class QComboBox;
@@ -53,7 +55,7 @@ private slots:
     void seek(int mseconds);
     void playlistPositionChanged(int);
 
-    void statusChanged(QMediaPlayer::MediaStatus status);
+    void statusChanged(MediaPlayer::MediaStatus status);
     void bufferingProgress(float progress);
 
     void displayErrorMessage();
@@ -65,13 +67,13 @@ private:
     Ui::PlayerView *ui;
     void setTrackInfo(const QString &info);
     void setStatusInfo(const QString &info);
-    void setPlaybackState(QMediaPlayer::PlaybackState state);
-    void handleCursor(QMediaPlayer::MediaStatus status);
+    void setPlaybackState(MediaPlayer::PlaybackState state);
+    void handleCursor(MediaPlayer::MediaStatus status);
     void updateDurationInfo(qint64 currentInfo);
     void volumeChanged();
     QString trackName(const QMediaMetaData &metaData, int index);
 
-    QMediaPlayer *m_player = nullptr;
+    MediaPlayer *m_player = nullptr;
     QAudioOutput *m_audioOutput = nullptr;
     QMediaPlaylist *m_playlist = nullptr;
 

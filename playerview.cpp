@@ -30,17 +30,17 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     ui->setupUi(this);
 
     //! [create-objs]
-    m_player = new QMediaPlayer(this);
+    m_player = new MediaPlayer(this);
     m_audioOutput = new QAudioOutput(this);
-    m_player->setAudioOutput(m_audioOutput);
+    //m_player->setAudioOutput(m_audioOutput);
     //! [create-objs]
-    connect(m_player, &QMediaPlayer::durationChanged, this, &PlayerView::durationChanged);
-    connect(m_player, &QMediaPlayer::positionChanged, this, &PlayerView::positionChanged);
-    connect(m_player, QOverload<>::of(&QMediaPlayer::metaDataChanged), this,
-            &PlayerView::metaDataChanged);
-    connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &PlayerView::statusChanged);
-    connect(m_player, &QMediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
-    connect(m_player, &QMediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
+    connect(m_player, &MediaPlayer::durationChanged, this, &PlayerView::durationChanged);
+    connect(m_player, &MediaPlayer::positionChanged, this, &PlayerView::positionChanged);
+    //connect(m_player, QOverload<>::of(&MediaPlayer::metaDataChanged), this,
+    //        &PlayerView::metaDataChanged);
+    //connect(m_player, &MediaPlayer::mediaStatusChanged, this, &PlayerView::statusChanged);
+    //connect(m_player, &MediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
+    //connect(m_player, &MediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
 
     m_playlistModel = playlistModel;
     m_playlist = m_playlistModel->playlist();
@@ -79,7 +79,7 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
     connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
 
-    connect(m_player, &QMediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
+    connect(m_player, &MediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
     connect(m_audioOutput, &QAudioOutput::volumeChanged, this, &PlayerView::setVolumeSlider);
 
     if (!isPlayerAvailable()) {
@@ -99,7 +99,7 @@ PlayerView::~PlayerView()
 
 bool PlayerView::isPlayerAvailable() const
 {
-    return m_player->isAvailable();
+    return true; //m_player->isAvailable();
 }
 
 void PlayerView::open()
@@ -155,7 +155,7 @@ void PlayerView::positionChanged(qint64 progress)
 
 void PlayerView::metaDataChanged()
 {
-    auto metaData = m_player->metaData();
+    /*auto metaData = m_player->metaData();
 
     // Generate track info string
     QString artist = metaData.value(QMediaMetaData::AlbumArtist).toString().toUpper();
@@ -186,7 +186,7 @@ void PlayerView::metaDataChanged()
 
     // Set kHz TODO
     QString khz = metaData.value(QMediaMetaData::AudioCodec).toString();
-    ui->khzValueLabel->setText(khz);
+    ui->khzValueLabel->setText(khz);*/
 }
 
 QString PlayerView::trackName(const QMediaMetaData &metaData, int index)
@@ -261,41 +261,41 @@ void PlayerView::seek(int mseconds)
     m_player->setPosition(mseconds);
 }
 
-void PlayerView::statusChanged(QMediaPlayer::MediaStatus status)
+void PlayerView::statusChanged(MediaPlayer::MediaStatus status)
 {
     handleCursor(status);
 
     // handle status message
     switch (status) {
-    case QMediaPlayer::NoMedia:
-    case QMediaPlayer::LoadedMedia:
+    case MediaPlayer::NoMedia:
+    case MediaPlayer::LoadedMedia:
         setStatusInfo(QString());
         break;
-    case QMediaPlayer::LoadingMedia:
+    case MediaPlayer::LoadingMedia:
         setStatusInfo(tr("Loading..."));
         break;
-    case QMediaPlayer::BufferingMedia:
-    case QMediaPlayer::BufferedMedia:
+    case MediaPlayer::BufferingMedia:
+    case MediaPlayer::BufferedMedia:
         setStatusInfo(tr("Buffering %1%").arg(qRound(m_player->bufferProgress() * 100.)));
         break;
-    case QMediaPlayer::StalledMedia:
+    case MediaPlayer::StalledMedia:
         setStatusInfo(tr("Stalled %1%").arg(qRound(m_player->bufferProgress() * 100.)));
         break;
-    case QMediaPlayer::EndOfMedia:
+    case MediaPlayer::EndOfMedia:
         QApplication::alert(this);
         m_playlist->next();
         break;
-    case QMediaPlayer::InvalidMedia:
+    case MediaPlayer::InvalidMedia:
         displayErrorMessage();
         break;
     }
 }
 
-void PlayerView::handleCursor(QMediaPlayer::MediaStatus status)
+void PlayerView::handleCursor(MediaPlayer::MediaStatus status)
 {
 #ifndef QT_NO_CURSOR
-    if (status == QMediaPlayer::LoadingMedia || status == QMediaPlayer::BufferingMedia
-        || status == QMediaPlayer::StalledMedia)
+    if (status == MediaPlayer::LoadingMedia || status == MediaPlayer::BufferingMedia
+        || status == MediaPlayer::StalledMedia)
         setCursor(QCursor(Qt::BusyCursor));
     else
         unsetCursor();
@@ -304,10 +304,10 @@ void PlayerView::handleCursor(QMediaPlayer::MediaStatus status)
 
 void PlayerView::bufferingProgress(float progress)
 {
-    if (m_player->mediaStatus() == QMediaPlayer::StalledMedia)
+    /*if (m_player->mediaStatus() == MediaPlayer::StalledMedia)
         setStatusInfo(tr("Stalled %1%").arg(qRound(progress * 100.)));
     else
-        setStatusInfo(tr("Buffering %1%").arg(qRound(progress * 100.)));
+        setStatusInfo(tr("Buffering %1%").arg(qRound(progress * 100.)));*/
 }
 
 void PlayerView::setTrackInfo(const QString &info)
@@ -334,9 +334,9 @@ void PlayerView::setStatusInfo(const QString &info)
 
 void PlayerView::displayErrorMessage()
 {
-    if (m_player->error() == QMediaPlayer::NoError)
+    /*if (m_player->error() == MediaPlayer::NoError)
         return;
-    setStatusInfo(m_player->errorString());
+    setStatusInfo(m_player->errorString());*/
 }
 
 void PlayerView::updateDurationInfo(qint64 currentInfo)
@@ -374,17 +374,17 @@ void PlayerView::volumeChanged()
     m_audioOutput->setVolume(linearVolume);
 }
 
-void PlayerView::setPlaybackState(QMediaPlayer::PlaybackState state)
+void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
 {
     QString imageSrc;
     switch(state) {
-    case QMediaPlayer::StoppedState:
+    case MediaPlayer::StoppedState:
         imageSrc = ":/assets/status_stopped.png";
         break;
-    case QMediaPlayer::PlayingState:
+    case MediaPlayer::PlayingState:
         imageSrc = ":/assets/status_playing.png";
         break;
-    case QMediaPlayer::PausedState:
+    case MediaPlayer::PausedState:
         imageSrc = ":/assets/status_paused.png";
         break;
     }

@@ -7,7 +7,9 @@ QT += network \
       widgets
 
 HEADERS = \
+    fft.h \
     mainwindow.h \
+    mediaplayer.h \
     playerview.h \
     playlistmodel.h \
     playlistview.h \
@@ -17,7 +19,9 @@ HEADERS = \
     qplaylistfileparser.h
 
 SOURCES = main.cpp \
+    fft.cpp \
     mainwindow.cpp \
+    mediaplayer.cpp \
     playerview.cpp \
     playlistmodel.cpp \
     playlistview.cpp \
