@@ -33,9 +33,9 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(m_player, &MediaPlayer::positionChanged, this, &PlayerView::positionChanged);
     connect(m_player, QOverload<>::of(&MediaPlayer::metaDataChanged), this,
             &PlayerView::metaDataChanged);
-    //connect(m_player, &MediaPlayer::mediaStatusChanged, this, &PlayerView::statusChanged);
+    connect(m_player, &MediaPlayer::mediaStatusChanged, this, &PlayerView::statusChanged);
     connect(m_player, &MediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
-    //connect(m_player, &MediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
+    connect(m_player, &MediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
 
     m_playlistModel = playlistModel;
     m_playlist = m_playlistModel->playlist();
@@ -256,6 +256,7 @@ void PlayerView::seek(int mseconds)
 
 void PlayerView::statusChanged(MediaPlayer::MediaStatus status)
 {
+    qDebug() << "Status changed: " << status;
     handleCursor(status);
 
     // handle status message
@@ -327,9 +328,10 @@ void PlayerView::setStatusInfo(const QString &info)
 
 void PlayerView::displayErrorMessage()
 {
-    /*if (m_player->error() == MediaPlayer::NoError)
+    if (m_player->error() == MediaPlayer::NoError)
         return;
-    setStatusInfo(m_player->errorString());*/
+    setStatusInfo(m_player->errorString());
+    qDebug() << m_player->errorString();
 }
 
 void PlayerView::updateDurationInfo(qint64 currentInfo)

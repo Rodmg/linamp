@@ -10,6 +10,7 @@
 #include <QAudioFormat>
 #include <QFile>
 #include <QAudioSink>
+#include <QMutex>
 
 // Class for decode audio files like MP3 and push decoded audio data to QOutputDevice (like speaker) and also signal newData().
 // For decoding it uses QAudioDecoder which uses QAudioFormat for decode audio file for desire format, then put decoded data to buffer.
@@ -21,12 +22,32 @@ class MediaPlayer : public QIODevice
 public:
     MediaPlayer(QObject *parent = nullptr);
 
-    enum PlaybackState { StoppedState, PlayingState, PausedState };
-    enum MediaStatus { NoMedia, LoadingMedia, LoadedMedia, StalledMedia, BufferingMedia, BufferedMedia, EndOfMedia, InvalidMedia };
+    enum PlaybackState {
+        StoppedState,
+        PlayingState,
+        PausedState
+    };
+    enum MediaStatus {
+        NoMedia,
+        LoadingMedia,
+        LoadedMedia,
+        StalledMedia,
+        BufferingMedia,
+        BufferedMedia,
+        EndOfMedia,
+        InvalidMedia
+    };
+    enum Error {
+        NoError,
+        ResourceError,
+        FormatError,
+        NetworkError,
+        AccessDeniedError
+    };
 
     void play();
     void pause();
-    void stop();
+    void stop(bool stopAudioOutput = true);
 
     PlaybackState playbackState() const;
 
@@ -36,6 +57,8 @@ public:
     MediaStatus mediaStatus() const;
     float volume() const;
     QMediaMetaData metaData() const;
+    Error error() const;
+    QString errorString() const;
 
 protected:
     qint64 readData(char* data, qint64 maxlen) override;
@@ -50,7 +73,10 @@ private:
     QAudioSink *m_audioOutput = nullptr;
     QUrl m_source;
     QMediaMetaData m_metaData = QMediaMetaData{};
+    QMutex initMutex;
+    QMutex readMutex;
 
+    Error m_error = NoError;
     MediaStatus m_status = MediaStatus::NoMedia;
     PlaybackState m_state = PlaybackState::StoppedState;
 
@@ -69,6 +95,8 @@ private:
     void clear();
     bool atEnd() const override;
     void parseMetaData();
+    void setError(Error error);
+    void setMediaStatus(MediaStatus status);
 
 public slots:
     void setSource(const QUrl &source);
@@ -80,15 +108,19 @@ private slots:
     void finished();
     void onPositionChanged();
     void onDurationChanged(qint64 duration);
+    void onDecoderError(QAudioDecoder::Error error);
+    void onAtEnd();
 
 signals:
     void playbackStateChanged(MediaPlayer::PlaybackState state);
+    void mediaStatusChanged(MediaPlayer::MediaStatus status);
     void newData(const QByteArray& data);
     void durationChanged(qint64 duration);
     void positionChanged(qint64 position);
     void bufferProgressChanged(float progress);
     void volumeChanged(float volume);
     void metaDataChanged();
+    void errorChanged();
 };
 
 #endif // MEDIAPLAYER_H

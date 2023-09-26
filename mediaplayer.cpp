@@ -5,7 +5,8 @@
 #include <taglib/tpropertymap.h>
 #include <QDebug>
 #include <QMediaDevices>
-#import <QCoreApplication>
+#include <QCoreApplication>
+#include <QTimer>
 
 MediaPlayer::MediaPlayer(QObject *parent) :
     m_input(&m_data),
@@ -21,15 +22,16 @@ MediaPlayer::MediaPlayer(QObject *parent) :
 // format - the format to which we will decode the data for output (PCM)
 bool MediaPlayer::init(const QAudioFormat& format)
 {
+    QMutexLocker l(&initMutex);
     m_format = format;
 
     // Initialize buffers
     if (!m_output.open(QIODevice::ReadOnly) || !m_input.open(QIODevice::WriteOnly))
     {
+        qDebug() << "Error initing buffers";
         return false;
     }
 
-    clear();
     setupDecoder();
     setupAudioOutput();
 
@@ -47,14 +49,16 @@ void MediaPlayer::setupDecoder()
     connect(m_decoder, &QAudioDecoder::bufferReady, this, &MediaPlayer::bufferReady);
     connect(m_decoder, &QAudioDecoder::finished, this, &MediaPlayer::finished);
     connect(m_decoder, &QAudioDecoder::durationChanged, this, &MediaPlayer::onDurationChanged);
+    connect(m_decoder, QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), this, &MediaPlayer::onDecoderError);
     connect(this, &MediaPlayer::newData, this, &MediaPlayer::onPositionChanged);
 }
 
 void MediaPlayer::setupAudioOutput()
 {
+    if(m_audioOutput) {
+        delete m_audioOutput;
+    }
     m_audioOutput = new QAudioSink(m_format, this);
-    //connect(m_audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-    m_audioOutput->start(this);
     m_audioOutput->setVolume(m_volume);
     emit volumeChanged(volume());
 }
@@ -78,28 +82,35 @@ void MediaPlayer::clearAudioOutput()
 // AudioOutput devices (like speaker) will call this function to get new audio data
 qint64 MediaPlayer::readData(char* data, qint64 maxlen)
 {
+    QMutexLocker l(&readMutex);
+    //qDebug() << "maxlen: " << maxlen;
+
     memset(data, 0, maxlen);
+    qint64 bytesRead = 0;
 
     if (m_state == PlaybackState::PlayingState)
     {
         // Copy bytes from buffer into data
-        m_output.read(data, maxlen);
+        bytesRead = m_output.read(data, maxlen);
 
         // Emmit newData event, for visualization
         if (maxlen > 0)
         {
-            QByteArray buff(data, maxlen);
+            QByteArray buff(data, bytesRead);
             emit newData(buff);
         }
 
         // If we are at the end of the file, stop
         if (atEnd())
         {
-            stop();
+            int timeout = 1; // msecs
+            QTimer::singleShot(timeout, this, &MediaPlayer::onAtEnd);
         }
     }
 
-    return maxlen;
+    //qDebug() << "Bytes read: " << bytesRead;
+
+    return bytesRead;
 }
 
 qint64 MediaPlayer::writeData(const char* data, qint64 len)
@@ -110,21 +121,15 @@ qint64 MediaPlayer::writeData(const char* data, qint64 len)
     return 0;
 }
 
-// Start play audio file
+// Start playing audio file
 void MediaPlayer::play()
 {
     if(m_state == PlaybackState::PlayingState) return;
 
     if(m_state == PlaybackState::PausedState) {
-        m_decoder->start();
         m_audioOutput->resume();
     } else {
-        clear();
-        QAudioDevice info(QMediaDevices::defaultAudioOutput());
-        QAudioFormat format = info.preferredFormat();
-        init(format);
-        m_decoder->setSource(m_source);
-        m_decoder->start();
+        m_audioOutput->start(this);
     }
 
     m_state = PlaybackState::PlayingState;
@@ -135,22 +140,21 @@ void MediaPlayer::pause()
 {
     if(m_state == PlaybackState::PausedState) return;
 
-    m_decoder->stop();
     m_audioOutput->suspend();
 
     m_state = PlaybackState::PausedState;
     emit playbackStateChanged(m_state);
 }
 
-// Stop play audio file
-void MediaPlayer::stop()
+// Stop playing audio file
+void MediaPlayer::stop(bool stopAudioOutput)
 {
     if(m_state == PlaybackState::StoppedState) return;
 
-    m_decoder->stop();
-    m_audioOutput->stop();
+    if(stopAudioOutput) m_audioOutput->stop();
+    setPosition(0);
+    onPositionChanged();
 
-    clear();
     m_state = PlaybackState::StoppedState;
     emit playbackStateChanged(m_state);
 }
@@ -158,13 +162,17 @@ void MediaPlayer::stop()
 
 void MediaPlayer::clear()
 {
+    QMutexLocker l(&initMutex);
     clearAudioOutput();
     clearDecoder();
     m_data.clear();
+    m_input.close();
+    m_output.close();
     isDecodingFinished = false;
+    isInited = false;
 }
 
-// Is finish of file
+// Is at the end of the file
 bool MediaPlayer::atEnd() const
 {
     return m_output.size()
@@ -210,7 +218,21 @@ void MediaPlayer::parseMetaData() {
         m_metaData.insert(QMediaMetaData::Duration, duration);
     }
 
+    setMediaStatus(MediaPlayer::LoadedMedia);
     emit metaDataChanged();
+}
+
+void MediaPlayer::setError(Error error)
+{
+    m_error = error;
+    emit errorChanged();
+}
+
+void MediaPlayer::setMediaStatus(MediaStatus status)
+{
+    if(m_status == status) return;
+    m_status = status;
+    emit mediaStatusChanged(m_status);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -226,6 +248,10 @@ void MediaPlayer::bufferReady() // SLOT
 
     m_input.write(data, length);
 
+    if(m_status != BufferingMedia) {
+        setMediaStatus(BufferingMedia);
+    }
+
     emit bufferProgressChanged(bufferProgress());
 }
 
@@ -234,6 +260,9 @@ void MediaPlayer::finished() // SLOT
 {
     isDecodingFinished = true;
     emit bufferProgressChanged(bufferProgress());
+    if(m_status != BufferedMedia) {
+        setMediaStatus(BufferedMedia);
+    }
 }
 
 // Handle positionChanged from decoder and adapt to ms
@@ -253,18 +282,39 @@ void MediaPlayer::onDurationChanged(qint64 duration) // SLOT
     emit durationChanged(duration);
 }
 
+void MediaPlayer::onDecoderError(QAudioDecoder::Error error)
+{
+    switch(error) {
+    case QAudioDecoder::NoError:
+        setError(MediaPlayer::NoError);
+        break;
+    case QAudioDecoder::ResourceError:
+        setError(MediaPlayer::ResourceError);
+        break;
+    case QAudioDecoder::FormatError:
+        setError(MediaPlayer::FormatError);
+        break;
+    case QAudioDecoder::AccessDeniedError:
+        setError(MediaPlayer::AccessDeniedError);
+        break;
+    case QAudioDecoder::NotSupportedError:
+        setError(MediaPlayer::FormatError);
+        break;
+    }
+}
+
+void MediaPlayer::onAtEnd()
+{
+    // Avoid lock
+    if(m_status == MediaStatus::LoadingMedia) return;
+    stop(false);
+    setMediaStatus(EndOfMedia);
+}
+
 /////////////////////////////////////////////////////////////////////
 
 MediaPlayer::PlaybackState MediaPlayer::playbackState() const
 {
-    // In case if EndOfMedia status is already received
-    // but state is not.
-    /*if (control
-        && control->mediaStatus() == MediaPlayer::EndOfMedia
-        && state != control->state()) {
-        return control->state();
-    }*/
-
     return m_state;
 }
 
@@ -299,8 +349,7 @@ float MediaPlayer::bufferProgress() const
 
 MediaPlayer::MediaStatus MediaPlayer::mediaStatus() const
 {
-    // TODO
-    return MediaStatus::BufferingMedia;
+    return m_status;
 }
 
 float MediaPlayer::volume() const
@@ -313,13 +362,50 @@ QMediaMetaData MediaPlayer::metaData() const
     return m_metaData;
 }
 
+MediaPlayer::Error MediaPlayer::error() const
+{
+    return m_error;
+}
+
+QString MediaPlayer::errorString() const
+{
+    QString errorStr = "";
+    switch(m_error) {
+    case NoError:
+        break;
+    case ResourceError:
+        errorStr = "Resource Error";
+        if(m_decoder) errorStr.append(": ").append(m_decoder->errorString());
+        break;
+    case FormatError:
+        return "Format Error";
+        if(m_decoder) errorStr.append(": ").append(m_decoder->errorString());
+        break;
+    case NetworkError:
+        return "Network Error";
+        if(m_decoder) errorStr.append(": ").append(m_decoder->errorString());
+        break;
+    case AccessDeniedError:
+        return "Access Denied";
+        if(m_decoder) errorStr.append(": ").append(m_decoder->errorString());
+        break;
+    }
+    return errorStr;
+}
+
 void MediaPlayer::setSource(const QUrl &source)
 {
+    setMediaStatus(MediaPlayer::LoadingMedia);
     if(m_state != PlaybackState::StoppedState) {
         stop();
     }
-    qInfo() << source.toString();
+    clear();
+    QAudioDevice info(QMediaDevices::defaultAudioOutput());
+    QAudioFormat format = info.preferredFormat();
+    init(format);
     m_source = source;
+    m_decoder->setSource(m_source);
+    m_decoder->start();
     parseMetaData();
 }
 
@@ -332,6 +418,7 @@ void MediaPlayer::setPosition(qint64 position)
                        * (m_format.channelCount());
 
     if(target >= currentBufferSize) target = currentBufferSize - 1;
+    if(target < 0) target = 0;
 
     m_output.seek(target);
 }
