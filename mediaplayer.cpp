@@ -411,6 +411,8 @@ void MediaPlayer::setSource(const QUrl &source)
 
 void MediaPlayer::setPosition(qint64 position)
 {
+    // Don't let set the possition while media is still buffering, avoid noise error
+    if(m_status == MediaStatus::BufferingMedia) return;
     const qsizetype currentBufferSize = m_data.size();
     qint64 target = position
                        * (m_format.sampleFormat())
