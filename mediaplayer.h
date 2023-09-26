@@ -2,6 +2,7 @@
 #ifndef MEDIAPLAYER_H
 #define MEDIAPLAYER_H
 
+#include "qmediametadata.h"
 #include "qurl.h"
 #include <QIODevice>
 #include <QBuffer>
@@ -34,6 +35,7 @@ public:
     float bufferProgress() const;
     MediaStatus mediaStatus() const;
     float volume() const;
+    QMediaMetaData metaData() const;
 
 protected:
     qint64 readData(char* data, qint64 maxlen) override;
@@ -47,6 +49,7 @@ private:
     QAudioDecoder *m_decoder = nullptr;
     QAudioSink *m_audioOutput = nullptr;
     QUrl m_source;
+    QMediaMetaData m_metaData = QMediaMetaData{};
 
     MediaStatus m_status = MediaStatus::NoMedia;
     PlaybackState m_state = PlaybackState::StoppedState;
@@ -65,6 +68,7 @@ private:
     void clearAudioOutput();
     void clear();
     bool atEnd() const override;
+    void parseMetaData();
 
 public slots:
     void setSource(const QUrl &source);
@@ -84,7 +88,7 @@ signals:
     void positionChanged(qint64 position);
     void bufferProgressChanged(float progress);
     void volumeChanged(float volume);
-
+    void metaDataChanged();
 };
 
 #endif // MEDIAPLAYER_H

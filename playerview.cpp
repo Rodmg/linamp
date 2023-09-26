@@ -31,8 +31,8 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     //! [create-objs]
     connect(m_player, &MediaPlayer::durationChanged, this, &PlayerView::durationChanged);
     connect(m_player, &MediaPlayer::positionChanged, this, &PlayerView::positionChanged);
-    //connect(m_player, QOverload<>::of(&MediaPlayer::metaDataChanged), this,
-    //        &PlayerView::metaDataChanged);
+    connect(m_player, QOverload<>::of(&MediaPlayer::metaDataChanged), this,
+            &PlayerView::metaDataChanged);
     //connect(m_player, &MediaPlayer::mediaStatusChanged, this, &PlayerView::statusChanged);
     connect(m_player, &MediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
     //connect(m_player, &MediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
@@ -148,7 +148,7 @@ void PlayerView::positionChanged(qint64 progress)
 
 void PlayerView::metaDataChanged()
 {
-    /*auto metaData = m_player->metaData();
+    auto metaData = m_player->metaData();
 
     // Generate track info string
     QString artist = metaData.value(QMediaMetaData::AlbumArtist).toString().toUpper();
@@ -177,9 +177,9 @@ void PlayerView::metaDataChanged()
     int bitrate = metaData.value(QMediaMetaData::AudioBitRate).toInt()/1000;
     ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
 
-    // Set kHz TODO
-    QString khz = metaData.value(QMediaMetaData::AudioCodec).toString();
-    ui->khzValueLabel->setText(khz);*/
+    // Set kHz
+    int khz = metaData.value(QMediaMetaData::AudioCodec).toInt()/1000;
+    ui->khzValueLabel->setText(khz > 0 ? QString::number(khz) : "");
 }
 
 QString PlayerView::trackName(const QMediaMetaData &metaData, int index)

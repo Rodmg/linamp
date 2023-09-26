@@ -6,6 +6,8 @@ QT += network \
       multimediawidgets \
       widgets
 
+LIBS += -ltag
+
 HEADERS = \
     fft.h \
     mainwindow.h \

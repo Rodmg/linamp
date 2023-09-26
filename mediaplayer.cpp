@@ -1,5 +1,8 @@
 #include "mediaplayer.h"
 #include "qurl.h"
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/tpropertymap.h>
 #include <QDebug>
 #include <QMediaDevices>
 #import <QCoreApplication>
@@ -169,7 +172,46 @@ bool MediaPlayer::atEnd() const
            && isDecodingFinished;
 }
 
+void MediaPlayer::parseMetaData() {
+    TagLib::FileRef f(m_source.toLocalFile().toLocal8Bit().data());
 
+    if(!f.isNull() && f.tag()) {
+        TagLib::Tag *tag = f.tag();
+
+        QString title = QString::fromStdString(tag->title().toCString(true));
+        QString albumTitle = QString::fromStdString(tag->album().toCString(true));
+        QString artist = QString::fromStdString(tag->artist().toCString(true));
+        QString comment = QString::fromStdString(tag->comment().toCString(true));
+        QString genre = QString::fromStdString(tag->genre().toCString(true));
+        qint64 track = tag->track();
+        qint64 year = tag->year();
+
+        m_metaData = QMediaMetaData{};
+        m_metaData.insert(QMediaMetaData::Title, title);
+        m_metaData.insert(QMediaMetaData::AlbumTitle, albumTitle);
+        m_metaData.insert(QMediaMetaData::AlbumArtist, artist);
+        m_metaData.insert(QMediaMetaData::Comment, comment);
+        m_metaData.insert(QMediaMetaData::Genre, genre);
+        m_metaData.insert(QMediaMetaData::TrackNumber, track);
+        m_metaData.insert(QMediaMetaData::Url, m_source);
+        m_metaData.insert(QMediaMetaData::Date, year);
+    }
+
+    if(!f.isNull() && f.audioProperties()) {
+        TagLib::AudioProperties *properties = f.audioProperties();
+
+        qint64 duration = properties->lengthInMilliseconds();
+        qint64 bitrate = properties->bitrate() * 1000;
+        qint64 sampleRate = properties->sampleRate();
+
+        //m_metaData.insert(QMediaMetaData::MediaType, artist); // TODO
+        m_metaData.insert(QMediaMetaData::AudioBitRate, bitrate);
+        m_metaData.insert(QMediaMetaData::AudioCodec, sampleRate); // Using AudioCodec as sample rate for now
+        m_metaData.insert(QMediaMetaData::Duration, duration);
+    }
+
+    emit metaDataChanged();
+}
 
 /////////////////////////////////////////////////////////////////////
 // QAudioDecoder logic. These methods are responsible for decoding audio files and putting audio data into stream buffer
@@ -251,7 +293,7 @@ float MediaPlayer::bufferProgress() const
     //qDebug() << "currentBufferSize: " << currentBufferSize;
     float progress = (float (currentBufferSize) / float (totalExpectedBufferSize)) * 100.0;
     progress = progress > 100.00 ? 100.00 : progress;
-    qDebug() << "progress: " << progress;
+    //qDebug() << "progress: " << progress;
     return progress;
 }
 
@@ -266,6 +308,11 @@ float MediaPlayer::volume() const
     return m_volume;
 }
 
+QMediaMetaData MediaPlayer::metaData() const
+{
+    return m_metaData;
+}
+
 void MediaPlayer::setSource(const QUrl &source)
 {
     if(m_state != PlaybackState::StoppedState) {
@@ -273,6 +320,7 @@ void MediaPlayer::setSource(const QUrl &source)
     }
     qInfo() << source.toString();
     m_source = source;
+    parseMetaData();
 }
 
 void MediaPlayer::setPosition(qint64 position)
