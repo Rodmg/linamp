@@ -7,13 +7,11 @@
 
 #include <QMediaMetaData>
 #include <QAudioOutput>
-//#include <QMediaPlayer>
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
 class QAbstractItemView;
 class QLabel;
-//class QMediaPlayer;
 class QModelIndex;
 class QPushButton;
 class QComboBox;
@@ -74,7 +72,6 @@ private:
     QString trackName(const QMediaMetaData &metaData, int index);
 
     MediaPlayer *m_player = nullptr;
-    QAudioOutput *m_audioOutput = nullptr;
     QMediaPlaylist *m_playlist = nullptr;
 
     PlaylistModel *m_playlistModel = nullptr;

@@ -21,9 +21,6 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     ui(new Ui::PlayerView)
 {
     // Load custom fonts
-    QFontDatabase::addApplicationFont(":/assets/Minecraft.ttf");
-    QFontDatabase::addApplicationFont(":/assets/Winamp.ttf");
-    QFontDatabase::addApplicationFont(":/assets/LED_LCD_123.ttf");
     QFontDatabase::addApplicationFont(":/assets/bignumbers.ttf");
 
     // Setup UI
@@ -31,15 +28,13 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
 
     //! [create-objs]
     m_player = new MediaPlayer(this);
-    m_audioOutput = new QAudioOutput(this);
-    //m_player->setAudioOutput(m_audioOutput);
     //! [create-objs]
     connect(m_player, &MediaPlayer::durationChanged, this, &PlayerView::durationChanged);
     connect(m_player, &MediaPlayer::positionChanged, this, &PlayerView::positionChanged);
     //connect(m_player, QOverload<>::of(&MediaPlayer::metaDataChanged), this,
     //        &PlayerView::metaDataChanged);
     //connect(m_player, &MediaPlayer::mediaStatusChanged, this, &PlayerView::statusChanged);
-    //connect(m_player, &MediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
+    connect(m_player, &MediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
     //connect(m_player, &MediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
 
     m_playlistModel = playlistModel;
@@ -49,17 +44,15 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
             &PlayerView::playlistPositionChanged);
 
     // duration slider and label
-
     ui->posBar->setRange(0, m_player->duration());
     connect(ui->posBar, &QSlider::sliderMoved, this, &PlayerView::seek);
 
     // controls
-
     connect(ui->openButton, &QPushButton::clicked, this, &PlayerView::open);
 
     // Set volume slider
     ui->volumeSlider->setRange(0, 100);
-    this->setVolumeSlider(m_audioOutput->volume());
+    this->setVolumeSlider(m_player->volume());
 
     // Set Balance Slider
     ui->balanceSlider->setRange(0, 100);
@@ -80,7 +73,7 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
 
     connect(m_player, &MediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
-    connect(m_audioOutput, &QAudioOutput::volumeChanged, this, &PlayerView::setVolumeSlider);
+    connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
 
     if (!isPlayerAvailable()) {
         QMessageBox::warning(this, tr("Service not available"),
@@ -204,7 +197,7 @@ QString PlayerView::trackName(const QMediaMetaData &metaData, int index)
         if (lang == QLocale::Language::AnyLanguage)
             name = title;
         else
-            name = QString("%1 - [%2]").arg(title).arg(QLocale::languageToString(lang));
+            name = QString("%1 - [%2]").arg(title, QLocale::languageToString(lang));
     }
     return name;
 }
@@ -304,10 +297,10 @@ void PlayerView::handleCursor(MediaPlayer::MediaStatus status)
 
 void PlayerView::bufferingProgress(float progress)
 {
-    /*if (m_player->mediaStatus() == MediaPlayer::StalledMedia)
+    if (m_player->mediaStatus() == MediaPlayer::StalledMedia)
         setStatusInfo(tr("Stalled %1%").arg(qRound(progress * 100.)));
     else
-        setStatusInfo(tr("Buffering %1%").arg(qRound(progress * 100.)));*/
+        setStatusInfo(tr("Buffering %1%").arg(qRound(progress * 100.)));
 }
 
 void PlayerView::setTrackInfo(const QString &info)
@@ -317,7 +310,7 @@ void PlayerView::setTrackInfo(const QString &info)
     ui->songInfoLabel->setText(info);
 
     if (!m_statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
+        setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));
     else
         setWindowTitle(m_trackInfo);
 }
@@ -327,7 +320,7 @@ void PlayerView::setStatusInfo(const QString &info)
     m_statusInfo = info;
 
     if (!m_statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
+        setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));
     else
         setWindowTitle(m_trackInfo);
 }
@@ -371,7 +364,7 @@ void PlayerView::volumeChanged()
         QAudio::convertVolume(ui->volumeSlider->value() / qreal(100),
                               QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
 
-    m_audioOutput->setVolume(linearVolume);
+    m_player->setVolume(linearVolume);
 }
 
 void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
