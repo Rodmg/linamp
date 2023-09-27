@@ -75,6 +75,16 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(m_player, &MediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
     connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
 
+    // Setup spectrum widget
+    spectrum = new SpectrumWidget(this);
+    connect(m_player, &MediaPlayer::newData, spectrum, &SpectrumWidget::setData);
+    QVBoxLayout *spectrumLayout = new QVBoxLayout;
+    spectrumLayout->addWidget(spectrum);
+    spectrumLayout->setContentsMargins(0, 0, 0, 0);
+    spectrumLayout->setSpacing(0);
+    ui->spectrumContainer->setLayout(spectrumLayout);
+
+
     if (!isPlayerAvailable()) {
         QMessageBox::warning(this, tr("Service not available"),
                              tr("The QMediaPlayer object does not have a valid service.\n"
@@ -374,12 +384,15 @@ void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
     QString imageSrc;
     switch(state) {
     case MediaPlayer::StoppedState:
+        if(spectrum) spectrum->stop();
         imageSrc = ":/assets/status_stopped.png";
         break;
     case MediaPlayer::PlayingState:
+        if(spectrum) spectrum->play();
         imageSrc = ":/assets/status_playing.png";
         break;
     case MediaPlayer::PausedState:
+        if(spectrum) spectrum->pause();
         imageSrc = ":/assets/status_paused.png";
         break;
     }

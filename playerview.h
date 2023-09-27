@@ -4,6 +4,7 @@
 #include "qmediaplaylist.h"
 #include "playlistmodel.h"
 #include "mediaplayer.h"
+#include "spectrumwidget.h"
 
 #include <QMediaMetaData>
 #include <QAudioOutput>
@@ -63,6 +64,7 @@ signals:
 
 private:
     Ui::PlayerView *ui;
+    SpectrumWidget *spectrum = nullptr;
     void setTrackInfo(const QString &info);
     void setStatusInfo(const QString &info);
     void setPlaybackState(MediaPlayer::PlaybackState state);

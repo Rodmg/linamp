@@ -18,7 +18,8 @@ HEADERS = \
     scrolltext.h \
     qmediaplaylist.h \
     qmediaplaylist_p.h \
-    qplaylistfileparser.h
+    qplaylistfileparser.h \
+    spectrumwidget.h
 
 SOURCES = main.cpp \
     fft.cpp \
@@ -30,7 +31,8 @@ SOURCES = main.cpp \
     scrolltext.cpp \
     qmediaplaylist.cpp \
     qmediaplaylist_p.cpp \
-    qplaylistfileparser.cpp
+    qplaylistfileparser.cpp \
+    spectrumwidget.cpp
 
 target.path = $$[QT_INSTALL_EXAMPLES]/multimedia/player
 INSTALLS += target
@@ -43,4 +45,5 @@ RESOURCES += \
     uiassets.qrc
 
 DISTFILES += \
+    README.md \
     scale-skin.sh

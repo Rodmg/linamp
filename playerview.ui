@@ -410,6 +410,22 @@
                 <enum>QFrame::Plain</enum>
                </property>
               </widget>
+              <widget class="QFrame" name="spectrumContainer">
+               <property name="geometry">
+                <rect>
+                 <x>34</x>
+                 <y>59</y>
+                 <width>231</width>
+                 <height>51</height>
+                </rect>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::NoFrame</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Plain</enum>
+               </property>
+              </widget>
              </widget>
             </item>
            </layout>

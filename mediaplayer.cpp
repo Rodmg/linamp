@@ -9,6 +9,7 @@
 #include <QTimer>
 
 MediaPlayer::MediaPlayer(QObject *parent) :
+    QIODevice{parent},
     m_input(&m_data),
     m_output(&m_data),
     m_state(PlaybackState::StoppedState)
@@ -83,7 +84,9 @@ void MediaPlayer::clearAudioOutput()
 qint64 MediaPlayer::readData(char* data, qint64 maxlen)
 {
     QMutexLocker l(&readMutex);
-    //qDebug() << "maxlen: " << maxlen;
+
+    // Limit max len
+    if(maxlen > 4096) maxlen = 4096;
 
     memset(data, 0, maxlen);
     qint64 bytesRead = 0;
