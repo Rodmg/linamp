@@ -22,13 +22,20 @@ protected:
 
 private:
     float m_data[DFT_SIZE];
-    float m_bandValues[N_BANDS];
+    float m_xscale[N_BANDS + 1];
+    int m_bandValues[N_BANDS + 1];
+    int m_bandDelays[N_BANDS + 1];
+    int m_peakValues[N_BANDS + 1];
+    int m_peakDelays[N_BANDS + 1];
     bool m_playing = false;
     QTimer *m_renderTimer = nullptr;
     QMutex dataMutex;
 
-    void paint_background (QPainter &);
-    void paint_spectrum (QPainter &);
+    void paintBackground(QPainter &);
+    void paintSpectrum(QPainter &);
+    void paintPeaks(QPainter &);
+
+    void clear();
 
 public slots:
     void setData(const QByteArray& data);
