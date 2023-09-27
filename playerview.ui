@@ -413,7 +413,7 @@
               <widget class="QFrame" name="spectrumContainer">
                <property name="geometry">
                 <rect>
-                 <x>34</x>
+                 <x>33</x>
                  <y>59</y>
                  <width>231</width>
                  <height>51</height>
