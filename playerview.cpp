@@ -28,6 +28,7 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
 
     //! [create-objs]
     m_player = new MediaPlayer(this);
+    spectrum = new SpectrumWidget(this);
     //! [create-objs]
     connect(m_player, &MediaPlayer::durationChanged, this, &PlayerView::durationChanged);
     connect(m_player, &MediaPlayer::positionChanged, this, &PlayerView::positionChanged);
@@ -76,7 +77,6 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
 
     // Setup spectrum widget
-    spectrum = new SpectrumWidget(this);
     connect(m_player, &MediaPlayer::newData, spectrum, &SpectrumWidget::setData);
     QVBoxLayout *spectrumLayout = new QVBoxLayout;
     spectrumLayout->addWidget(spectrum);

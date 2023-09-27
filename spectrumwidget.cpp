@@ -9,13 +9,15 @@
 #define VIS_PEAK_FALLOFF 1 /* falloff in pixels per frame */
 
 
-static void pcm_to_mono(const float * data, float * mono, int channels)
+static void pcm_to_mono(const float *data, float *mono, int channels)
 {
     if (channels == 1)
+    {
         memcpy(mono, data, sizeof(float) * 512);
+    }
     else
     {
-        float * set = mono;
+        float *set = mono;
         while (set < &mono[512])
         {
             *set++ = (data[0] + data[1]) / 2;
@@ -224,7 +226,7 @@ void SpectrumWidget::paintEvent (QPaintEvent *)
 void SpectrumWidget::setData(const QByteArray& data)
 {
     // TODO: this needs to vary depending on source codec...
-    for(int i = 0; i < DFT_SIZE; i++) {
+    for(int i = 0; i < DFT_SIZE * 2; i++) {
         if(i < data.length()) {
             m_data[i] = (float)data[i];
         }
@@ -235,4 +237,6 @@ void SpectrumWidget::clear() {
     memset(m_data, 0, sizeof m_data);
     memset(m_bandValues, 0, sizeof m_bandValues);
     memset(m_bandDelays, 0, sizeof m_bandDelays);
+    memset(m_peakValues, 0, sizeof m_bandValues);
+    memset(m_peakDelays, 0, sizeof m_bandDelays);
 }

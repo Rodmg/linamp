@@ -12,6 +12,12 @@ sudo apt install libtag1-dev
 
 ## Development
 
+### Debugging memory:
+
+- Install valgrind
+- In Qt Creator, in the menu bar, click Analyze -> Valgrind Memory Analizer
+- Wait for the app to start (it will be slow), use it and close it, you will get the results then.
+
 ### Useful links:
 
 - https://taglib.org/
