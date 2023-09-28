@@ -153,6 +153,10 @@ void MediaPlayer::stop(bool stopAudioOutput)
     if(m_state == PlaybackState::StoppedState) return;
 
     if(stopAudioOutput) m_audioOutput->stop();
+    // Clear buffers, avoids pops and clicks when playing after stopping
+    m_audioOutput->reset();
+    this->reset();
+
     setPosition(0);
     onPositionChanged();
 
