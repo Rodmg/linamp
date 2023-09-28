@@ -11,6 +11,17 @@
 #include <QRandomGenerator>
 #include <QUrl>
 
+// Useful for debugging:
+/*
+void printList(QList<QUrl> list)
+{
+    qDebug() << "List:";
+    for(unsigned int i = 0; i < list.length(); i++) {
+        qDebug() << list.at(i).toString();
+    }
+}
+*/
+
 QT_BEGIN_NAMESPACE
 
 class QM3uPlaylistWriter
@@ -39,13 +50,13 @@ int QMediaPlaylistPrivate::nextPosition(int steps) const
     if (playlist.count() == 0)
         return -1;
 
-    int next = currentPos + steps;
+    int next = currentPos() + steps;
 
     switch (playbackMode) {
     case QMediaPlaylist::CurrentItemOnce:
-        return steps != 0 ? -1 : currentPos;
+        return steps != 0 ? -1 : currentPos();
     case QMediaPlaylist::CurrentItemInLoop:
-        return currentPos;
+        return currentPos();
     case QMediaPlaylist::Sequential:
         if (next >= playlist.size())
             next = -1;
@@ -63,16 +74,16 @@ int QMediaPlaylistPrivate::prevPosition(int steps) const
     if (playlist.count() == 0)
         return -1;
 
-    int next = currentPos;
+    int next = currentPos();
     if (next < 0)
         next = playlist.size();
     next -= steps;
 
     switch (playbackMode) {
     case QMediaPlaylist::CurrentItemOnce:
-        return steps != 0 ? -1 : currentPos;
+        return steps != 0 ? -1 : currentPos();
     case QMediaPlaylist::CurrentItemInLoop:
-        return currentPos;
+        return currentPos();
     case QMediaPlaylist::Sequential:
         if (next < 0)
             next = -1;
@@ -81,6 +92,59 @@ int QMediaPlaylistPrivate::prevPosition(int steps) const
         next %= playlist.size();
         if (next < 0)
             next += playlist.size();
+        break;
+    }
+
+    return next;
+}
+
+int QMediaPlaylistPrivate::nextQueuePosition(int steps) const
+{
+    if (playqueue.count() == 0)
+        return -1;
+
+    int next = currentQueuePos() + steps;
+
+    switch (playbackMode) {
+    case QMediaPlaylist::CurrentItemOnce:
+        return steps != 0 ? -1 : currentQueuePos();
+    case QMediaPlaylist::CurrentItemInLoop:
+        return currentQueuePos();
+    case QMediaPlaylist::Sequential:
+        if (next >= playqueue.size())
+            next = -1;
+        break;
+    case QMediaPlaylist::Loop:
+        next %= playqueue.count();
+        break;
+    }
+
+    return next;
+}
+
+int QMediaPlaylistPrivate::prevQueuePosition(int steps) const
+{
+    if (playqueue.count() == 0)
+        return -1;
+
+    int next = currentQueuePos();
+    if (next < 0)
+        next = playqueue.size();
+    next -= steps;
+
+    switch (playbackMode) {
+    case QMediaPlaylist::CurrentItemOnce:
+        return steps != 0 ? -1 : currentQueuePos();
+    case QMediaPlaylist::CurrentItemInLoop:
+        return currentQueuePos();
+    case QMediaPlaylist::Sequential:
+        if (next < 0)
+            next = -1;
+        break;
+    case QMediaPlaylist::Loop:
+        next %= playqueue.size();
+        if (next < 0)
+            next += playqueue.size();
         break;
     }
 
@@ -176,24 +240,55 @@ void QMediaPlaylist::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
     emit playbackModeChanged(mode);
 }
 
+void QMediaPlaylist::setShuffle(bool shuffle)
+{
+    shuffleEnabled = shuffle;
+    if(shuffleEnabled) {
+        this->shuffle();
+    } else {
+        this->unshuffle();
+    }
+}
+
+
 /*!
   Returns position of the current media content in the playlist.
 */
 int QMediaPlaylist::currentIndex() const
 {
-    return d_func()->currentPos;
+    return d_func()->currentPos();
 }
 
 /*!
-  Returns the current media content.
+  Returns position of the current media content in the playqueue.
+*/
+int QMediaPlaylist::currentQueueIndex() const
+{
+    return d_func()->currentQueuePos();
+}
+
+/*!
+  Returns the current media content in the playlist.
 */
 
 QUrl QMediaPlaylist::currentMedia() const
 {
     Q_D(const QMediaPlaylist);
-    if (d->currentPos < 0 || d->currentPos >= d->playlist.size())
+    if (d->currentPos() < 0 || d->currentPos() >= d->playlist.size())
         return QUrl();
-    return d_func()->playlist.at(d_func()->currentPos);
+    return d_func()->playlist.at(d_func()->currentPos());
+}
+
+/*!
+  Returns the current media content in the playqueue.
+*/
+
+QUrl QMediaPlaylist::currentQueueMedia() const
+{
+    Q_D(const QMediaPlaylist);
+    if (d->currentQueuePos() < 0 || d->currentQueuePos() >= d->playqueue.size())
+        return QUrl();
+    return d_func()->playqueue.at(d_func()->currentQueuePos());
 }
 
 /*!
@@ -220,6 +315,32 @@ int QMediaPlaylist::nextIndex(int steps) const
 int QMediaPlaylist::previousIndex(int steps) const
 {
     return d_func()->prevPosition(steps);
+}
+
+/*!
+  Returns the index of the item, which would be current after calling next()
+  \a steps times.
+
+  Returned value depends on the size of playqueue, current position
+  and playback mode.
+
+  \sa QMediaPlaylist::playbackMode(), previousIndex()
+*/
+int QMediaPlaylist::nextQueueIndex(int steps) const
+{
+    return d_func()->nextQueuePosition(steps);
+}
+
+/*!
+  Returns the index of the item, which would be current after calling previous()
+  \a steps times.
+
+  \sa QMediaPlaylist::playbackMode(), nextIndex()
+*/
+
+int QMediaPlaylist::previousQueueIndex(int steps) const
+{
+    return d_func()->prevQueuePosition(steps);
 }
 
 /*!
@@ -255,6 +376,18 @@ QUrl QMediaPlaylist::media(int index) const
 }
 
 /*!
+  Returns the media content at \a index in the playqueue.
+*/
+
+QUrl QMediaPlaylist::queueMedia(int index) const
+{
+    Q_D(const QMediaPlaylist);
+    if (index < 0 || index >= d->playqueue.size())
+        return QUrl();
+    return d->playqueue.at(index);
+}
+
+/*!
   Append the media \a content to the playlist.
 
   Returns true if the operation is successful, otherwise returns false.
@@ -265,6 +398,11 @@ void QMediaPlaylist::addMedia(const QUrl &content)
     int pos = d->playlist.size();
     emit mediaAboutToBeInserted(pos, pos);
     d->playlist.append(content);
+    // Do also playqueue
+    d_func()->playqueue = d_func()->playlist;
+    if(shuffleEnabled) {
+        this->shuffle();
+    }
     emit mediaInserted(pos, pos);
 }
 
@@ -283,6 +421,11 @@ void QMediaPlaylist::addMedia(const QList<QUrl> &items)
     int last = first + items.size() - 1;
     emit mediaAboutToBeInserted(first, last);
     d_func()->playlist.append(items);
+    // Do also playqueue
+    d_func()->playqueue = QList(d_func()->playlist);
+    if(shuffleEnabled) {
+        this->shuffle();
+    }
     emit mediaInserted(first, last);
 }
 
@@ -298,6 +441,13 @@ bool QMediaPlaylist::insertMedia(int pos, const QUrl &content)
     pos = qBound(0, pos, d->playlist.size());
     emit mediaAboutToBeInserted(pos, pos);
     d->playlist.insert(pos, content);
+
+    // Do also playqueue
+    d->playqueue = QList(d->playlist);
+    if(shuffleEnabled) {
+        this->shuffle();
+    }
+
     emit mediaInserted(pos, pos);
     return true;
 }
@@ -321,6 +471,13 @@ bool QMediaPlaylist::insertMedia(int pos, const QList<QUrl> &items)
     newList += items;
     newList += d->playlist.mid(pos);
     d->playlist = newList;
+
+    // Do also playqueue
+    d->playqueue = QList(newList);
+    if(shuffleEnabled) {
+        this->shuffle();
+    }
+
     emit mediaInserted(pos, last);
     return true;
 }
@@ -368,6 +525,7 @@ bool QMediaPlaylist::removeMedia(int start, int end)
 
     emit mediaAboutToBeRemoved(start, end);
     d->playlist.remove(start, end - start + 1);
+    // TODO also remove from playqueue
     emit mediaRemoved(start, end);
     return true;
 }
@@ -383,6 +541,7 @@ void QMediaPlaylist::clear()
     int size = d->playlist.size();
     emit mediaAboutToBeRemoved(0, size - 1);
     d->playlist.clear();
+    d->playqueue.clear();
     emit mediaRemoved(0, size - 1);
 }
 
@@ -492,27 +651,51 @@ QString QMediaPlaylist::errorString() const
 }
 
 /*!
-  Shuffle items in the playlist.
+  Shuffle items in the playqueue.
 */
 void QMediaPlaylist::shuffle()
 {
     Q_D(QMediaPlaylist);
-    QList<QUrl> playlist;
+    QList<QUrl> playqueue;
 
     // keep the current item when shuffling
     QUrl current;
-    if (d->currentPos != -1)
-        current = d->playlist.takeAt(d->currentPos);
+    if (d->currentQueuePos() != -1)
+        current = d->playqueue.takeAt(d->currentQueuePos());
 
-    while (!d->playlist.isEmpty())
-        playlist.append(
-                d->playlist.takeAt(QRandomGenerator::global()->bounded(int(d->playlist.size()))));
+    while (!d->playqueue.isEmpty())
+        playqueue.append(
+                d->playqueue.takeAt(QRandomGenerator::global()->bounded(int(d->playqueue.size()))));
 
-    if (d->currentPos != -1)
-        playlist.insert(d->currentPos, current);
-    d->playlist = playlist;
-    emit mediaChanged(0, d->playlist.count());
+    if (d->currentQueuePos() != -1)
+        playqueue.insert(d->currentQueuePos(), current);
+    d->playqueue = playqueue;
+    emit mediaChanged(0, d->playqueue.count());
 }
+
+/*!
+  Restore playlist into playqueue.
+*/
+void QMediaPlaylist::unshuffle()
+{
+    Q_D(QMediaPlaylist);
+
+    // keep the current item when unshuffling
+    QUrl current;
+    if (d->currentQueuePos() != -1)
+        current = d->playqueue.takeAt(d->currentQueuePos());
+
+    QList<QUrl> playqueue(d->playlist);
+
+    d->playqueue = playqueue;
+
+    int newPlayPos = d->playqueue.indexOf(current);
+
+    d->setCurrentQueuePos(newPlayPos);
+
+    emit mediaChanged(0, d->playqueue.count());
+}
+
 
 /*!
     Advance to the next media content in playlist.
@@ -520,11 +703,11 @@ void QMediaPlaylist::shuffle()
 void QMediaPlaylist::next()
 {
     Q_D(QMediaPlaylist);
-    int nextPosition = d->nextPosition(1);
+    int nextPosition = d->nextQueuePosition(1);
     if(nextPosition == -1) return;
-    d->currentPos = nextPosition;
+    d->setCurrentQueuePos(nextPosition);
 
-    emit currentIndexChanged(d->currentPos);
+    emit currentIndexChanged(d->currentPos());
     emit currentMediaChanged(currentMedia());
 }
 
@@ -534,11 +717,11 @@ void QMediaPlaylist::next()
 void QMediaPlaylist::previous()
 {
     Q_D(QMediaPlaylist);
-    int prevPosition = d->prevPosition(1);
+    int prevPosition = d->prevQueuePosition(1);
     if(prevPosition == -1) return;
-    d->currentPos = prevPosition;
+    d->setCurrentQueuePos(prevPosition);
 
-    emit currentIndexChanged(d->currentPos);
+    emit currentIndexChanged(d->currentPos());
     emit currentMediaChanged(currentMedia());
 }
 
@@ -551,9 +734,24 @@ void QMediaPlaylist::setCurrentIndex(int playlistPosition)
     Q_D(QMediaPlaylist);
     if (playlistPosition < 0 || playlistPosition >= d->playlist.size())
         playlistPosition = -1;
-    d->currentPos = playlistPosition;
+    d->setCurrentPos(playlistPosition);
 
-    emit currentIndexChanged(d->currentPos);
+    emit currentIndexChanged(d->currentPos());
+    emit currentMediaChanged(currentMedia());
+}
+
+/*!
+    Activate media content from playlist at position \a playlistPosition.
+*/
+
+void QMediaPlaylist::setCurrentQueueIndex(int playlistPosition)
+{
+    Q_D(QMediaPlaylist);
+    if (playlistPosition < 0 || playlistPosition >= d->playqueue.size())
+        playlistPosition = -1;
+    d->setCurrentQueuePos(playlistPosition);
+
+    emit currentIndexChanged(d->currentPos());
     emit currentMediaChanged(currentMedia());
 }
 

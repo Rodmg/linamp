@@ -62,4 +62,30 @@ void QMediaPlaylistPrivate::ensureParser()
                      });
 }
 
+int QMediaPlaylistPrivate::currentPos() const
+{
+    return m_currentPos;
+}
+
+int QMediaPlaylistPrivate::currentQueuePos() const
+{
+    return m_currentQueuePos;
+}
+
+void QMediaPlaylistPrivate::setCurrentPos(int pos)
+{
+    m_currentPos = pos;
+    // Sync currentPlayPos
+    QUrl item = playlist.at(m_currentPos);
+    m_currentQueuePos = playqueue.indexOf(item);
+}
+
+void QMediaPlaylistPrivate::setCurrentQueuePos(int pos)
+{
+    m_currentQueuePos = pos;
+    // Sync currentPos
+    QUrl item = playqueue.at(m_currentQueuePos);
+    m_currentPos = playlist.indexOf(item);
+}
+
 QT_END_NAMESPACE

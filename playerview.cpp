@@ -259,7 +259,7 @@ void PlayerView::repeatButtonClicked(bool checked)
 void PlayerView::shuffleButtonClicked(bool checked)
 {
     shuffleEnabled = checked;
-    // TODO
+    m_playlist->setShuffle(shuffleEnabled);
 }
 
 void PlayerView::jump(const QModelIndex &index)
@@ -273,7 +273,7 @@ void PlayerView::jump(const QModelIndex &index)
 
 void PlayerView::playlistPositionChanged(int)
 {
-    m_player->setSource(m_playlist->currentMedia());
+    m_player->setSource(m_playlist->currentQueueMedia());
 
     if (shouldBePlaying) {
         m_player->play();

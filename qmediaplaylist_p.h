@@ -49,9 +49,16 @@ public:
     int nextPosition(int steps) const;
     int prevPosition(int steps) const;
 
-    QList<QUrl> playlist;
+    int nextQueuePosition(int steps) const;
+    int prevQueuePosition(int steps) const;
 
-    int currentPos = -1;
+    QList<QUrl> playlist; // Displayed playlist
+    QList<QUrl> playqueue; // Actual playing queue
+
+    int currentPos() const;
+    int currentQueuePos() const;
+    void setCurrentPos(int pos);
+    void setCurrentQueuePos(int pos);
     QMediaPlaylist::PlaybackMode playbackMode = QMediaPlaylist::Sequential;
 
     QPlaylistFileParser *parser = nullptr;
@@ -59,6 +66,10 @@ public:
     mutable QString errorString;
 
     QMediaPlaylist *q_ptr;
+
+private:
+    int m_currentPos = -1;
+    int m_currentQueuePos = -1;
 };
 
 QT_END_NAMESPACE

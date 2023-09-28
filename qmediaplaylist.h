@@ -30,14 +30,24 @@ public:
 
     PlaybackMode playbackMode() const;
     void setPlaybackMode(PlaybackMode mode);
+    void setShuffle(bool shuffle);
 
+    // For playlist
     int currentIndex() const;
     QUrl currentMedia() const;
+
+    // For playqueue
+    int currentQueueIndex() const;
+    QUrl currentQueueMedia() const;
 
     int nextIndex(int steps = 1) const;
     int previousIndex(int steps = 1) const;
 
+    int nextQueueIndex(int steps = 1) const;
+    int previousQueueIndex(int steps = 1) const;
+
     QUrl media(int index) const;
+    QUrl queueMedia(int index) const;
 
     int mediaCount() const;
     bool isEmpty() const;
@@ -62,11 +72,13 @@ public:
 
 public slots:
     void shuffle();
+    void unshuffle();
 
     void next();
     void previous();
 
     void setCurrentIndex(int index);
+    void setCurrentQueueIndex(int index);
 
 signals:
     void currentIndexChanged(int index);
@@ -83,6 +95,7 @@ signals:
     void loadFailed();
 
 private:
+    bool shuffleEnabled = false;
     QMediaPlaylistPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QMediaPlaylist)
 };
