@@ -266,7 +266,6 @@ void PlayerView::seek(int mseconds)
 
 void PlayerView::statusChanged(MediaPlayer::MediaStatus status)
 {
-    qDebug() << "Status changed: " << status;
     handleCursor(status);
 
     // handle status message

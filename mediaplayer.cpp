@@ -111,8 +111,6 @@ qint64 MediaPlayer::readData(char* data, qint64 maxlen)
         }
     }
 
-    //qDebug() << "Bytes read: " << bytesRead;
-
     return bytesRead;
 }
 
@@ -275,7 +273,6 @@ void MediaPlayer::onPositionChanged() // SLOT
                  / (m_format.sampleFormat())
                  / (m_format.sampleRate() / 1000)
                  / (m_format.channelCount());
-    //qDebug() << "Position: " << m_position;
     emit positionChanged(m_position);
 }
 
@@ -324,7 +321,6 @@ MediaPlayer::PlaybackState MediaPlayer::playbackState() const
 qint64 MediaPlayer::duration() const
 {
     qint64 duration = m_decoder ? m_decoder->duration() : 0;
-    //qDebug() << "Duration: " << duration;
     return duration;
 }
 
@@ -342,11 +338,8 @@ float MediaPlayer::bufferProgress() const
                                      * (m_format.sampleRate() / 1000)
                                      * (m_format.channelCount());
     qsizetype currentBufferSize = m_data.size();
-    //qDebug() << "totalExpectedBufferSize: " << totalExpectedBufferSize;
-    //qDebug() << "currentBufferSize: " << currentBufferSize;
     float progress = (float (currentBufferSize) / float (totalExpectedBufferSize)) * 100.0;
     progress = progress > 100.00 ? 100.00 : progress;
-    //qDebug() << "progress: " << progress;
     return progress;
 }
 

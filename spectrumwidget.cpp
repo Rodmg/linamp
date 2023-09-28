@@ -221,6 +221,11 @@ void SpectrumWidget::setData(const QByteArray &data, QAudioFormat format)
 
     const int bytesPerFrame = format.bytesPerFrame();
 
+    if(data.length() < DFT_SIZE * 4) {
+        // Not enough data for processing, ignore
+        return;
+    }
+
     const char *ptr = data.constData();
     for (int i = 0; i < DFT_SIZE * 2; ++i) {
         const qint16 pcmSample = *reinterpret_cast<const qint16 *>(ptr);
