@@ -47,9 +47,12 @@ private slots:
     void metaDataChanged();
 
     void previousClicked();
+    void nextClicked();
     void playClicked();
     void pauseClicked();
     void stopClicked();
+    void repeatButtonClicked(bool checked);
+    void shuffleButtonClicked(bool checked);
 
     void seek(int mseconds);
     void playlistPositionChanged(int);
@@ -72,6 +75,8 @@ private:
     void handleCursor(MediaPlayer::MediaStatus status);
     void updateDurationInfo(qint64 currentInfo);
     void volumeChanged();
+    void handlePrevious();
+    void handleNext();
     QString trackName(const QMediaMetaData &metaData, int index);
 
     MediaPlayer *m_player = nullptr;

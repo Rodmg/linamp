@@ -68,10 +68,12 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(ui->playButton, &QPushButton::clicked, this, &PlayerView::playClicked);
     connect(ui->pauseButton, &QPushButton::clicked, this, &PlayerView::pauseClicked);
     connect(ui->stopButton, &QPushButton::clicked, this, &PlayerView::stopClicked);
-    connect(ui->nextButton, &QPushButton::clicked, m_playlist, &QMediaPlaylist::next);
+    connect(ui->nextButton, &QPushButton::clicked, this, &PlayerView::nextClicked);
     connect(ui->backButton, &QPushButton::clicked, this, &PlayerView::previousClicked);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
     connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
+    connect(ui->repeatButton, &QCheckBox::clicked, this, &PlayerView::repeatButtonClicked);
+    connect(ui->shuffleButton, &QCheckBox::clicked, this, &PlayerView::shuffleButtonClicked);
 
     connect(m_player, &MediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
     connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
@@ -217,10 +219,15 @@ void PlayerView::previousClicked()
     // Go to previous track if we are within the first 5 seconds of playback
     // Otherwise, seek to the beginning.
     if (m_player->position() <= 5000) {
-        m_playlist->previous();
+        handlePrevious();
     } else {
         m_player->setPosition(0);
     }
+}
+
+void PlayerView::nextClicked()
+{
+    handleNext();
 }
 
 void PlayerView::playClicked()
@@ -241,6 +248,20 @@ void PlayerView::stopClicked()
     m_player->stop();
 }
 
+void PlayerView::repeatButtonClicked(bool checked)
+{
+    repeatEnabled = checked;
+    QMediaPlaylist::PlaybackMode mode = QMediaPlaylist::PlaybackMode::Sequential;
+    if(repeatEnabled) mode = QMediaPlaylist::PlaybackMode::Loop;
+    m_playlist->setPlaybackMode(mode);
+}
+
+void PlayerView::shuffleButtonClicked(bool checked)
+{
+    shuffleEnabled = checked;
+    // TODO
+}
+
 void PlayerView::jump(const QModelIndex &index)
 {
     if (index.isValid()) {
@@ -250,7 +271,7 @@ void PlayerView::jump(const QModelIndex &index)
     }
 }
 
-void PlayerView::playlistPositionChanged(int currentItem)
+void PlayerView::playlistPositionChanged(int)
 {
     m_player->setSource(m_playlist->currentMedia());
 
@@ -286,7 +307,7 @@ void PlayerView::statusChanged(MediaPlayer::MediaStatus status)
         break;
     case MediaPlayer::EndOfMedia:
         QApplication::alert(this);
-        m_playlist->next();
+        handleNext();
         break;
     case MediaPlayer::InvalidMedia:
         displayErrorMessage();
@@ -382,6 +403,22 @@ void PlayerView::volumeChanged()
                               QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
 
     m_player->setVolume(linearVolume);
+}
+
+void PlayerView::handlePrevious()
+{
+    // If is first item in playlist, do nothing
+    // That's handled by QMediaPlaylist
+    m_playlist->previous();
+}
+
+void PlayerView::handleNext()
+{
+    // If is last item in playlist:
+    // If repeat enabled, go to first
+    // If not, do nothing
+    // That's handled by QMediaPlaylist
+    m_playlist->next();
 }
 
 void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)

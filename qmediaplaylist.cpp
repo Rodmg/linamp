@@ -520,7 +520,9 @@ void QMediaPlaylist::shuffle()
 void QMediaPlaylist::next()
 {
     Q_D(QMediaPlaylist);
-    d->currentPos = d->nextPosition(1);
+    int nextPosition = d->nextPosition(1);
+    if(nextPosition == -1) return;
+    d->currentPos = nextPosition;
 
     emit currentIndexChanged(d->currentPos);
     emit currentMediaChanged(currentMedia());
@@ -532,7 +534,9 @@ void QMediaPlaylist::next()
 void QMediaPlaylist::previous()
 {
     Q_D(QMediaPlaylist);
-    d->currentPos = d->prevPosition(1);
+    int prevPosition = d->prevPosition(1);
+    if(prevPosition == -1) return;
+    d->currentPos = prevPosition;
 
     emit currentIndexChanged(d->currentPos);
     emit currentMediaChanged(currentMedia());
