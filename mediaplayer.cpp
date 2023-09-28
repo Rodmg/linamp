@@ -396,6 +396,12 @@ QString MediaPlayer::errorString() const
     return errorStr;
 }
 
+QAudioFormat MediaPlayer::format()
+{
+    return m_format;
+}
+
+
 void MediaPlayer::setSource(const QUrl &source)
 {
     setMediaStatus(MediaPlayer::LoadingMedia);

@@ -77,7 +77,7 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
 
     // Setup spectrum widget
-    connect(m_player, &MediaPlayer::newData, spectrum, &SpectrumWidget::setData);
+    connect(m_player, &MediaPlayer::newData, this, &PlayerView::handleSpectrumData);
     QVBoxLayout *spectrumLayout = new QVBoxLayout;
     spectrumLayout->addWidget(spectrum);
     spectrumLayout->setContentsMargins(0, 0, 0, 0);
@@ -313,6 +313,12 @@ void PlayerView::bufferingProgress(float progress)
     else
         setStatusInfo(tr("Buffering %1%").arg(qRound(progress * 100.)));
 }
+
+void PlayerView::handleSpectrumData(const QByteArray& data)
+{
+    spectrum->setData(data, m_player->format());
+}
+
 
 void PlayerView::setTrackInfo(const QString &info)
 {

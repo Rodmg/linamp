@@ -1,12 +1,12 @@
 #ifndef SPECTRUMWIDGET_H
 #define SPECTRUMWIDGET_H
 
+#include "qaudioformat.h"
 #define DFT_SIZE 512  /* size of the DFT */
 #define N_BANDS 19
 
 #include <QWidget>
 #include <QTimer>
-#include <QMutex>
 
 class SpectrumWidget : public QWidget
 {
@@ -29,7 +29,7 @@ private:
     int m_peakDelays[N_BANDS + 1];
     bool m_playing = false;
     QTimer *m_renderTimer = nullptr;
-    QMutex dataMutex;
+    QAudioFormat m_format;
 
     void paintBackground(QPainter &);
     void paintSpectrum(QPainter &);
@@ -38,7 +38,7 @@ private:
     void clear();
 
 public slots:
-    void setData(const QByteArray& data);
+    void setData(const QByteArray &data, QAudioFormat format);
 
 signals:
 

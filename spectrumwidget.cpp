@@ -3,41 +3,43 @@
 #include <QPainter>
 #include <QColor>
 
-#define VIS_DELAY 2 /* delay before falloff in frames */
-#define VIS_FALLOFF 2 /* falloff in pixels per frame */
+#define VIS_DELAY 1 /* delay before falloff in frames */
+#define VIS_FALLOFF 4 /* falloff in pixels per frame */
 #define VIS_PEAK_DELAY 16
 #define VIS_PEAK_FALLOFF 1 /* falloff in pixels per frame */
 
+const quint16 PCMS16MaxAmplitude = 32768; // because minimum is -32768
 
-static void pcm_to_mono(const float *data, float *mono, int channels)
+float pcmToFloat(qint16 pcm)
 {
-    if (channels == 1)
-    {
+    return float(pcm) / PCMS16MaxAmplitude;
+}
+
+static void floatPcmToMono(const float *data, float *mono, int channels)
+{
+    if (channels == 1) {
         memcpy(mono, data, sizeof(float) * 512);
     }
-    else
-    {
+    else {
         float *set = mono;
-        while (set < &mono[512])
-        {
+        while (set < &mono[512]) {
             *set++ = (data[0] + data[1]) / 2;
             data += channels;
         }
     }
 }
 
-static float compute_freq_band(const float * freq,
-                               const float * xscale, int band,
+static float computeFreqBand(const float *freq,
+                               const float *xscale, int band,
                                int bands)
 {
     int a = ceilf(xscale[band]);
     int b = floorf(xscale[band + 1]);
     float n = 0;
 
-    if (b < a)
+    if (b < a) {
         n += freq[b] * (xscale[band + 1] - xscale[band]);
-    else
-    {
+    } else {
         if (a > 0)
             n += freq[a - 1] * (a - xscale[band]);
         for (; a < b; a++)
@@ -53,7 +55,7 @@ static float compute_freq_band(const float * freq,
     return 20 * log10f(n);
 }
 
-static void compute_log_xscale(float * xscale, int bands)
+static void computeLogXscale(float *xscale, int bands)
 {
     for (int i = 0; i <= bands; i++)
         xscale[i] = powf(256, (float)i / bands) - 0.5f;
@@ -95,7 +97,7 @@ SpectrumWidget::SpectrumWidget(QWidget *parent)
     : QWidget{parent}
 {
     clear();
-    compute_log_xscale(m_xscale, N_BANDS);
+    computeLogXscale(m_xscale, N_BANDS);
     m_renderTimer = new QTimer(this);
     m_renderTimer->setInterval(33); // around 30 fps
     connect(m_renderTimer, &QTimer::timeout, this, QOverload<>::of(&SpectrumWidget::update));
@@ -178,17 +180,12 @@ void SpectrumWidget::paintEvent (QPaintEvent *)
         float mono[N];
         float freq[N / 2];
         int channels = 2; // TODO get from format
-        pcm_to_mono(m_data, mono, channels);
+        floatPcmToMono(m_data, mono, channels);
         calc_freq(mono, freq);
 
-        for(int i = 0; i < N/2; i++) {
-            qDebug() << "freq " << i << ": " << freq[i];
-        }
-
-        for(int i = 0; i < N_BANDS; i ++)
-        {
+        for(int i = 0; i < N_BANDS; i ++) {
             /* 40 dB range */
-            int x = /*40 +*/ compute_freq_band(freq, m_xscale, i, N_BANDS);
+            int x = 40 + computeFreqBand(freq, m_xscale, i, N_BANDS);
             x = std::clamp(x, 0, 40);
 
             m_bandValues[i] -= std::max(0, VIS_FALLOFF - m_bandDelays[i]);
@@ -196,8 +193,7 @@ void SpectrumWidget::paintEvent (QPaintEvent *)
             if (m_bandDelays[i])
                 m_bandDelays[i]--;
 
-            if (x > m_bandValues[i])
-            {
+            if (x > m_bandValues[i]) {
                 m_bandValues[i] = x;
                 m_bandDelays[i] = VIS_DELAY;
             }
@@ -207,15 +203,10 @@ void SpectrumWidget::paintEvent (QPaintEvent *)
             if (m_peakDelays[i])
                 m_peakDelays[i]--;
 
-            if (x > m_peakValues[i])
-            {
+            if (x > m_peakValues[i]) {
                 m_peakValues[i] = x;
                 m_peakDelays[i] = VIS_PEAK_DELAY;
             }
-        }
-
-        for(int i = 0; i < N_BANDS; i++) {
-            qDebug() << "band " << i << ": " << m_bandValues[i];
         }
 
         paintSpectrum(p);
@@ -223,13 +214,20 @@ void SpectrumWidget::paintEvent (QPaintEvent *)
     }
 }
 
-void SpectrumWidget::setData(const QByteArray& data)
+void SpectrumWidget::setData(const QByteArray &data, QAudioFormat format)
 {
-    // TODO: this needs to vary depending on source codec...
-    for(int i = 0; i < DFT_SIZE * 2; i++) {
-        if(i < data.length()) {
-            m_data[i] = (float)data[i];
-        }
+    m_format = format;
+    Q_ASSERT(m_format.sampleFormat() == QAudioFormat::Int16);
+
+    const int bytesPerFrame = format.bytesPerFrame();
+
+    const char *ptr = data.constData();
+    for (int i = 0; i < DFT_SIZE * 2; ++i) {
+        const qint16 pcmSample = *reinterpret_cast<const qint16 *>(ptr);
+        // Scale down to range [-1.0, 1.0]
+        float floatSample = pcmToFloat(pcmSample);
+        m_data[i] = floatSample;
+        ptr += bytesPerFrame;
     }
 }
 

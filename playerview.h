@@ -56,6 +56,7 @@ private slots:
 
     void statusChanged(MediaPlayer::MediaStatus status);
     void bufferingProgress(float progress);
+    void handleSpectrumData(const QByteArray& data);
 
     void displayErrorMessage();
 

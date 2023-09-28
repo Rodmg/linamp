@@ -59,6 +59,7 @@ public:
     QMediaMetaData metaData() const;
     Error error() const;
     QString errorString() const;
+    QAudioFormat format();
 
 protected:
     qint64 readData(char* data, qint64 maxlen) override;
