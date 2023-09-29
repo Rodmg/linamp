@@ -133,7 +133,7 @@ void SpectrumWidget::paintBackground(QPainter & p)
 
     // Starting points
     unsigned int x = 3;
-    unsigned int y = 4;
+    unsigned int y = 6;
 
     const QColor color = QColor::fromRgb(64, 64, 64);
 
