@@ -41,11 +41,6 @@ public slots:
     void jump(const QModelIndex &index);
     void open();
 
-private slots:
-    void durationChanged(qint64 duration);
-    void positionChanged(qint64 progress);
-    void metaDataChanged();
-
     void previousClicked();
     void nextClicked();
     void playClicked();
@@ -53,6 +48,11 @@ private slots:
     void stopClicked();
     void repeatButtonClicked(bool checked);
     void shuffleButtonClicked(bool checked);
+
+private slots:
+    void durationChanged(qint64 duration);
+    void positionChanged(qint64 progress);
+    void metaDataChanged();
 
     void seek(int mseconds);
     void playlistPositionChanged(int);

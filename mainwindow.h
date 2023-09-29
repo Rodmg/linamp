@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStackedLayout>
+#include "controlbuttonswidget.h"
 #include "playerview.h"
 #include "playlistview.h"
 #include "qmediaplaylist.h"
@@ -18,6 +19,7 @@ public:
     QStackedLayout *viewStack;
 
     PlayerView *player;
+    ControlButtonsWidget *controlButtons;
     PlaylistView *playlist;
 
 public slots:

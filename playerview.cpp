@@ -48,9 +48,6 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     ui->posBar->setRange(0, m_player->duration());
     connect(ui->posBar, &QSlider::sliderMoved, this, &PlayerView::seek);
 
-    // controls
-    connect(ui->openButton, &QPushButton::clicked, this, &PlayerView::open);
-
     // Set volume slider
     ui->volumeSlider->setRange(0, 100);
     this->setVolumeSlider(m_player->volume());
@@ -65,15 +62,8 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     // Set play status icon
     setPlaybackState(m_player->playbackState());
 
-    connect(ui->playButton, &QPushButton::clicked, this, &PlayerView::playClicked);
-    connect(ui->pauseButton, &QPushButton::clicked, this, &PlayerView::pauseClicked);
-    connect(ui->stopButton, &QPushButton::clicked, this, &PlayerView::stopClicked);
-    connect(ui->nextButton, &QPushButton::clicked, this, &PlayerView::nextClicked);
-    connect(ui->backButton, &QPushButton::clicked, this, &PlayerView::previousClicked);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
     connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
-    connect(ui->repeatButton, &QCheckBox::clicked, this, &PlayerView::repeatButtonClicked);
-    connect(ui->shuffleButton, &QCheckBox::clicked, this, &PlayerView::shuffleButtonClicked);
 
     connect(m_player, &MediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
     connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);

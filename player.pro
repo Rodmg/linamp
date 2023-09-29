@@ -9,6 +9,8 @@ QT += network \
 LIBS += -ltag
 
 HEADERS = \
+    controlbuttonswidget.h \
+    desktopplayerwindow.h \
     fft.h \
     mainwindow.h \
     mediaplayer.h \
@@ -22,6 +24,8 @@ HEADERS = \
     spectrumwidget.h
 
 SOURCES = main.cpp \
+    controlbuttonswidget.cpp \
+    desktopplayerwindow.cpp \
     fft.cpp \
     mainwindow.cpp \
     mediaplayer.cpp \
@@ -38,6 +42,8 @@ target.path = $$[QT_INSTALL_EXAMPLES]/multimedia/player
 INSTALLS += target
 
 FORMS += \
+    controlbuttonswidget.ui \
+    desktopplayerwindow.ui \
     playerview.ui \
     playlistview.ui
 

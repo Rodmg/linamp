@@ -151,21 +151,41 @@ QScrollBar::handle:vertical:pressed {
    <item>
     <layout class="QVBoxLayout" name="plControlsContainer">
      <item>
-      <widget class="QPushButton" name="goPlayerButton">
-       <property name="minimumSize">
-        <size>
-         <width>75</width>
-         <height>54</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>75</width>
-         <height>54</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">#goPlayerButton {
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Minimum</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QPushButton" name="goPlayerButton">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>75</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">#goPlayerButton {
 	background-color: transparent;
 	border-image: url(:assets/pl_close.png);
 	background: none;
@@ -175,28 +195,37 @@ QScrollBar::handle:vertical:pressed {
 #goPlayerButton:pressed {
 	border-image: url(:assets/pl_close_p.png);
 }</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="addButton">
-       <property name="minimumSize">
-        <size>
-         <width>75</width>
-         <height>54</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>75</width>
-         <height>54</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">#addButton {
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>75</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">#addButton {
 	background-color: transparent;
 	border-image: url(:assets/pl_add.png);
 	background: none;
@@ -206,11 +235,109 @@ QScrollBar::handle:vertical:pressed {
 #addButton:pressed {
 	border-image: url(:assets/pl_add_p.png);
 }</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="removeButton">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>75</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Bitstream Vera Sans Mono</family>
+             <pointsize>14</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">#removeButton {
+	color: #2f374d;
+	border-top: 6px solid #adb4c4;
+	border-left: 6px solid #adb4c4;
+	border-right: 6px solid #46505d;
+	border-bottom: 6px solid #46505d;
+	border-radius: 0px;
+	background: solid;
+	background-color: #bfcdd3;
+}
+
+#removeButton:pressed {
+	color: #000000;
+	border-top: 10px solid #0b0f16;
+	border-left: 10px solid #0b0f16;
+	border-right: 2px solid #677986;
+	border-bottom: 2px solid #677986;
+	background-color: #798a9e
+}</string>
+           </property>
+           <property name="text">
+            <string>REM</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="clearButton">
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>75</width>
+             <height>54</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Bitstream Vera Sans Mono</family>
+             <pointsize>14</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">#clearButton {
+	color: #2f374d;
+	border-top: 6px solid #adb4c4;
+	border-left: 6px solid #adb4c4;
+	border-right: 6px solid #46505d;
+	border-bottom: 6px solid #46505d;
+	border-radius: 0px;
+	background: solid;
+	background-color: #bfcdd3;
+}
+
+#clearButton:pressed {
+	color: #000000;
+	border-top: 10px solid #0b0f16;
+	border-left: 10px solid #0b0f16;
+	border-right: 2px solid #677986;
+	border-bottom: 2px solid #677986;
+	background-color: #798a9e
+}</string>
+           </property>
+           <property name="text">
+            <string>CLEAR</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
      <item>
       <spacer name="verticalSpacer">
@@ -224,6 +351,193 @@ QScrollBar::handle:vertical:pressed {
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QFrame" name="plDurationFrame">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#plDurationFrame {
+	background-color: #000000;
+	border-top: 3px solid #26253c;
+	border-right: 3px solid #6d6d7f;
+	border-bottom: 3px solid #6d6d7f;
+	border-left: 3px solid #26253c;
+}</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>2</number>
+        </property>
+        <property name="topMargin">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>2</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="plDuration">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="128">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="128">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="128">
+                <red>0</red>
+                <green>226</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </disabled>
+           </palette>
+          </property>
+          <property name="font">
+           <font>
+            <family>Bitstream Vera Sans Mono</family>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#plDuration {
+	color: #00e200;
+}</string>
+          </property>
+          <property name="text">
+           <string>5:35/1:23:23</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </item>
     </layout>
    </item>
