@@ -1,5 +1,7 @@
 #include "mainwindow.h"
+#include "desktopbasewindow.h"
 #include "desktopplayerwindow.h"
+#include "ui_desktopbasewindow.h"
 #include "ui_desktopplayerwindow.h"
 #include <QLabel>
 #include <QVBoxLayout>
@@ -47,10 +49,18 @@ MainWindow::MainWindow(QWidget *parent)
     buttonsLayout->addWidget(controlButtons);
     playerWindow->ui->controlButtonsContainer->setLayout(buttonsLayout);
 
+    // Prepare playlist view
+    DesktopBaseWindow *playlistWindow = new DesktopBaseWindow(this);
+    playlistWindow->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
+    QVBoxLayout *playlistLayout = new QVBoxLayout;
+    playlistLayout->setContentsMargins(0, 0, 0, 0);
+    playlistLayout->addWidget(playlist);
+    playlistWindow->ui->body->setLayout(playlistLayout);
+
     // Prepare navigation stack
     viewStack = new QStackedLayout;
     viewStack->addWidget(playerWindow);
-    viewStack->addWidget(playlist);
+    viewStack->addWidget(playlistWindow);
 
     // Final UI setup and show
     QVBoxLayout *centralLayout = new QVBoxLayout;
@@ -67,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->setMaximumHeight(351);
     this->setMinimumWidth(831);
     this->setMinimumHeight(351);
-    //setWindowFlags(Qt::CustomizeWindowHint);
+    setWindowFlags(Qt::CustomizeWindowHint);
 }
 
 MainWindow::~MainWindow()

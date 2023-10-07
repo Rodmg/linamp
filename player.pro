@@ -10,6 +10,7 @@ LIBS += -ltag
 
 HEADERS = \
     controlbuttonswidget.h \
+    desktopbasewindow.h \
     desktopplayerwindow.h \
     fft.h \
     mainwindow.h \
@@ -21,10 +22,12 @@ HEADERS = \
     qmediaplaylist.h \
     qmediaplaylist_p.h \
     qplaylistfileparser.h \
-    spectrumwidget.h
+    spectrumwidget.h \
+    titlebar.h
 
 SOURCES = main.cpp \
     controlbuttonswidget.cpp \
+    desktopbasewindow.cpp \
     desktopplayerwindow.cpp \
     fft.cpp \
     mainwindow.cpp \
@@ -36,16 +39,19 @@ SOURCES = main.cpp \
     qmediaplaylist.cpp \
     qmediaplaylist_p.cpp \
     qplaylistfileparser.cpp \
-    spectrumwidget.cpp
+    spectrumwidget.cpp \
+    titlebar.cpp
 
 target.path = $$[QT_INSTALL_EXAMPLES]/multimedia/player
 INSTALLS += target
 
 FORMS += \
     controlbuttonswidget.ui \
+    desktopbasewindow.ui \
     desktopplayerwindow.ui \
     playerview.ui \
-    playlistview.ui
+    playlistview.ui \
+    titlebar.ui
 
 RESOURCES += \
     uiassets.qrc

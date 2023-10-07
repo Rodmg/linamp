@@ -49,5 +49,8 @@
         <file>assets/pl_close.png</file>
         <file>assets/scroll_handle_p.png</file>
         <file>assets/scroll_handle.png</file>
+        <file>assets/windowClose.png</file>
+        <file>assets/windowMaximize.png</file>
+        <file>assets/windowMinimize.png</file>
     </qresource>
 </RCC>
