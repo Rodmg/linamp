@@ -127,6 +127,9 @@ void MediaPlayer::play()
 {
     if(m_state == PlaybackState::PlayingState) return;
 
+    if(!m_audioOutput)
+        return;
+
     if(m_state == PlaybackState::PausedState) {
         m_audioOutput->resume();
     } else {
@@ -141,6 +144,9 @@ void MediaPlayer::pause()
 {
     if(m_state == PlaybackState::PausedState) return;
 
+    if(!m_audioOutput)
+        return;
+
     m_audioOutput->suspend();
 
     m_state = PlaybackState::PausedState;
@@ -151,6 +157,9 @@ void MediaPlayer::pause()
 void MediaPlayer::stop(bool stopAudioOutput)
 {
     if(m_state == PlaybackState::StoppedState) return;
+
+    if(!m_audioOutput)
+        return;
 
     if(stopAudioOutput) m_audioOutput->stop();
     // Clear buffers, avoids pops and clicks when playing after stopping

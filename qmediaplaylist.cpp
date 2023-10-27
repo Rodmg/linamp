@@ -656,6 +656,10 @@ QString QMediaPlaylist::errorString() const
 void QMediaPlaylist::shuffle()
 {
     Q_D(QMediaPlaylist);
+
+    if(d->playqueue.empty())
+        return;
+
     QList<QUrl> playqueue;
 
     // keep the current item when shuffling
@@ -679,6 +683,9 @@ void QMediaPlaylist::shuffle()
 void QMediaPlaylist::unshuffle()
 {
     Q_D(QMediaPlaylist);
+
+    if(d->playqueue.empty())
+        return;
 
     // keep the current item when unshuffling
     QUrl current;
