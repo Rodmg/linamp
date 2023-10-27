@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>831</width>
-    <height>351</height>
+    <width>277</width>
+    <height>117</height>
    </rect>
   </property>
   <property name="palette">
@@ -115,16 +115,16 @@
     <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="topMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="rightMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="bottomMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <item>
     <widget class="QFrame" name="outerFrame">
@@ -163,13 +163,13 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>24</height>
+          <height>8</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>24</height>
+          <height>8</height>
          </size>
         </property>
        </widget>
@@ -187,16 +187,16 @@
           <number>0</number>
          </property>
          <property name="leftMargin">
-          <number>6</number>
+          <number>2</number>
          </property>
          <property name="topMargin">
           <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>6</number>
+          <number>2</number>
          </property>
          <property name="bottomMargin">
-          <number>6</number>
+          <number>2</number>
          </property>
          <item>
           <widget class="QFrame" name="bodyOuterFrame">
@@ -220,16 +220,16 @@
              <number>0</number>
             </property>
             <property name="leftMargin">
-             <number>3</number>
+             <number>1</number>
             </property>
             <property name="topMargin">
-             <number>3</number>
+             <number>1</number>
             </property>
             <property name="rightMargin">
-             <number>3</number>
+             <number>1</number>
             </property>
             <property name="bottomMargin">
-             <number>3</number>
+             <number>1</number>
             </property>
             <item>
              <widget class="QFrame" name="bodyInnerFrame">

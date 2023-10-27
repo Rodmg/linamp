@@ -3,6 +3,7 @@
 
 #include "playlistmodel.h"
 #include "qmediaplaylist.h"
+#include "scale.h"
 
 #include <QApplication>
 #include <QAudioDevice>
@@ -25,6 +26,7 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
 
     // Setup UI
     ui->setupUi(this);
+    scale();
 
     //! [create-objs]
     m_player = new MediaPlayer(this);
@@ -90,6 +92,92 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
 PlayerView::~PlayerView()
 {
     delete ui;
+}
+
+void PlayerView::scale()
+{
+    this->setMaximumSize(this->maximumSize() * UI_SCALE);
+    this->setMinimumSize(this->minimumSize() * UI_SCALE);
+
+    ui->posBarContainer->layout()->setContentsMargins(ui->posBarContainer->layout()->contentsMargins() * UI_SCALE);
+
+    ui->posBar->setMaximumHeight(ui->posBar->maximumHeight() * UI_SCALE);
+    ui->posBar->setMinimumHeight(ui->posBar->minimumHeight() * UI_SCALE);
+    // TODO stylesheet
+
+    ui->infoContainer->setContentsMargins(ui->infoContainer->contentsMargins() * UI_SCALE);
+    ui->visualizationContainer->setContentsMargins(ui->visualizationContainer->contentsMargins() * UI_SCALE);
+
+    ui->codecDetailsContainer->layout()->setContentsMargins(ui->codecDetailsContainer->layout()->contentsMargins() * UI_SCALE);
+
+    ui->kHzLabel->setMaximumHeight(ui->kHzLabel->maximumHeight() * UI_SCALE);
+    ui->kHzLabel->setMinimumHeight(ui->kHzLabel->minimumHeight() * UI_SCALE);
+    // TODO font
+
+    ui->kbpsLabel->setMaximumHeight(ui->kbpsLabel->maximumHeight() * UI_SCALE);
+    ui->kbpsLabel->setMinimumHeight(ui->kbpsLabel->minimumHeight() * UI_SCALE);
+    // TODO font
+
+    ui->kbpsFrame->setMinimumSize(ui->kbpsFrame->minimumSize() * UI_SCALE);
+    ui->kbpsFrame->setMaximumHeight(ui->kbpsFrame->maximumHeight() * UI_SCALE);
+    ui->kbpsFrame->layout()->setContentsMargins(ui->kbpsFrame->layout()->contentsMargins() * UI_SCALE);
+    ui->kbpsFrame->layout()->setSpacing(ui->kbpsFrame->layout()->spacing() * UI_SCALE);
+    // TODO stylesheet
+
+    ui->khzFrame->setMinimumSize(ui->khzFrame->minimumSize() * UI_SCALE);
+    ui->khzFrame->setMaximumHeight(ui->khzFrame->maximumHeight() * UI_SCALE);
+    ui->khzFrame->layout()->setContentsMargins(ui->khzFrame->layout()->contentsMargins() * UI_SCALE);
+    ui->khzFrame->layout()->setSpacing(ui->khzFrame->layout()->spacing() * UI_SCALE);
+    // TODO stylesheet
+
+
+    //ui->kbpsValueLabel;
+    //ui->khzValueLabel;
+    // TODO font
+
+    // Volume and balance sliders and buttons container
+    ui->horizontalWidget_2->setMinimumHeight(ui->horizontalWidget_2->minimumHeight() * UI_SCALE);
+    ui->horizontalWidget_2->setMaximumHeight(ui->horizontalWidget_2->maximumHeight() * UI_SCALE);
+    ui->horizontalWidget_2->layout()->setContentsMargins(ui->horizontalWidget_2->layout()->contentsMargins() * UI_SCALE);
+
+    ui->eqButton->setMinimumSize(ui->eqButton->minimumSize() * UI_SCALE);
+    ui->eqButton->setMaximumSize(ui->eqButton->maximumSize() * UI_SCALE);
+    // TODO stylesheet
+
+    ui->playlistButton->setMinimumSize(ui->playlistButton->minimumSize() * UI_SCALE);
+    ui->playlistButton->setMaximumSize(ui->playlistButton->maximumSize() * UI_SCALE);
+    // TODO stylesheet
+
+    ui->balanceSlider->setMinimumSize(ui->balanceSlider->minimumSize() * UI_SCALE);
+    // TODO stylesheet
+
+    ui->volumeSlider->setMinimumSize(ui->volumeSlider->minimumSize() * UI_SCALE);
+    ui->volumeSlider->setMaximumSize(ui->volumeSlider->maximumSize() * UI_SCALE);
+    // TODO stylesheet
+
+    ui->songInfoContainer->setMinimumHeight(ui->songInfoContainer->minimumHeight() * UI_SCALE);
+    ui->songInfoContainer->setMaximumHeight(ui->songInfoContainer->maximumHeight() * UI_SCALE);
+    ui->songInfoContainer->layout()->setContentsMargins(ui->songInfoContainer->layout()->contentsMargins() * UI_SCALE);
+    // TODO stylesheet
+
+    //ui->songInfoLabel;
+    // TODO font
+
+    ui->visualizationFrame->setMaximumSize(ui->visualizationFrame->maximumSize() * UI_SCALE);
+    ui->visualizationFrame->setMinimumSize(ui->visualizationFrame->minimumSize() * UI_SCALE);
+    // TODO stylesheet
+
+    ui->playStatusIcon->setMaximumSize(ui->playStatusIcon->maximumSize() * UI_SCALE);
+    ui->playStatusIcon->setMinimumSize(ui->playStatusIcon->minimumSize() * UI_SCALE);
+    QRect psiGeo = ui->playStatusIcon->geometry();
+    ui->playStatusIcon->setGeometry(psiGeo.x()*UI_SCALE, psiGeo.y()*UI_SCALE, psiGeo.width(), psiGeo.height());
+
+    QRect ptlGeo = ui->playStatusIcon->geometry();
+    ui->progressTimeLabel->setGeometry(ptlGeo.x()*UI_SCALE, ptlGeo.y()*UI_SCALE, ptlGeo.width()*UI_SCALE, ptlGeo.height()*UI_SCALE);
+    // TODO fontsize
+
+    QRect scGeo = ui->spectrumContainer->geometry();
+    ui->spectrumContainer->setGeometry(scGeo.x()*UI_SCALE, scGeo.y()*UI_SCALE, scGeo.width()*UI_SCALE, scGeo.height()*UI_SCALE);
 }
 
 bool PlayerView::isPlayerAvailable() const

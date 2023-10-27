@@ -68,6 +68,7 @@ signals:
 
 private:
     Ui::PlayerView *ui;
+    void scale();
     SpectrumWidget *spectrum = nullptr;
     void setTrackInfo(const QString &info);
     void setStatusInfo(const QString &info);

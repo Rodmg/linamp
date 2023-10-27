@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>666</width>
-    <height>51</height>
+    <width>222</width>
+    <height>18</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>666</width>
-    <height>51</height>
+    <width>222</width>
+    <height>17</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>666</width>
-    <height>51</height>
+    <width>222</width>
+    <height>18</height>
    </size>
   </property>
   <property name="palette">
@@ -91,14 +91,14 @@
     <widget class="QPushButton" name="backButton">
      <property name="minimumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -122,14 +122,14 @@
     <widget class="QPushButton" name="playButton">
      <property name="minimumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -153,14 +153,14 @@
     <widget class="QPushButton" name="pauseButton">
      <property name="minimumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -184,14 +184,14 @@
     <widget class="QPushButton" name="stopButton">
      <property name="minimumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -215,14 +215,14 @@
     <widget class="QPushButton" name="nextButton">
      <property name="minimumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>66</width>
-       <height>54</height>
+       <width>22</width>
+       <height>18</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -252,8 +252,8 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>18</width>
-       <height>20</height>
+       <width>6</width>
+       <height>17</height>
       </size>
      </property>
     </spacer>
@@ -262,14 +262,14 @@
     <widget class="QPushButton" name="openButton">
      <property name="minimumSize">
       <size>
-       <width>66</width>
-       <height>48</height>
+       <width>22</width>
+       <height>16</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>66</width>
-       <height>48</height>
+       <width>22</width>
+       <height>16</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -299,8 +299,8 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>21</width>
-       <height>20</height>
+       <width>7</width>
+       <height>17</height>
       </size>
      </property>
     </spacer>
@@ -309,14 +309,14 @@
     <widget class="QCheckBox" name="shuffleButton">
      <property name="minimumSize">
       <size>
-       <width>141</width>
-       <height>45</height>
+       <width>47</width>
+       <height>15</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>141</width>
-       <height>45</height>
+       <width>47</width>
+       <height>15</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -325,8 +325,8 @@
 }
 
 QCheckBox::indicator {
-    width: 141px;
-    height: 45px;
+    width: 47px;
+    height: 15px;
 }
 
 QCheckBox::indicator:unchecked {
@@ -370,14 +370,14 @@ QCheckBox::indicator:indeterminate:pressed {
     <widget class="QCheckBox" name="repeatButton">
      <property name="minimumSize">
       <size>
-       <width>84</width>
-       <height>45</height>
+       <width>28</width>
+       <height>15</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>64</width>
-       <height>45</height>
+       <width>28</width>
+       <height>15</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -386,8 +386,8 @@ QCheckBox::indicator:indeterminate:pressed {
 }
 
 QCheckBox::indicator {
-    width: 85px;
-    height: 45px;
+    width: 28px;
+    height: 15px;
 }
 
 QCheckBox::indicator:unchecked {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>768</width>
-    <height>180</height>
+    <width>577</width>
+    <height>86</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>768</width>
-    <height>180</height>
+    <width>256</width>
+    <height>60</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>768</width>
-    <height>180</height>
+    <width>577</width>
+    <height>86</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -77,7 +77,7 @@
           <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>8</number>
+          <number>2</number>
          </property>
          <property name="bottomMargin">
           <number>0</number>
@@ -86,14 +86,14 @@
           <widget class="QFrame" name="visualizationFrame">
            <property name="minimumSize">
             <size>
-             <width>279</width>
-             <height>129</height>
+             <width>93</width>
+             <height>43</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>279</width>
-             <height>129</height>
+             <width>93</width>
+             <height>43</height>
             </size>
            </property>
            <property name="styleSheet">
@@ -134,10 +134,10 @@
               <widget class="QLabel" name="progressTimeLabel">
                <property name="geometry">
                 <rect>
-                 <x>118</x>
-                 <y>9</y>
-                 <width>150</width>
-                 <height>61</height>
+                 <x>39</x>
+                 <y>3</y>
+                 <width>50</width>
+                 <height>20</height>
                 </rect>
                </property>
                <property name="palette">
@@ -288,22 +288,22 @@
               <widget class="QGraphicsView" name="playStatusIcon">
                <property name="geometry">
                 <rect>
-                 <x>36</x>
-                 <y>15</y>
-                 <width>33</width>
-                 <height>27</height>
+                 <x>12</x>
+                 <y>5</y>
+                 <width>11</width>
+                 <height>9</height>
                 </rect>
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>33</width>
-                 <height>27</height>
+                 <width>11</width>
+                 <height>9</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>33</width>
-                 <height>27</height>
+                 <width>11</width>
+                 <height>9</height>
                 </size>
                </property>
                <property name="palette">
@@ -412,10 +412,10 @@
               <widget class="QFrame" name="spectrumContainer">
                <property name="geometry">
                 <rect>
-                 <x>33</x>
-                 <y>57</y>
-                 <width>231</width>
-                 <height>51</height>
+                 <x>11</x>
+                 <y>19</y>
+                 <width>77</width>
+                 <height>17</height>
                 </rect>
                </property>
                <property name="frameShape">
@@ -451,7 +451,7 @@
           <number>0</number>
          </property>
          <property name="leftMargin">
-          <number>5</number>
+          <number>2</number>
          </property>
          <property name="topMargin">
           <number>0</number>
@@ -464,13 +464,13 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>41</height>
+             <height>14</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>22</height>
+             <height>14</height>
             </size>
            </property>
            <property name="styleSheet">
@@ -483,14 +483,17 @@
 }</string>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <property name="leftMargin">
-             <number>8</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
              <number>0</number>
             </property>
             <property name="rightMargin">
-             <number>8</number>
+             <number>3</number>
             </property>
             <property name="bottomMargin">
              <number>0</number>
@@ -555,30 +558,33 @@
             </size>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <property name="leftMargin">
              <number>0</number>
             </property>
             <property name="topMargin">
-             <number>18</number>
+             <number>6</number>
             </property>
             <property name="rightMargin">
-             <number>15</number>
+             <number>5</number>
             </property>
             <property name="bottomMargin">
-             <number>8</number>
+             <number>3</number>
             </property>
             <item>
              <widget class="QFrame" name="kbpsFrame">
               <property name="minimumSize">
                <size>
-                <width>58</width>
-                <height>34</height>
+                <width>19</width>
+                <height>11</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>34</height>
+                <height>11</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -591,14 +597,17 @@
 }</string>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <property name="spacing">
+                <number>2</number>
+               </property>
                <property name="leftMargin">
-                <number>4</number>
+                <number>1</number>
                </property>
                <property name="topMargin">
                 <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>1</number>
                </property>
                <property name="bottomMargin">
                 <number>0</number>
@@ -656,13 +665,13 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>34</height>
+                <height>11</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>34</height>
+                <height>11</height>
                </size>
               </property>
               <property name="palette">
@@ -727,14 +736,14 @@
              <widget class="QFrame" name="khzFrame">
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>34</height>
+                <width>15</width>
+                <height>11</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>34</height>
+                <height>11</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -747,14 +756,17 @@
 }</string>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <property name="spacing">
+                <number>2</number>
+               </property>
                <property name="leftMargin">
-                <number>4</number>
+                <number>1</number>
                </property>
                <property name="topMargin">
                 <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>1</number>
                </property>
                <property name="bottomMargin">
                 <number>0</number>
@@ -812,13 +824,13 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>34</height>
+                <height>11</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>34</height>
+                <height>11</height>
                </size>
               </property>
               <property name="palette">
@@ -1002,6 +1014,9 @@
             <property name="topMargin">
              <number>0</number>
             </property>
+            <property name="rightMargin">
+             <number>3</number>
+            </property>
             <property name="bottomMargin">
              <number>0</number>
             </property>
@@ -1009,14 +1024,14 @@
              <widget class="QSlider" name="volumeSlider">
               <property name="minimumSize">
                <size>
-                <width>180</width>
-                <height>33</height>
+                <width>60</width>
+                <height>11</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>180</width>
-                <height>33</height>
+                <width>60</width>
+                <height>11</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -1075,7 +1090,7 @@ QSlider::add-page:horizontal {
               <property name="sizeHint" stdset="0">
                <size>
                 <width>16</width>
-                <height>20</height>
+                <height>1</height>
                </size>
               </property>
              </spacer>
@@ -1084,8 +1099,8 @@ QSlider::add-page:horizontal {
              <widget class="QSlider" name="balanceSlider">
               <property name="minimumSize">
                <size>
-                <width>110</width>
-                <height>33</height>
+                <width>37</width>
+                <height>11</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -1144,7 +1159,7 @@ QSlider::add-page:horizontal {
               <property name="sizeHint" stdset="0">
                <size>
                 <width>14</width>
-                <height>20</height>
+                <height>1</height>
                </size>
               </property>
              </spacer>
@@ -1153,14 +1168,14 @@ QSlider::add-page:horizontal {
              <widget class="QCheckBox" name="eqButton">
               <property name="minimumSize">
                <size>
-                <width>69</width>
-                <height>36</height>
+                <width>23</width>
+                <height>12</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>69</width>
-                <height>36</height>
+                <width>23</width>
+                <height>12</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -1169,8 +1184,8 @@ QSlider::add-page:horizontal {
 }
 
 QCheckBox::indicator {
-    width: 69px;
-    height: 36px;
+    width: 23px;
+    height: 12px;
 }
 
 QCheckBox::indicator:unchecked {
@@ -1214,14 +1229,14 @@ QCheckBox::indicator:indeterminate:pressed {
              <widget class="QCheckBox" name="playlistButton">
               <property name="minimumSize">
                <size>
-                <width>69</width>
-                <height>36</height>
+                <width>23</width>
+                <height>12</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>69</width>
-                <height>36</height>
+                <width>23</width>
+                <height>12</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -1230,8 +1245,8 @@ QCheckBox::indicator:indeterminate:pressed {
 }
 
 QCheckBox::indicator {
-    width: 69px;
-    height: 36px;
+    width: 23px;
+    height: 12px;
 }
 
 QCheckBox::indicator:unchecked {
@@ -1297,10 +1312,10 @@ QCheckBox::indicator:indeterminate:pressed {
         <number>0</number>
        </property>
        <property name="leftMargin">
-        <number>15</number>
+        <number>5</number>
        </property>
        <property name="rightMargin">
-        <number>6</number>
+        <number>2</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -1310,19 +1325,19 @@ QCheckBox::indicator:indeterminate:pressed {
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>27</height>
+           <height>9</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>27</height>
+           <height>9</height>
           </size>
          </property>
          <property name="styleSheet">
           <string notr="true">QSlider::handle:horizontal {
-	width: 84px;
-	height: 27px;
+	width: 28px;
+	height: 9px;
 	background-color: transparent;
 	border-image: url(:assets/posHandle.png);
 	background: none;
@@ -1339,11 +1354,11 @@ QSlider::groove:horizontal {
 
 #posBar {
 	background-color: #2c2b43;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
-	padding: -3px;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
+	padding: -1px;
 }</string>
          </property>
          <property name="orientation">

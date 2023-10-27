@@ -17,6 +17,7 @@ public:
 
 private:
     Ui::ControlButtonsWidget *ui;
+    void scale();
 
 signals:
     void playClicked();

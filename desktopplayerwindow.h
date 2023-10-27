@@ -15,6 +15,9 @@ public:
     explicit DesktopPlayerWindow(QWidget *parent = nullptr);
     ~DesktopPlayerWindow();
     Ui::DesktopPlayerWindow *ui;
+
+private:
+    void scale();
 };
 
 #endif // DESKTOPPLAYERWINDOW_H
