@@ -5,6 +5,10 @@
 #include "ui_desktopplayerwindow.h"
 #include <QLabel>
 #include <QVBoxLayout>
+#include "scale.h"
+
+const unsigned int WINDOW_W = 277 * UI_SCALE;
+const unsigned int WINDOW_H = 117*UI_SCALE;
 
 MainWindow::MainWindow(QWidget *parent)
      : QMainWindow{parent}
@@ -72,11 +76,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(centralWidget);
 
-    resize(831, 351);
-    this->setMaximumWidth(831);
-    this->setMaximumHeight(351);
-    this->setMinimumWidth(831);
-    this->setMinimumHeight(351);
+    resize(WINDOW_W, WINDOW_H);
+    this->setMaximumWidth(WINDOW_W);
+    this->setMaximumHeight(WINDOW_H);
+    this->setMinimumWidth(WINDOW_W);
+    this->setMinimumHeight(WINDOW_H);
     setWindowFlags(Qt::CustomizeWindowHint);
 }
 

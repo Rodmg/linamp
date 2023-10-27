@@ -18,6 +18,7 @@ HEADERS = \
     playerview.h \
     playlistmodel.h \
     playlistview.h \
+    scale.h \
     scrolltext.h \
     qmediaplaylist.h \
     qmediaplaylist_p.h \
