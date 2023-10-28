@@ -3,6 +3,7 @@
 // Copyright (C) 2023 Rodrigo Mendez.
 
 #include "mainwindow.h"
+#include "scale.h"
 
 #include <QApplication>
 #include <QCommandLineOption>
@@ -33,6 +34,10 @@ int main(int argc, char *argv[])
             urls.append(QUrl::fromUserInput(a, QDir::currentPath()));
         window.player->addToPlaylist(urls);
     }
+
+    #ifdef IS_EMBEDDED
+    window.setWindowState(Qt::WindowFullScreen);
+    #endif
     window.show();
 
     return app.exec();

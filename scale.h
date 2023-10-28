@@ -2,6 +2,7 @@
 #define SCALE_H
 
 #define UI_SCALE 4
+#define IS_EMBEDDED
 
 #include <QString>
 

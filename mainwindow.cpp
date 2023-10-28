@@ -1,14 +1,26 @@
 #include "mainwindow.h"
-#include "desktopbasewindow.h"
 #include "desktopplayerwindow.h"
-#include "ui_desktopbasewindow.h"
 #include "ui_desktopplayerwindow.h"
-#include <QLabel>
-#include <QVBoxLayout>
 #include "scale.h"
 
+#ifdef IS_EMBEDDED
+#include "embeddedbasewindow.h"
+#include "ui_embeddedbasewindow.h"
+#else
+#include "desktopbasewindow.h"
+#include "ui_desktopbasewindow.h"
+#endif
+
+#include <QLabel>
+#include <QVBoxLayout>
+
+#ifdef IS_EMBEDDED
+const unsigned int WINDOW_W = 320 * UI_SCALE;
+const unsigned int WINDOW_H = 100 * UI_SCALE;
+#else
 const unsigned int WINDOW_W = 277 * UI_SCALE;
-const unsigned int WINDOW_H = 117*UI_SCALE;
+const unsigned int WINDOW_H = 117 * UI_SCALE;
+#endif
 
 MainWindow::MainWindow(QWidget *parent)
      : QMainWindow{parent}
@@ -42,7 +54,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleButtonClicked);
 
     // Prepare player main view
+    #ifdef IS_EMBEDDED
+    EmbeddedBaseWindow *playerWindow = new EmbeddedBaseWindow(this);
+    #else
     DesktopBaseWindow *playerWindow = new DesktopBaseWindow(this);
+    #endif
+
     playerWindow->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
 
     DesktopPlayerWindow *playerWindowContent = new DesktopPlayerWindow(this);
@@ -61,7 +78,12 @@ MainWindow::MainWindow(QWidget *parent)
     playerWindow->ui->body->setLayout(playerContentLayout);
 
     // Prepare playlist view
+    #ifdef IS_EMBEDDED
+    EmbeddedBaseWindow *playlistWindow = new EmbeddedBaseWindow(this);
+    #else
     DesktopBaseWindow *playlistWindow = new DesktopBaseWindow(this);
+    #endif
+
     playlistWindow->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
     QVBoxLayout *playlistLayout = new QVBoxLayout;
     playlistLayout->setContentsMargins(0, 0, 0, 0);
@@ -88,7 +110,10 @@ MainWindow::MainWindow(QWidget *parent)
     this->setMaximumHeight(WINDOW_H);
     this->setMinimumWidth(WINDOW_W);
     this->setMinimumHeight(WINDOW_H);
+
+    #ifndef IS_EMBEDDED
     setWindowFlags(Qt::CustomizeWindowHint);
+    #endif
 }
 
 MainWindow::~MainWindow()

@@ -12,6 +12,7 @@ HEADERS = \
     controlbuttonswidget.h \
     desktopbasewindow.h \
     desktopplayerwindow.h \
+    embeddedbasewindow.h \
     fft.h \
     mainwindow.h \
     mediaplayer.h \
@@ -30,6 +31,7 @@ SOURCES = main.cpp \
     controlbuttonswidget.cpp \
     desktopbasewindow.cpp \
     desktopplayerwindow.cpp \
+    embeddedbasewindow.cpp \
     fft.cpp \
     mainwindow.cpp \
     mediaplayer.cpp \
@@ -51,6 +53,7 @@ FORMS += \
     controlbuttonswidget.ui \
     desktopbasewindow.ui \
     desktopplayerwindow.ui \
+    embeddedbasewindow.ui \
     playerview.ui \
     playlistview.ui \
     titlebar.ui
