@@ -2,6 +2,8 @@
 #include "ui_controlbuttonswidget.h"
 #include "scale.h"
 
+#include <QFile>
+
 ControlButtonsWidget::ControlButtonsWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ControlButtonsWidget)
@@ -60,12 +62,13 @@ void ControlButtonsWidget::scale()
     ui->shuffleButton->setMinimumWidth(ui->shuffleButton->minimumWidth() * UI_SCALE);
     ui->shuffleButton->setMaximumHeight(ui->shuffleButton->maximumHeight() * UI_SCALE);
     ui->shuffleButton->setMinimumHeight(ui->shuffleButton->minimumHeight() * UI_SCALE);
+    ui->shuffleButton->setStyleSheet(getStylesheet("controlbuttonswidget.shuffleButton"));
 
     ui->repeatButton->setMaximumWidth(ui->repeatButton->maximumWidth() * UI_SCALE);
     ui->repeatButton->setMinimumWidth(ui->repeatButton->minimumWidth() * UI_SCALE);
     ui->repeatButton->setMaximumHeight(ui->repeatButton->maximumHeight() * UI_SCALE);
     ui->repeatButton->setMinimumHeight(ui->repeatButton->minimumHeight() * UI_SCALE);
-    // TODO Stylesheets
+    ui->repeatButton->setStyleSheet(getStylesheet("controlbuttonswidget.repeatButton"));
 
     this->setMaximumWidth(this->maximumWidth() * UI_SCALE);
     this->setMinimumWidth(this->minimumWidth() * UI_SCALE);

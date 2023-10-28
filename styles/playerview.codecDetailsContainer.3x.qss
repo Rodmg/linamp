@@ -1,0 +1,7 @@
+#kHzLabel {
+    font-size: 15pt;
+}
+
+#kbpsLabel {
+    font-size: 15pt;
+}

@@ -1,0 +1,11 @@
+#songInfoContainer {
+        background-color: #000000;
+        border-top: 2px solid #26253c;
+        border-right: 2px solid #6d6d7f;
+        border-bottom: 2px solid #6d6d7f;
+        border-left: 2px solid #26253c;
+}
+
+#songInfoLabel {
+        font-size: 12pt;
+}

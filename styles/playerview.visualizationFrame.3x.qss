@@ -1,0 +1,14 @@
+#visualizationFrame {
+        background-color: #000;
+        border-top: 3px solid #26253c;
+        border-right: 3px solid #6d6d7f;
+        border-bottom: 3px solid #6d6d7f;
+        border-left: 3px solid #26253c;
+}
+
+#progressTimeLabel {
+        font-size: 29pt;
+        font-family: "bignumbers";
+        letter-spacing: 8px;
+        color: #00f800;
+}

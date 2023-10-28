@@ -1,0 +1,38 @@
+QSlider::handle:horizontal {
+        width: 56px;
+        height: 44px;
+        background-color: transparent;
+        border-image: url(:assets/volumeHandle.png);
+        background: none;
+        background-repeat: none;
+        margin-top: -10px;
+        margin-bottom: -10px;
+}
+
+QSlider::handle:horizontal:pressed {
+        border-image: url(:assets/volumeHandle_p.png);
+}
+
+QSlider::groove:horizontal {
+        background: transparent;
+        height: 24px;
+}
+
+QSlider::sub-page:horizontal {
+        background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #9f161b, stop: 1 #e11f26);
+        border-top: 4px solid #161623;
+        border-left: 4px solid #161623;
+        border-bottom: 4px solid #7d7d92;
+        border-right: 4px solid #7d7d92;
+        border-radius: 10.64px;
+}
+
+QSlider::add-page:horizontal {
+        height: 24px;
+        background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
+        border-top: 4px solid #161623;
+        border-left: 4px solid #161623;
+        border-bottom: 4px solid #7d7d92;
+        border-right: 4px solid #7d7d92;
+        border-radius: 10.64px;
+}

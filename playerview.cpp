@@ -103,37 +103,32 @@ void PlayerView::scale()
 
     ui->posBar->setMaximumHeight(ui->posBar->maximumHeight() * UI_SCALE);
     ui->posBar->setMinimumHeight(ui->posBar->minimumHeight() * UI_SCALE);
-    // TODO stylesheet
+    ui->posBar->setStyleSheet(getStylesheet("playerview.posBar"));
 
     ui->infoContainer->setContentsMargins(ui->infoContainer->contentsMargins() * UI_SCALE);
     ui->visualizationContainer->setContentsMargins(ui->visualizationContainer->contentsMargins() * UI_SCALE);
 
     ui->codecDetailsContainer->layout()->setContentsMargins(ui->codecDetailsContainer->layout()->contentsMargins() * UI_SCALE);
+    ui->codecDetailsContainer->setStyleSheet(getStylesheet("playerview.codecDetailsContainer"));
+
 
     ui->kHzLabel->setMaximumHeight(ui->kHzLabel->maximumHeight() * UI_SCALE);
     ui->kHzLabel->setMinimumHeight(ui->kHzLabel->minimumHeight() * UI_SCALE);
-    // TODO font
 
     ui->kbpsLabel->setMaximumHeight(ui->kbpsLabel->maximumHeight() * UI_SCALE);
     ui->kbpsLabel->setMinimumHeight(ui->kbpsLabel->minimumHeight() * UI_SCALE);
-    // TODO font
 
     ui->kbpsFrame->setMinimumSize(ui->kbpsFrame->minimumSize() * UI_SCALE);
     ui->kbpsFrame->setMaximumHeight(ui->kbpsFrame->maximumHeight() * UI_SCALE);
     ui->kbpsFrame->layout()->setContentsMargins(ui->kbpsFrame->layout()->contentsMargins() * UI_SCALE);
     ui->kbpsFrame->layout()->setSpacing(ui->kbpsFrame->layout()->spacing() * UI_SCALE);
-    // TODO stylesheet
+    ui->kbpsFrame->setStyleSheet(getStylesheet("playerview.kbpsFrame"));
 
     ui->khzFrame->setMinimumSize(ui->khzFrame->minimumSize() * UI_SCALE);
     ui->khzFrame->setMaximumHeight(ui->khzFrame->maximumHeight() * UI_SCALE);
     ui->khzFrame->layout()->setContentsMargins(ui->khzFrame->layout()->contentsMargins() * UI_SCALE);
     ui->khzFrame->layout()->setSpacing(ui->khzFrame->layout()->spacing() * UI_SCALE);
-    // TODO stylesheet
-
-
-    //ui->kbpsValueLabel;
-    //ui->khzValueLabel;
-    // TODO font
+    ui->khzFrame->setStyleSheet(getStylesheet("playerview.khzFrame"));
 
     // Volume and balance sliders and buttons container
     ui->horizontalWidget_2->setMinimumHeight(ui->horizontalWidget_2->minimumHeight() * UI_SCALE);
@@ -142,30 +137,27 @@ void PlayerView::scale()
 
     ui->eqButton->setMinimumSize(ui->eqButton->minimumSize() * UI_SCALE);
     ui->eqButton->setMaximumSize(ui->eqButton->maximumSize() * UI_SCALE);
-    // TODO stylesheet
+    ui->eqButton->setStyleSheet(getStylesheet("playerview.eqButton"));
 
     ui->playlistButton->setMinimumSize(ui->playlistButton->minimumSize() * UI_SCALE);
     ui->playlistButton->setMaximumSize(ui->playlistButton->maximumSize() * UI_SCALE);
-    // TODO stylesheet
+    ui->playlistButton->setStyleSheet(getStylesheet("playerview.playlistButton"));
 
     ui->balanceSlider->setMinimumSize(ui->balanceSlider->minimumSize() * UI_SCALE);
-    // TODO stylesheet
+    ui->balanceSlider->setStyleSheet(getStylesheet("playerview.balanceSlider"));
 
     ui->volumeSlider->setMinimumSize(ui->volumeSlider->minimumSize() * UI_SCALE);
     ui->volumeSlider->setMaximumSize(ui->volumeSlider->maximumSize() * UI_SCALE);
-    // TODO stylesheet
+    ui->volumeSlider->setStyleSheet(getStylesheet("playerview.volumeSlider"));
 
     ui->songInfoContainer->setMinimumHeight(ui->songInfoContainer->minimumHeight() * UI_SCALE);
     ui->songInfoContainer->setMaximumHeight(ui->songInfoContainer->maximumHeight() * UI_SCALE);
     ui->songInfoContainer->layout()->setContentsMargins(ui->songInfoContainer->layout()->contentsMargins() * UI_SCALE);
-    // TODO stylesheet
-
-    //ui->songInfoLabel;
-    // TODO font
+    ui->songInfoContainer->setStyleSheet(getStylesheet("playerview.songInfoContainer"));
 
     ui->visualizationFrame->setMaximumSize(ui->visualizationFrame->maximumSize() * UI_SCALE);
     ui->visualizationFrame->setMinimumSize(ui->visualizationFrame->minimumSize() * UI_SCALE);
-    // TODO stylesheet
+    ui->visualizationFrame->setStyleSheet(getStylesheet("playerview.visualizationFrame"));
 
     ui->playStatusIcon->setMaximumSize(ui->playStatusIcon->maximumSize() * UI_SCALE);
     ui->playStatusIcon->setMinimumSize(ui->playStatusIcon->minimumSize() * UI_SCALE);
@@ -173,8 +165,7 @@ void PlayerView::scale()
     ui->playStatusIcon->setGeometry(psiGeo.x()*UI_SCALE, psiGeo.y()*UI_SCALE, psiGeo.width(), psiGeo.height());
 
     QRect ptlGeo = ui->playStatusIcon->geometry();
-    ui->progressTimeLabel->setGeometry(ptlGeo.x()*UI_SCALE, ptlGeo.y()*UI_SCALE, ptlGeo.width()*UI_SCALE, ptlGeo.height()*UI_SCALE);
-    // TODO fontsize
+    ui->progressTimeLabel->setGeometry(ptlGeo.x()*UI_SCALE, ptlGeo.y(), ptlGeo.width()*UI_SCALE, ptlGeo.height()*UI_SCALE);
 
     QRect scGeo = ui->spectrumContainer->geometry();
     ui->spectrumContainer->setGeometry(scGeo.x()*UI_SCALE, scGeo.y()*UI_SCALE, scGeo.width()*UI_SCALE, scGeo.height()*UI_SCALE);

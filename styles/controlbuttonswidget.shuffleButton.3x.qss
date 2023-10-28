@@ -1,0 +1,40 @@
+QCheckBox {
+    spacing: 0px;
+}
+
+QCheckBox::indicator {
+    width: 141px;
+    height: 45px;
+}
+
+QCheckBox::indicator:unchecked {
+    image: url(:assets/shuffle_off.png);
+}
+
+QCheckBox::indicator:unchecked:hover {
+    image: url(:assets/shuffle_off.png);
+}
+
+QCheckBox::indicator:unchecked:pressed {
+    image: url(:assets/shuffle_off_p.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:assets/shuffle_on.png);
+}
+
+QCheckBox::indicator:checked:hover {
+    image: url(:assets/shuffle_on.png);
+}
+
+QCheckBox::indicator:checked:pressed {
+    image: url(:assets/shuffle_on_p.png);
+}
+
+QCheckBox::indicator:indeterminate:hover {
+    image:  url(:assets/shuffle_off.png);
+}
+
+QCheckBox::indicator:indeterminate:pressed {
+    image:  url(:assets/shuffle_off_p.png);
+}

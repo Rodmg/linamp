@@ -3,4 +3,8 @@
 
 #define UI_SCALE 4
 
+#include <QString>
+
+QString getStylesheet(QString name);
+
 #endif // SCALE_H

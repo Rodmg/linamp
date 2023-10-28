@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>577</width>
+    <width>573</width>
     <height>86</height>
    </rect>
   </property>
@@ -24,7 +24,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>577</width>
+    <width>573</width>
     <height>86</height>
    </size>
   </property>
@@ -99,10 +99,10 @@
            <property name="styleSheet">
             <string notr="true">#visualizationFrame {
 	background-color: #000;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
 }</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -282,7 +282,7 @@
                 <bool>false</bool>
                </property>
                <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
                </property>
               </widget>
               <widget class="QGraphicsView" name="playStatusIcon">
@@ -476,10 +476,10 @@
            <property name="styleSheet">
             <string notr="true">#songInfoContainer {
 	background-color: #000000;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
 }</string>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -530,16 +530,14 @@
               <property name="font">
                <font>
                 <family>Bitstream Vera Sans Mono</family>
-                <pointsize>18</pointsize>
+                <pointsize>6</pointsize>
                 <bold>true</bold>
                 <stylestrategy>NoAntialias</stylestrategy>
                 <kerning>true</kerning>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">#songInfoLabel {
-
-}</string>
+               <string notr="true"/>
               </property>
               <property name="text">
                <string>ARTIST - ALBUM - SONG (0:00) ---</string>
@@ -590,10 +588,10 @@
               <property name="styleSheet">
                <string notr="true">#kbpsFrame {
 	background-color: #000000;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
 }</string>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -644,7 +642,7 @@
                  <property name="font">
                   <font>
                    <family>Bitstream Vera Sans Mono</family>
-                   <pointsize>18</pointsize>
+                   <pointsize>6</pointsize>
                    <bold>true</bold>
                    <stylestrategy>NoAntialias</stylestrategy>
                   </font>
@@ -704,7 +702,7 @@
               <property name="font">
                <font>
                 <family>Bitstream Vera Sans Mono</family>
-                <pointsize>16</pointsize>
+                <pointsize>5</pointsize>
                 <bold>true</bold>
                </font>
               </property>
@@ -749,10 +747,10 @@
               <property name="styleSheet">
                <string notr="true">#khzFrame {
 	background-color: #000000;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
 }</string>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -803,7 +801,7 @@
                  <property name="font">
                   <font>
                    <family>Bitstream Vera Sans Mono</family>
-                   <pointsize>18</pointsize>
+                   <pointsize>6</pointsize>
                    <bold>true</bold>
                    <stylestrategy>NoAntialias</stylestrategy>
                   </font>
@@ -863,7 +861,7 @@
               <property name="font">
                <font>
                 <family>Bitstream Vera Sans Mono</family>
-                <pointsize>16</pointsize>
+                <pointsize>5</pointsize>
                 <bold>true</bold>
                </font>
               </property>
@@ -1036,14 +1034,14 @@
               </property>
               <property name="styleSheet">
                <string notr="true">QSlider::handle:horizontal {
-	width: 42px;
-	height: 33px;
+	width: 14px;
+	height: 11px;
 	background-color: transparent;
 	border-image: url(:assets/volumeHandle.png);
 	background: none;
 	background-repeat: none;
-	margin-top: -7.5px;
-	margin-bottom: -7.5px;
+	margin-top: -2.5px;
+	margin-bottom: -2.5px;
 }
 
 QSlider::handle:horizontal:pressed {
@@ -1052,26 +1050,26 @@ QSlider::handle:horizontal:pressed {
 
 QSlider::groove:horizontal {
 	background: transparent;
-	height: 18px;
+	height: 6px;
 }
 
 QSlider::sub-page:horizontal {
 	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #9f161b, stop: 1 #e11f26);
-	border-top: 3px solid #161623;
-	border-left: 3px solid #161623;
-	border-bottom: 3px solid #7d7d92;
-	border-right: 3px solid #7d7d92;
-	border-radius: 8px;
+	border-top: 1px solid #161623;
+	border-left: 1px solid #161623;
+	border-bottom: 1px solid #7d7d92;
+	border-right: 1px solid #7d7d92;
+	border-radius: 2.66px;
 }
 
 QSlider::add-page:horizontal {
-	height: 18px;
+	height: 6px;
 	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
-	border-top: 3px solid #161623;
-	border-left: 3px solid #161623;
-	border-bottom: 3px solid #7d7d92;
-	border-right: 3px solid #7d7d92;
-	border-radius: 8px;
+	border-top: 1px solid #161623;
+	border-left: 1px solid #161623;
+	border-bottom: 1px solid #7d7d92;
+	border-right: 1px solid #7d7d92;
+	border-radius: 2.66px;
 }</string>
               </property>
               <property name="orientation">
@@ -1105,14 +1103,14 @@ QSlider::add-page:horizontal {
               </property>
               <property name="styleSheet">
                <string notr="true">QSlider::handle:horizontal {
-	width: 42px;
-	height: 33px;
+	width: 14px;
+	height: 11px;
 	background-color: transparent;
 	border-image: url(:assets/balanceHandle.png);
 	background: none;
 	background-repeat: none;
-	margin-top: -7.5px;
-	margin-bottom: -7.5px;
+	margin-top: -2.5px;
+	margin-bottom: -2.5px;
 }
 
 QSlider::handle:horizontal:pressed {
@@ -1121,26 +1119,26 @@ QSlider::handle:horizontal:pressed {
 
 QSlider::groove:horizontal {
 	background: transparent;
-	height: 15px;
+	height: 5px;
 }
 
 QSlider::sub-page:horizontal {
 	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
-	border-top: 2px solid #161623;
-	border-left: 2px solid #161623;
-	border-bottom: 2px solid #7d7d92;
-	border-right: 2px solid #7d7d92;
-	border-radius: 2px;
+	border-top: 0.66px solid #161623;
+	border-left: 0.66px solid #161623;
+	border-bottom: 0.66px solid #7d7d92;
+	border-right: 0.66px solid #7d7d92;
+	border-radius: 0.66px;
 }
 
 QSlider::add-page:horizontal {
-	height: 15px;
+	height: 5px;
 	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
-	border-top: 2px solid #161623;
-	border-left: 2px solid #161623;
-	border-bottom: 2px solid #7d7d92;
-	border-right: 2px solid #7d7d92;
-	border-radius: 2px;
+	border-top: 0.66px solid #161623;
+	border-left: 0.66px solid #161623;
+	border-bottom: 0.66px solid #7d7d92;
+	border-right: 0.66px solid #7d7d92;
+	border-radius: 0.66px;
 }</string>
               </property>
               <property name="orientation">

@@ -36,6 +36,7 @@ SOURCES = main.cpp \
     playerview.cpp \
     playlistmodel.cpp \
     playlistview.cpp \
+    scale.cpp \
     scrolltext.cpp \
     qmediaplaylist.cpp \
     qmediaplaylist_p.cpp \
@@ -59,4 +60,5 @@ RESOURCES += \
 
 DISTFILES += \
     README.md \
-    scale-skin.sh
+    scale-skin.sh \
+    styles/controlbuttonswidget.shuffleButton.4x.qss
