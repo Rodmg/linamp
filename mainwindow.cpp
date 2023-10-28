@@ -42,16 +42,23 @@ MainWindow::MainWindow(QWidget *parent)
     connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleButtonClicked);
 
     // Prepare player main view
-    DesktopPlayerWindow *playerWindow = new DesktopPlayerWindow(this);
+    DesktopBaseWindow *playerWindow = new DesktopBaseWindow(this);
     playerWindow->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
+
+    DesktopPlayerWindow *playerWindowContent = new DesktopPlayerWindow(this);
     QVBoxLayout *playerLayout = new QVBoxLayout;
     playerLayout->setContentsMargins(0, 0, 0, 0);
     playerLayout->addWidget(player);
-    playerWindow->ui->playerViewContainer->setLayout(playerLayout);
+    playerWindowContent->ui->playerViewContainer->setLayout(playerLayout);
     QVBoxLayout *buttonsLayout = new QVBoxLayout;
     buttonsLayout->setContentsMargins(0, 0, 0, 0);
     buttonsLayout->addWidget(controlButtons);
-    playerWindow->ui->controlButtonsContainer->setLayout(buttonsLayout);
+    playerWindowContent->ui->controlButtonsContainer->setLayout(buttonsLayout);
+
+    QVBoxLayout *playerContentLayout = new QVBoxLayout;
+    playerContentLayout->setContentsMargins(0, 0, 0, 0);
+    playerContentLayout->addWidget(playerWindowContent);
+    playerWindow->ui->body->setLayout(playerContentLayout);
 
     // Prepare playlist view
     DesktopBaseWindow *playlistWindow = new DesktopBaseWindow(this);
