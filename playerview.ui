@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>573</width>
+    <width>279</width>
     <height>86</height>
    </rect>
   </property>
@@ -24,7 +24,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>573</width>
+    <width>279</width>
     <height>86</height>
    </size>
   </property>
@@ -880,7 +880,7 @@
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>40</width>
+                <width>1</width>
                 <height>1</height>
                </size>
               </property>
@@ -891,7 +891,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>34</height>
+                <height>11</height>
                </size>
               </property>
               <property name="palette">
@@ -924,7 +924,7 @@
               <property name="font">
                <font>
                 <family>Noto Sans</family>
-                <pointsize>11</pointsize>
+                <pointsize>4</pointsize>
                </font>
               </property>
               <property name="text">
@@ -937,7 +937,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>34</height>
+                <height>11</height>
                </size>
               </property>
               <property name="palette">
@@ -970,7 +970,7 @@
               <property name="font">
                <font>
                 <family>Noto Sans</family>
-                <pointsize>11</pointsize>
+                <pointsize>4</pointsize>
                </font>
               </property>
               <property name="text">

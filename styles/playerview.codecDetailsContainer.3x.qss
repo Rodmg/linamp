@@ -5,3 +5,11 @@
 #kbpsLabel {
     font-size: 15pt;
 }
+
+#monoLabel {
+        font-size: 11pt;
+}
+
+#stereoLabel {
+        font-size: 11pt;
+}

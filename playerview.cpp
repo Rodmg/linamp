@@ -109,6 +109,7 @@ void PlayerView::scale()
     ui->visualizationContainer->setContentsMargins(ui->visualizationContainer->contentsMargins() * UI_SCALE);
 
     ui->codecDetailsContainer->layout()->setContentsMargins(ui->codecDetailsContainer->layout()->contentsMargins() * UI_SCALE);
+    ui->codecDetailsContainer->layout()->setSpacing(ui->codecDetailsContainer->layout()->spacing() * UI_SCALE);
     ui->codecDetailsContainer->setStyleSheet(getStylesheet("playerview.codecDetailsContainer"));
 
 
@@ -129,6 +130,9 @@ void PlayerView::scale()
     ui->khzFrame->layout()->setContentsMargins(ui->khzFrame->layout()->contentsMargins() * UI_SCALE);
     ui->khzFrame->layout()->setSpacing(ui->khzFrame->layout()->spacing() * UI_SCALE);
     ui->khzFrame->setStyleSheet(getStylesheet("playerview.khzFrame"));
+
+    ui->monoLabel->setMinimumHeight(ui->monoLabel->minimumHeight() * UI_SCALE);
+    ui->stereoLabel->setMinimumHeight(ui->stereoLabel->minimumHeight() * UI_SCALE);
 
     // Volume and balance sliders and buttons container
     ui->horizontalWidget_2->setMinimumHeight(ui->horizontalWidget_2->minimumHeight() * UI_SCALE);
