@@ -106,9 +106,33 @@
   </property>
   <property name="styleSheet">
    <string notr="true">#DesktopBaseWindow {
-	border: 3px solid #0d0d14;
-	background-color: #333350;
-}</string>
+    border: 1px solid #0d0d14;
+    background-color: #333350;
+}
+
+#outerFrame {
+    border-top: 1px solid #5c5c63;
+    border-left: 1px solid #5c5c63;
+    border-bottom: 1px solid #25253a;
+    border-right: 1px solid #25253a;
+}
+
+#bodyOuterFrame {
+    border-top: 1px solid #25253a;
+    border-left: 1px solid #25253a;
+    border-bottom: 1px solid #5c5c63;
+    border-right: 1px solid #5c5c63;
+    background-color: #25253a;
+}
+
+#bodyInnerFrame {
+    border-top: 1px solid #5c5c63;
+    border-left: 1px solid #5c5c63;
+    border-bottom: 1px solid #25253a;
+    border-right: 1px solid #25253a;
+    background-color: #333350;
+}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -129,12 +153,7 @@
    <item>
     <widget class="QFrame" name="outerFrame">
      <property name="styleSheet">
-      <string notr="true">#outerFrame {
-	border-top: 3px solid #5c5c63;
-	border-left: 3px solid #5c5c63;
-	border-bottom: 3px solid #25253a;
-	border-right: 3px solid #25253a;
-}</string>
+      <string notr="true"/>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -201,13 +220,7 @@
          <item>
           <widget class="QFrame" name="bodyOuterFrame">
            <property name="styleSheet">
-            <string notr="true">#bodyOuterFrame {
-	border-top: 3px solid #25253a;
-	border-left: 3px solid #25253a;
-	border-bottom: 3px solid #5c5c63;
-	border-right: 3px solid #5c5c63;
-	background-color: #25253a;
-}</string>
+            <string notr="true"/>
            </property>
            <property name="frameShape">
             <enum>QFrame::StyledPanel</enum>
@@ -234,13 +247,7 @@
             <item>
              <widget class="QFrame" name="bodyInnerFrame">
               <property name="styleSheet">
-               <string notr="true">#bodyInnerFrame {
-	border-top: 3px solid #5c5c63;
-	border-left: 3px solid #5c5c63;
-	border-bottom: 3px solid #25253a;
-	border-right: 3px solid #25253a;
-	background-color: #333350;
-}</string>
+               <string notr="true"/>
               </property>
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>

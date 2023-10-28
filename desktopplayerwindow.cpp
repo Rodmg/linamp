@@ -22,7 +22,7 @@ void DesktopPlayerWindow::scale()
     this->setMaximumSize(this->maximumSize() * UI_SCALE);
     this->layout()->setContentsMargins(this->layout()->contentsMargins() * UI_SCALE);
 
-    ui->bodyInnerFrame->layout()->setContentsMargins(ui->bodyInnerFrame->layout()->contentsMargins() * UI_SCALE);
+    ui->dpwBodyInnerFrame->layout()->setContentsMargins(ui->dpwBodyInnerFrame->layout()->contentsMargins() * UI_SCALE);
 
     QSize sh = ui->horizontalSpacer->sizeHint();
     QSizePolicy sp = ui->horizontalSpacer->sizePolicy();

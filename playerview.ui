@@ -282,7 +282,7 @@
                 <bool>false</bool>
                </property>
                <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
                </property>
               </widget>
               <widget class="QGraphicsView" name="playStatusIcon">

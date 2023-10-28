@@ -138,7 +138,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QFrame" name="bodyInnerFrame">
+    <widget class="QFrame" name="dpwBodyInnerFrame">
      <property name="styleSheet">
       <string notr="true">#bodyInnerFrame {
 	background-color: #333350;

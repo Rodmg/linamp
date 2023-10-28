@@ -26,5 +26,5 @@ void DesktopBaseWindow::scale()
     ui->titlebarContainer->setMaximumHeight(ui->titlebarContainer->maximumHeight() * UI_SCALE);
     ui->titlebarContainer->setMinimumHeight(ui->titlebarContainer->minimumHeight() * UI_SCALE);
 
-    // TODO Stylesheets
+    this->setStyleSheet(getStylesheet("desktopbasewindow"));
 }
