@@ -261,7 +261,7 @@
                <property name="font">
                 <font>
                  <family>bignumbers</family>
-                 <pointsize>29</pointsize>
+                 <pointsize>10</pointsize>
                  <stylestrategy>NoAntialias</stylestrategy>
                 </font>
                </property>
