@@ -104,5 +104,9 @@
         <file>styles/desktopbasewindow.2x.qss</file>
         <file>styles/desktopbasewindow.3x.qss</file>
         <file>styles/desktopbasewindow.4x.qss</file>
+        <file>styles/filedialog.1x.qss</file>
+        <file>styles/filedialog.2x.qss</file>
+        <file>styles/filedialog.3x.qss</file>
+        <file>styles/filedialog.4x.qss</file>
     </qresource>
 </RCC>

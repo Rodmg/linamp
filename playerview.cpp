@@ -186,6 +186,13 @@ bool PlayerView::isPlayerAvailable() const
 
 void PlayerView::open()
 {
+
+    QList<QUrl> urls;
+    urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first())
+         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first())
+         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).first());
+
+
     QFileDialog fileDialog(this);
     fileDialog.setNameFilter(tr("Audio (*.mp3 *.flac *.m4a *.ogg *.wma *.wav *.m3u)"));
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
@@ -193,6 +200,18 @@ void PlayerView::open()
     fileDialog.setWindowTitle(tr("Open Files"));
     fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation)
                                 .value(0, QDir::homePath()));
+    fileDialog.setOption(QFileDialog::ReadOnly, true);
+    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog.setViewMode(QFileDialog::Detail);
+    fileDialog.setSidebarUrls(urls);
+
+    fileDialog.setStyleSheet(getStylesheet("filedialog"));
+
+
+    #ifdef IS_EMBEDDED
+    fileDialog.setWindowState(Qt::WindowFullScreen);
+    #endif
+
     if (fileDialog.exec() == QDialog::Accepted)
         addToPlaylist(fileDialog.selectedUrls());
 }

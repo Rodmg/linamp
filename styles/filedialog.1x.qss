@@ -1,0 +1,19 @@
+QScrollBar:vertical {
+    width: 30px;
+}
+
+QScrollBar::handle:vertical {
+    min-height: 30px;
+}
+
+QScrollBar:horizontal {
+    height: 30px;
+}
+
+QScrollBar::handle:horizontal {
+    min-width: 30px;
+}
+
+QAbstractItemView::item, QListView::item {
+    min-height: 30px;
+}
