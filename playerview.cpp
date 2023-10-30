@@ -4,6 +4,7 @@
 #include "playlistmodel.h"
 #include "qmediaplaylist.h"
 #include "scale.h"
+#include "touchfiledialog.h"
 
 #include <QApplication>
 #include <QAudioDevice>
@@ -193,7 +194,7 @@ void PlayerView::open()
          << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).first());
 
 
-    QFileDialog fileDialog(this);
+    TouchFileDialog fileDialog(this);
     fileDialog.setNameFilter(tr("Audio (*.mp3 *.flac *.m4a *.ogg *.wma *.wav *.m3u)"));
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog.setFileMode(QFileDialog::ExistingFiles);
