@@ -46,6 +46,8 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     //! [2]
     connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this,
             &PlayerView::playlistPositionChanged);
+    connect(m_playlist, &QMediaPlaylist::mediaAboutToBeRemoved, this,
+            &PlayerView::playlistMediaRemoved);
 
     // duration slider and label
     ui->posBar->setRange(0, m_player->duration());
@@ -374,6 +376,17 @@ void PlayerView::playlistPositionChanged(int)
 
     if (shouldBePlaying) {
         m_player->play();
+    }
+}
+
+void PlayerView::playlistMediaRemoved(int from, int to)
+{
+    // Stop only if currently playing file was removed
+    int playingIndex = m_playlist->currentIndex();
+    if(playingIndex >= from && playingIndex <= to) {
+        shouldBePlaying = false;
+        m_player->stop();
+        m_player->clearSource();
     }
 }
 

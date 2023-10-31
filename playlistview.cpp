@@ -18,6 +18,9 @@ PlaylistView::PlaylistView(QWidget *parent, PlaylistModel *playlistModel) :
     ui->playList->setModel(m_playlistModel);
     ui->playList->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
     connect(ui->playList, &QAbstractItemView::clicked, this, &PlaylistView::songSelected);
+
+    connect(ui->clearButton, &QPushButton::clicked, this, &PlaylistView::clearPlaylist);
+    connect(ui->removeButton, &QPushButton::clicked, this, &PlaylistView::removeItem);
 }
 
 PlaylistView::~PlaylistView()
@@ -30,6 +33,18 @@ void PlaylistView::playlistPositionChanged(int currentItem)
     if (ui->playList)
         ui->playList->setCurrentIndex(m_playlistModel->index(currentItem, 0));
 }
+
+void PlaylistView::clearPlaylist()
+{
+    m_playlist->clear();
+}
+
+void PlaylistView::removeItem()
+{
+    QModelIndex selection = ui->playList->selectionModel()->currentIndex();
+    m_playlistModel->removeRow(selection.row());
+}
+
 
 void PlaylistView::setupPlayListUi()
 {

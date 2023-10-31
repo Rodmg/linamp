@@ -525,7 +525,13 @@ bool QMediaPlaylist::removeMedia(int start, int end)
 
     emit mediaAboutToBeRemoved(start, end);
     d->playlist.remove(start, end - start + 1);
-    // TODO also remove from playqueue
+
+    // Refill playqueue
+    d->playqueue = QList(d->playlist);
+    if(shuffleEnabled) {
+        this->shuffle();
+    }
+
     emit mediaRemoved(start, end);
     return true;
 }

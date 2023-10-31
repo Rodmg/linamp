@@ -26,6 +26,8 @@ private:
 
 private slots:
     void playlistPositionChanged(int);
+    void clearPlaylist();
+    void removeItem();
 
 signals:
     void showPlayerClicked();

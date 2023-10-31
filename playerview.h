@@ -56,6 +56,7 @@ private slots:
 
     void seek(int mseconds);
     void playlistPositionChanged(int);
+    void playlistMediaRemoved(int, int);
 
     void statusChanged(MediaPlayer::MediaStatus status);
     void bufferingProgress(float progress);

@@ -101,6 +101,7 @@ private:
 
 public slots:
     void setSource(const QUrl &source);
+    void clearSource();
     void setPosition(qint64 position);
     void setVolume(float volume);
 

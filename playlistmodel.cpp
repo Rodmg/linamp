@@ -32,6 +32,15 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const
     return !parent.isValid() ? ColumnCount : 0;
 }
 
+bool PlaylistModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    int endRow = row + (count - 1);
+    for(int i = row; i <= endRow; i++) {
+        m_playlist->removeMedia(i);
+    }
+    return true;
+}
+
 QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent) const
 {
     return m_playlist && !parent.isValid() && row >= 0 && row < m_playlist->mediaCount()
@@ -93,7 +102,8 @@ void PlaylistModel::beginRemoveItems(int start, int end)
 
 void PlaylistModel::endRemoveItems()
 {
-    endInsertRows();
+    endRemoveRows();
+    emit dataChanged(index(0, 0), index(m_playlist->mediaCount(), ColumnCount));
 }
 
 void PlaylistModel::changeItems(int start, int end)

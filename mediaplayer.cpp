@@ -424,6 +424,22 @@ void MediaPlayer::setSource(const QUrl &source)
     parseMetaData();
 }
 
+void MediaPlayer::clearSource()
+{
+    setMediaStatus(MediaPlayer::NoMedia);
+    if(m_state != PlaybackState::StoppedState) {
+        stop();
+    }
+    clear();
+    if(m_audioOutput) {
+        delete m_audioOutput;
+        m_audioOutput = nullptr;
+    }
+    m_metaData = QMediaMetaData{};
+    emit metaDataChanged();
+    emit durationChanged(0);
+}
+
 void MediaPlayer::setPosition(qint64 position)
 {
     // Don't let set the possition while media is still buffering, avoid noise error

@@ -543,9 +543,16 @@ QScrollBar::handle:vertical {
       </property>
       <item>
        <widget class="QListView" name="playList">
+        <property name="font">
+         <font>
+          <family>Bitstream Vera Sans Mono</family>
+          <pointsize>14</pointsize>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">QListView {
-	color: #00f800;
+	color: #00e800;
 	background-color: #000000;
 	border-top: 3px solid #26253c;
 	border-right: 3px solid #6d6d7f;
@@ -555,22 +562,22 @@ QScrollBar::handle:vertical {
 }
 
 QListView::item {
-	height: 32px;
+	height: 40px;
 }
 
 QListView::item:selected {
-	color: #FFF;
-    background-color: #0000c6;
+	color: #000;
+    background-color: #00e800;
 }
 
 QListView::item:selected:!active {
-	color: #FFF;
-	background-color: #0000c6;
+	color: #000;
+	background-color: #00e800;
 }
 
 QListView::item:selected:active {
-	color: #FFF;
-    background-color: #0000c6;
+	color: #000;
+    background-color: #00e800;
 }
 
 QScrollBar:vertical {
@@ -604,6 +611,44 @@ QScrollBar::handle:vertical {
  }
 
  QScrollBar::sub-line:vertical {
+    background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
+
+
+QScrollBar:horizontal {
+	background-color: #191926;
+}
+
+QScrollBar::handle:horizontal {
+	background-color: #b0995e;
+}
+
+ QScrollBar::left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
+	height: 0px;
+	width: 0px;
+	background-color: transparent;
+	background: none;
+	border: none;
+}
+
+ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+	background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
+
+ QScrollBar::add-line:horizontal {
+    background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
+
+ QScrollBar::sub-line:horizontal {
     background: none;
 	height: 0px;
 	width: 0px;
@@ -662,8 +707,17 @@ QScrollBar::handle:vertical:pressed {
         <property name="editTriggers">
          <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
         </property>
-        <property name="alternatingRowColors">
+        <property name="dragEnabled">
          <bool>true</bool>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::InternalMove</enum>
+        </property>
+        <property name="defaultDropAction">
+         <enum>Qt::MoveAction</enum>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>false</bool>
         </property>
         <property name="verticalScrollMode">
          <enum>QAbstractItemView::ScrollPerPixel</enum>
