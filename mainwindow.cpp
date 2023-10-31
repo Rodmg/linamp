@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent)
     buttonsLayout->addWidget(controlButtons);
     playerWindowContent->ui->controlButtonsContainer->setLayout(buttonsLayout);
 
-    QVBoxLayout *playerContentLayout = new QVBoxLayout;
+    QHBoxLayout *playerContentLayout = new QHBoxLayout;
     playerContentLayout->setContentsMargins(0, 0, 0, 0);
     playerContentLayout->addWidget(playerWindowContent);
     playerWindow->ui->body->setLayout(playerContentLayout);

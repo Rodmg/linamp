@@ -13,7 +13,6 @@ PlaylistView::PlaylistView(QWidget *parent, PlaylistModel *playlistModel) :
     setupPlayListUi();
     
     connect(ui->goPlayerButton, &QPushButton::clicked, this, &PlaylistView::showPlayerClicked);
-    connect(ui->addButton, &QPushButton::clicked, this, &PlaylistView::addButtonClicked);
     connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this, &PlaylistView::playlistPositionChanged);
 
     ui->playList->setModel(m_playlistModel);

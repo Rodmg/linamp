@@ -108,5 +108,12 @@
         <file>styles/filedialog.2x.qss</file>
         <file>styles/filedialog.3x.qss</file>
         <file>styles/filedialog.4x.qss</file>
+        <file>assets/filesIcon.png</file>
+        <file>assets/playlistsIcon.png</file>
+        <file>assets/spotifyIcon.png</file>
+        <file>assets/pl_addIcon.png</file>
+        <file>assets/pl_homeIcon.png</file>
+        <file>assets/pl_playerIcon.png</file>
+        <file>assets/pl_upIcon.png</file>
     </qresource>
 </RCC>
