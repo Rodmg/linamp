@@ -17,6 +17,7 @@ class PlaylistModel : public QAbstractItemModel
 
 public:
     enum Column { Title = 0, ColumnCount };
+    QString MimeType = "application/playlist.model";
 
     explicit PlaylistModel(QObject *parent = nullptr);
     ~PlaylistModel();
@@ -35,6 +36,18 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value,
                  int role = Qt::DisplayRole) override;
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+    Qt::DropActions supportedDragActions() const override;
+    Qt::DropActions supportedDropActions() const override;
+
+    QStringList mimeTypes() const override;
+    bool canDropMimeData(const QMimeData *data, Qt::DropAction action,
+                 int row, int column, const QModelIndex &parent) const override;
+    QMimeData *mimeData(const QModelIndexList &indexes) const override;
+    bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row,
+                 int column, const QModelIndex &parent) override;
 
 private slots:
     void beginInsertItems(int start, int end);

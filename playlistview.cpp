@@ -17,6 +17,14 @@ PlaylistView::PlaylistView(QWidget *parent, PlaylistModel *playlistModel) :
 
     ui->playList->setModel(m_playlistModel);
     ui->playList->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
+    //ui->playList->setSortingEnabled(true);
+    ui->playList->setDragEnabled(true);
+    ui->playList->setAcceptDrops(true);
+    ui->playList->setDropIndicatorShown(true);
+    ui->playList->setDragDropMode(QAbstractItemView::InternalMove);
+    ui->playList->setDefaultDropAction(Qt::MoveAction);
+    ui->playList->setDragDropOverwriteMode(false);
+
     connect(ui->playList, &QAbstractItemView::clicked, this, &PlaylistView::songSelected);
 
     connect(ui->clearButton, &QPushButton::clicked, this, &PlaylistView::clearPlaylist);
@@ -64,4 +72,5 @@ void PlaylistView::setupPlayListUi()
     QScroller* playlistViewScroller = QScroller::scroller(ui->playList);
     playlistViewScroller->grabGesture(ui->playList, QScroller::LeftMouseButtonGesture);
     playlistViewScroller->setScrollerProperties(sp);
+
 }

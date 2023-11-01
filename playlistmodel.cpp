@@ -6,6 +6,8 @@
 
 #include <QFileInfo>
 #include <QUrl>
+#include <QMimeData>
+#include <QDebug>
 
 PlaylistModel::PlaylistModel(QObject *parent) : QAbstractItemModel(parent)
 {
@@ -34,6 +36,9 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const
 
 bool PlaylistModel::removeRows(int row, int count, const QModelIndex &parent)
 {
+    if (parent.isValid())
+        return false;
+
     int endRow = row + (count - 1);
     for(int i = row; i <= endRow; i++) {
         m_playlist->removeMedia(i);
@@ -87,6 +92,7 @@ void PlaylistModel::beginInsertItems(int start, int end)
 {
     m_data.clear();
     beginInsertRows(QModelIndex(), start, end);
+    qDebug() << ">>>>>beginInsertItems";
 }
 
 void PlaylistModel::endInsertItems()
@@ -98,6 +104,7 @@ void PlaylistModel::beginRemoveItems(int start, int end)
 {
     m_data.clear();
     beginRemoveRows(QModelIndex(), start, end);
+    qDebug() << ">>>>>beginRemoveItems";
 }
 
 void PlaylistModel::endRemoveItems()
@@ -110,6 +117,103 @@ void PlaylistModel::changeItems(int start, int end)
 {
     m_data.clear();
     emit dataChanged(index(start, 0), index(end, ColumnCount));
+    qDebug() << ">>>>>changeItems";
 }
+
+Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsDropEnabled;
+
+    return Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | QAbstractItemModel::flags(index);
+}
+
+Qt::DropActions PlaylistModel::supportedDragActions() const
+{
+    return Qt::MoveAction;
+}
+
+Qt::DropActions PlaylistModel::supportedDropActions() const
+{
+    return Qt::MoveAction;
+}
+
+
+
+QStringList PlaylistModel::mimeTypes() const
+{
+    QStringList types;
+    types << PlaylistModel::MimeType;
+    return types;
+}
+
+bool PlaylistModel::canDropMimeData(const QMimeData *data, Qt::DropAction action,
+                     int row, int column, const QModelIndex &parent) const
+{
+    Q_UNUSED(row);
+    Q_UNUSED(column);
+    Q_UNUSED(parent);
+
+    if ( action != Qt::MoveAction || !data->hasFormat(PlaylistModel::MimeType))
+        return false;
+
+    return true;
+}
+
+QMimeData *PlaylistModel::mimeData(const QModelIndexList &indexes) const
+{
+    QMimeData* mimeData = new QMimeData;
+    QByteArray encodedData;
+
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);
+
+    for (const QModelIndex &index : indexes) {
+        if (index.isValid()) {
+            QString location = m_playlist->media(index.row()).toString();
+            stream << location;
+        }
+    }
+    mimeData->setData(PlaylistModel::MimeType, encodedData);
+    return mimeData;
+}
+
+bool PlaylistModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row,
+                  int column, const QModelIndex &parent)
+{
+    if (!canDropMimeData(data, action, row, column, parent))
+        return false;
+
+    if (action == Qt::IgnoreAction)
+        return true;
+    else if (action  != Qt::MoveAction)
+        return false;
+
+    QByteArray encodedData = data->data(PlaylistModel::MimeType);
+    QDataStream stream(&encodedData, QIODevice::ReadOnly);
+    QStringList newItems;
+    int rows = 0;
+
+    while (!stream.atEnd()) {
+        QString text;
+        stream >> text;
+        newItems << text;
+        ++rows;
+    }
+
+    insertRows(row, rows, QModelIndex());
+    for (const QString &text : qAsConst(newItems))
+    {
+        QModelIndex idx = index(row, 0, QModelIndex());
+        setData(idx, text);
+
+        QUrl url = QUrl(text);
+        m_playlist->insertMedia(idx.row(), url); // TODO better way to do this to avoid cuts in playback
+
+        row++;
+    }
+
+    return true;
+}
+
 
 #include "moc_playlistmodel.cpp"
