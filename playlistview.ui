@@ -441,6 +441,13 @@
       </item>
       <item>
        <widget class="QListView" name="fileBrowserListView">
+        <property name="font">
+         <font>
+          <family>Bitstream Vera Sans Mono</family>
+          <pointsize>14</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">QListView {
 	color: #00f800;
@@ -453,22 +460,22 @@
 }
 
 QListView::item {
-	height: 32px;
+	height: 40px;
 }
 
 QListView::item:selected {
-	color: #FFF;
-    background-color: #0000c6;
+	color: #000;
+    background-color: #00e800;
 }
 
 QListView::item:selected:!active {
-	color: #FFF;
-	background-color: #0000c6;
+	color: #000;
+	background-color: #00e800;
 }
 
 QListView::item:selected:active {
-	color: #FFF;
-    background-color: #0000c6;
+	color: #000;
+    background-color: #00e800;
 }
 
 QScrollBar:vertical {
@@ -547,7 +554,7 @@ QScrollBar::handle:vertical {
          <font>
           <family>Bitstream Vera Sans Mono</family>
           <pointsize>14</pointsize>
-          <bold>false</bold>
+          <bold>true</bold>
          </font>
         </property>
         <property name="styleSheet">

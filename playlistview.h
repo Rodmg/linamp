@@ -2,6 +2,7 @@
 #define PLAYLISTVIEW_H
 
 #include <QWidget>
+#include <QFileSystemModel>
 #include "qmediaplaylist.h"
 #include "playlistmodel.h"
 
@@ -21,13 +22,26 @@ private:
     Ui::PlaylistView *ui;
     QMediaPlaylist *m_playlist = nullptr;
     PlaylistModel *m_playlistModel = nullptr;
+    QFileSystemModel *m_fileSystemModel = nullptr;
 
     void setupPlayListUi();
+    void setupFileBrowserUi();
+
+    // File browser functions
+    void fbCd(QString path);
 
 private slots:
     void playlistPositionChanged(int);
     void clearPlaylist();
     void removeItem();
+
+    // File browser functions
+    void fbGoHome();
+    void fbGoUp();
+    void fbAdd();
+    void fbToggleSelect();
+
+    void fbItemClicked(const QModelIndex &index);
 
 signals:
     void showPlayerClicked();
