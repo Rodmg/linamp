@@ -115,5 +115,9 @@
         <file>assets/pl_homeIcon.png</file>
         <file>assets/pl_playerIcon.png</file>
         <file>assets/pl_upIcon.png</file>
+        <file>assets/fb_folderIcon.png</file>
+        <file>assets/fb_musicIcon.png</file>
+        <file>assets/fb_folderIcon_selected.png</file>
+        <file>assets/fb_musicIcon_selected.png</file>
     </qresource>
 </RCC>

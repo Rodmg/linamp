@@ -14,6 +14,7 @@ HEADERS = \
     desktopplayerwindow.h \
     embeddedbasewindow.h \
     fft.h \
+    filebrowsericonprovider.h \
     mainwindow.h \
     mediaplayer.h \
     playerview.h \
@@ -34,6 +35,7 @@ SOURCES = main.cpp \
     desktopplayerwindow.cpp \
     embeddedbasewindow.cpp \
     fft.cpp \
+    filebrowsericonprovider.cpp \
     mainwindow.cpp \
     mediaplayer.cpp \
     playerview.cpp \

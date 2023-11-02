@@ -1,5 +1,6 @@
 #include "playlistview.h"
 #include "ui_playlistview.h"
+#include "filebrowsericonprovider.h"
 #include <QScroller>
 #include <QFileIconProvider>
 #include <QStandardPaths>
@@ -94,7 +95,7 @@ void PlaylistView::setupFileBrowserUi()
     m_fileSystemModel->setNameFilters(filters);
     m_fileSystemModel->setNameFilterDisables(false); // Hide filtered files
 
-    QFileIconProvider *iconProvider = new QFileIconProvider();
+    FileBrowserIconProvider *iconProvider = new FileBrowserIconProvider();
     iconProvider->setOptions(QFileIconProvider::DontUseCustomDirectoryIcons);
     m_fileSystemModel->setIconProvider(iconProvider);
 
@@ -147,7 +148,7 @@ void PlaylistView::fbAdd()
     QModelIndexList selIndexes = ui->fileBrowserListView->selectionModel()->selectedIndexes();
 
     for(QModelIndex index : selIndexes) {
-        QUrl url = QUrl(m_fileSystemModel->filePath(index));
+        QUrl url = QUrl::fromLocalFile(m_fileSystemModel->filePath(index));
         // TODO: filter only allowed audio files by extension
         files.append(url);
     }
