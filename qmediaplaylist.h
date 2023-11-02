@@ -5,6 +5,7 @@
 #define QMEDIAPLAYLIST_H
 
 #include <QObject>
+#include <QMediaMetaData>
 
 #include <qmediaenumdebug.h>
 
@@ -24,6 +25,8 @@ public:
     Q_ENUM(PlaybackMode)
     enum Error { NoError, FormatError, FormatNotSupportedError, NetworkError, AccessDeniedError };
     Q_ENUM(Error)
+
+    static QMediaMetaData parseMetaData(const QUrl &url);
 
     explicit QMediaPlaylist(QObject *parent = nullptr);
     virtual ~QMediaPlaylist();
@@ -48,6 +51,10 @@ public:
 
     QUrl media(int index) const;
     QUrl queueMedia(int index) const;
+
+    QMediaMetaData mediaMetadata(int index) const;
+    QMediaMetaData queueMediaMetadata(int index) const;
+
 
     int mediaCount() const;
     bool isEmpty() const;
@@ -98,6 +105,10 @@ private:
     bool shuffleEnabled = false;
     QMediaPlaylistPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QMediaPlaylist)
+
+    // Metadata for files in the playlist
+    QMap<QUrl, QMediaMetaData> m_mediaMetadata;
+    void loadMetadata(const QUrl &url);
 };
 
 QT_END_NAMESPACE

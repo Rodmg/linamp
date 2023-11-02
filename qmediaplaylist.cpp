@@ -5,6 +5,9 @@
 #include "qmediaplaylist_p.h"
 #include "qplaylistfileparser.h"
 
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/tpropertymap.h>
 #include <QCoreApplication>
 #include <QFile>
 #include <QList>
@@ -387,6 +390,24 @@ QUrl QMediaPlaylist::queueMedia(int index) const
     return d->playqueue.at(index);
 }
 
+QMediaMetaData QMediaPlaylist::mediaMetadata(int index) const
+{
+    QUrl url = media(index);
+    if(!m_mediaMetadata.contains(url)) {
+        return QMediaMetaData{};
+    }
+    return m_mediaMetadata.value(url);
+}
+
+QMediaMetaData QMediaPlaylist::queueMediaMetadata(int index) const
+{
+    QUrl url = queueMedia(index);
+    if(!m_mediaMetadata.contains(url)) {
+        return QMediaMetaData{};
+    }
+    return m_mediaMetadata.value(url);
+}
+
 /*!
   Append the media \a content to the playlist.
 
@@ -397,6 +418,9 @@ void QMediaPlaylist::addMedia(const QUrl &content)
     Q_D(QMediaPlaylist);
     int pos = d->playlist.size();
     emit mediaAboutToBeInserted(pos, pos);
+
+    loadMetadata(content);
+
     d->playlist.append(content);
     // Do also playqueue
     d_func()->playqueue = d_func()->playlist;
@@ -420,6 +444,11 @@ void QMediaPlaylist::addMedia(const QList<QUrl> &items)
     int first = d->playlist.size();
     int last = first + items.size() - 1;
     emit mediaAboutToBeInserted(first, last);
+
+    for(const QUrl &item : items) {
+        loadMetadata(item);
+    }
+
     d_func()->playlist.append(items);
     // Do also playqueue
     d_func()->playqueue = QList(d_func()->playlist);
@@ -767,6 +796,63 @@ void QMediaPlaylist::setCurrentQueueIndex(int playlistPosition)
     emit currentIndexChanged(d->currentPos());
     emit currentMediaChanged(currentMedia());
 }
+
+QMediaMetaData QMediaPlaylist::parseMetaData(const QUrl &url)
+{
+    QMediaMetaData metadata;
+    TagLib::FileRef f(url.toLocalFile().toLocal8Bit().data());
+
+    if(!f.isNull() && f.tag()) {
+        TagLib::Tag *tag = f.tag();
+
+        QString title = QString::fromStdString(tag->title().toCString(true));
+        QString albumTitle = QString::fromStdString(tag->album().toCString(true));
+        QString artist = QString::fromStdString(tag->artist().toCString(true));
+        QString comment = QString::fromStdString(tag->comment().toCString(true));
+        QString genre = QString::fromStdString(tag->genre().toCString(true));
+        qint64 track = tag->track();
+        qint64 year = tag->year();
+
+        metadata = QMediaMetaData{};
+        metadata.insert(QMediaMetaData::Title, title);
+        metadata.insert(QMediaMetaData::AlbumTitle, albumTitle);
+        metadata.insert(QMediaMetaData::AlbumArtist, artist);
+        metadata.insert(QMediaMetaData::Comment, comment);
+        metadata.insert(QMediaMetaData::Genre, genre);
+        metadata.insert(QMediaMetaData::TrackNumber, track);
+        metadata.insert(QMediaMetaData::Url, url);
+        metadata.insert(QMediaMetaData::Date, year);
+    }
+
+    if(!f.isNull() && f.audioProperties()) {
+        TagLib::AudioProperties *properties = f.audioProperties();
+
+        qint64 duration = properties->lengthInMilliseconds();
+        qint64 bitrate = properties->bitrate() * 1000;
+        qint64 sampleRate = properties->sampleRate();
+
+        metadata.insert(QMediaMetaData::AudioBitRate, bitrate);
+        metadata.insert(QMediaMetaData::AudioCodec, sampleRate); // Using AudioCodec as sample rate for now
+        metadata.insert(QMediaMetaData::Duration, duration);
+    }
+
+    return metadata;
+}
+
+void QMediaPlaylist::loadMetadata(const QUrl &url)
+{
+    qDebug() << "<<<<<<<loadmetadata";
+    if(m_mediaMetadata.contains(url)) {
+        return;
+    }
+
+    QMediaMetaData meta = QMediaPlaylist::parseMetaData(url);
+
+    qDebug() << "<<<<meta" << meta.stringValue(QMediaMetaData::Title);
+
+    m_mediaMetadata.insert(url, meta);
+}
+
 
 /*!
     \fn void QMediaPlaylist::mediaInserted(int start, int end)

@@ -16,7 +16,7 @@ class PlaylistModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    enum Column { Title = 0, ColumnCount };
+    enum Column { Track = 0, Title, Artist, Album, Duration, ColumnCount };
     QString MimeType = "application/playlist.model";
 
     explicit PlaylistModel(QObject *parent = nullptr);

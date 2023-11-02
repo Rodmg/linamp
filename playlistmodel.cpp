@@ -64,13 +64,20 @@ QModelIndex PlaylistModel::parent(const QModelIndex &child) const
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 {
     if (index.isValid() && role == Qt::DisplayRole) {
-        QVariant value = m_data[index];
-        if (!value.isValid() && index.column() == Title) {
-            QUrl location = m_playlist->media(index.row());
-            return QFileInfo(location.path()).fileName();
+        QMediaMetaData meta = m_playlist->mediaMetadata(index.row());
+        qDebug() << "Requesting column:" << index.column();
+        switch(index.column()) {
+        case Track:
+            return meta.value(QMediaMetaData::TrackNumber);
+        case Title:
+            return meta.value(QMediaMetaData::Title);
+        case Artist:
+            return meta.value(QMediaMetaData::AlbumArtist);
+        case Album:
+            return meta.value(QMediaMetaData::AlbumTitle);
+        case Duration:
+            return meta.value(QMediaMetaData::Duration);
         }
-
-        return value;
     }
     return QVariant();
 }
