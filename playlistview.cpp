@@ -30,7 +30,6 @@ PlaylistView::PlaylistView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(ui->fbSelectButton, &QPushButton::clicked, this, &PlaylistView::fbToggleSelect);
     connect(ui->fbAddButton, &QPushButton::clicked, this, &PlaylistView::fbAdd);
     connect(ui->fileBrowserListView, &QAbstractItemView::clicked, this, &PlaylistView::fbItemClicked);
-
 }
 
 PlaylistView::~PlaylistView()
@@ -89,13 +88,36 @@ void PlaylistView::setupPlayListUi()
 void PlaylistView::setupFileBrowserUi()
 {
     m_fileSystemModel = new QFileSystemModel(this);
+    // filter only folders and audio files
+    QStringList filters;
+    filters << "*.mp3" << "*.flac" << "*.m4a" << "*.ogg" << "*.wma" << "*.wav" << "*.m3u";
+    m_fileSystemModel->setNameFilters(filters);
+    m_fileSystemModel->setNameFilterDisables(false); // Hide filtered files
+
     QFileIconProvider *iconProvider = new QFileIconProvider();
+    iconProvider->setOptions(QFileIconProvider::DontUseCustomDirectoryIcons);
     m_fileSystemModel->setIconProvider(iconProvider);
 
     ui->fileBrowserListView->setModel(m_fileSystemModel);
     ui->fileBrowserListView->setSelectionMode(QAbstractItemView::MultiSelection);
     fbCd(HOME_PATH);
-    // TODO filter only folders and audio files
+
+    // Add touch scroll to playList
+    QScrollerProperties sp;
+    sp.setScrollMetric(QScrollerProperties::DragVelocitySmoothingFactor, 0.6);
+    sp.setScrollMetric(QScrollerProperties::MinimumVelocity, 0.0);
+    sp.setScrollMetric(QScrollerProperties::MaximumVelocity, 0.5);
+    sp.setScrollMetric(QScrollerProperties::AcceleratingFlickMaximumTime, 0.4);
+    sp.setScrollMetric(QScrollerProperties::AcceleratingFlickSpeedupFactor, 1.2);
+    sp.setScrollMetric(QScrollerProperties::SnapPositionRatio, 0.2);
+    sp.setScrollMetric(QScrollerProperties::MaximumClickThroughVelocity, 0);
+    sp.setScrollMetric(QScrollerProperties::DragStartDistance, 0.001);
+    sp.setScrollMetric(QScrollerProperties::MousePressEventDelay, 1.0);
+    sp.setScrollMetric(QScrollerProperties::OvershootDragResistanceFactor, 0.3);
+    sp.setScrollMetric(QScrollerProperties::OvershootScrollDistanceFactor, 0.1);
+    QScroller* fbScroller = QScroller::scroller(ui->fileBrowserListView);
+    fbScroller->grabGesture(ui->fileBrowserListView, QScroller::LeftMouseButtonGesture);
+    fbScroller->setScrollerProperties(sp);
 }
 
 
@@ -120,7 +142,20 @@ void PlaylistView::fbGoUp()
 
 void PlaylistView::fbAdd()
 {
+    QList<QUrl> files;
 
+    QModelIndexList selIndexes = ui->fileBrowserListView->selectionModel()->selectedIndexes();
+
+    for(QModelIndex index : selIndexes) {
+        QUrl url = QUrl(m_fileSystemModel->filePath(index));
+        // TODO: filter only allowed audio files by extension
+        files.append(url);
+    }
+
+    // Clear selection
+    ui->fileBrowserListView->clearSelection();
+
+    emit addSelectedFilesClicked(files);
 }
 
 void PlaylistView::fbToggleSelect()
@@ -143,7 +178,7 @@ void PlaylistView::fbToggleSelect()
 void PlaylistView::fbItemClicked(const QModelIndex &index)
 {
     if(m_fileSystemModel->isDir(index)) {
-
+        fbCd(m_fileSystemModel->filePath(index));
     }
 }
 

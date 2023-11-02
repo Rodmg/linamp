@@ -480,6 +480,7 @@ QListView::item:selected:active {
 
 QScrollBar:vertical {
 	background-color: #191926;
+	width: 4px;
 }
 
 QScrollBar::handle:vertical {
@@ -514,7 +515,51 @@ QScrollBar::handle:vertical {
 	width: 0px;
 	border: none;
  }
+
+QScrollBar:horizontal {
+	background-color: #191926;
+	height: 4px;
+}
+
+QScrollBar::handle:horizontal {
+	background-color: #b0995e;
+}
+
+ QScrollBar::left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
+	height: 0px;
+	width: 0px;
+	background-color: transparent;
+	background: none;
+	border: none;
+}
+
+ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+	background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
+
+ QScrollBar::add-line:horizontal {
+    background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
+
+ QScrollBar::sub-line:horizontal {
+    background: none;
+	height: 0px;
+	width: 0px;
+	border: none;
+ }
 </string>
+        </property>
+        <property name="verticalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
+        <property name="horizontalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
         </property>
        </widget>
       </item>
@@ -589,6 +634,7 @@ QTreeView::item:selected:active {
 
 QScrollBar:vertical {
 	background-color: #191926;
+	width: 4px;
 }
 
 QScrollBar::handle:vertical {
@@ -627,6 +673,7 @@ QScrollBar::handle:vertical {
 
 QScrollBar:horizontal {
 	background-color: #191926;
+	height: 4px;
 }
 
 QScrollBar::handle:horizontal {

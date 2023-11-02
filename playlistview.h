@@ -2,6 +2,7 @@
 #define PLAYLISTVIEW_H
 
 #include <QWidget>
+#include <QUrl>
 #include <QFileSystemModel>
 #include "qmediaplaylist.h"
 #include "playlistmodel.h"
@@ -46,7 +47,7 @@ private slots:
 signals:
     void showPlayerClicked();
     void songSelected(const QModelIndex &index);
-    void addButtonClicked();
+    void addSelectedFilesClicked(const QList<QUrl> &urls);
 };
 
 #endif // PLAYLISTVIEW_H

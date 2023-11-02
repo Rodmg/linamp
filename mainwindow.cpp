@@ -42,14 +42,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(player, &PlayerView::showPlaylistClicked, this, &MainWindow::showPlaylist);
     connect(playlist, &PlaylistView::showPlayerClicked, this, &MainWindow::showPlayer);
     connect(playlist, &PlaylistView::songSelected, player, &PlayerView::jump);
-    connect(playlist, &PlaylistView::addButtonClicked, player, &PlayerView::open);
+    connect(playlist, &PlaylistView::addSelectedFilesClicked, player, &PlayerView::addToPlaylist);
 
     connect(controlButtons, &ControlButtonsWidget::playClicked, player, &PlayerView::playClicked);
     connect(controlButtons, &ControlButtonsWidget::pauseClicked, player, &PlayerView::pauseClicked);
     connect(controlButtons, &ControlButtonsWidget::stopClicked, player, &PlayerView::stopClicked);
     connect(controlButtons, &ControlButtonsWidget::nextClicked, player, &PlayerView::nextClicked);
     connect(controlButtons, &ControlButtonsWidget::previousClicked, player, &PlayerView::previousClicked);
-    connect(controlButtons, &ControlButtonsWidget::openClicked, player, &PlayerView::open);
+    connect(controlButtons, &ControlButtonsWidget::openClicked, player,  &PlayerView::showPlaylistClicked);
     connect(controlButtons, &ControlButtonsWidget::repeatClicked, player, &PlayerView::repeatButtonClicked);
     connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleButtonClicked);
 

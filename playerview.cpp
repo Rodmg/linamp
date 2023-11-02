@@ -238,8 +238,11 @@ void PlayerView::addToPlaylist(const QList<QUrl> &urls)
             m_playlist->addMedia(url);
     }
     if (m_playlist->mediaCount() > previousMediaCount) {
-        auto index = m_playlistModel->index(previousMediaCount, 0);
-        jump(index);
+        // Start playing only if not already playing
+        if(m_player->playbackState() == MediaPlayer::PlaybackState::StoppedState) {
+            auto index = m_playlistModel->index(previousMediaCount, 0);
+            jump(index);
+        }
     }
 }
 

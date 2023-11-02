@@ -34,12 +34,11 @@ public:
 
     bool isPlayerAvailable() const;
 
-    void addToPlaylist(const QList<QUrl> &urls);
-
 public slots:
     void setVolumeSlider(float volume);
     void jump(const QModelIndex &index);
     void open();
+    void addToPlaylist(const QList<QUrl> &urls);
 
     void previousClicked();
     void nextClicked();
