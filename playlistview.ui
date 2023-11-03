@@ -460,7 +460,7 @@
 }
 
 QListView::item {
-	height: 40px;
+	height: 45px;
 }
 
 QListView::item:selected {
@@ -614,7 +614,7 @@ QScrollBar::handle:horizontal {
 }
 
 QTreeView::item {
-	height: 40px;
+	height: 45px;
 }
 
 QTreeView::item:selected {

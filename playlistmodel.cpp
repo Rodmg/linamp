@@ -89,10 +89,17 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 {
     if (index.isValid() && role == Qt::DisplayRole) {
         QMediaMetaData meta = m_playlist->mediaMetadata(index.row());
-        qDebug() << "Requesting column:" << index.column();
+
+        // If the current track is playing, add play icon
+        QString playIcon = "   ";
+        int currentIndex = m_playlist->currentIndex();
+        if(currentIndex == index.row()) {
+            playIcon = " 🞂 ";
+        }
+
         switch(index.column()) {
         case Track:
-            return meta.value(QMediaMetaData::TrackNumber);
+            return playIcon + meta.value(QMediaMetaData::TrackNumber).toString();
         case Title:
             return meta.value(QMediaMetaData::Title);
         case Artist:

@@ -1,4 +1,5 @@
 #include "filebrowsericonprovider.h"
+#include "util.h"
 #include <QRegularExpression>
 
 FileBrowserIconProvider::FileBrowserIconProvider()
@@ -28,16 +29,8 @@ QIcon FileBrowserIconProvider::icon(const QFileInfo &info) const
 
     const QString &path = info.absoluteFilePath();
 
-    QStringList filters;
-    filters << "*.mp3" << "*.flac" << "*.m4a" << "*.ogg" << "*.wma" << "*.wav" << "*.m3u";
-
-    for(const QString &filter : filters) {
-        QRegularExpression rx = QRegularExpression::fromWildcard(filter,
-                                                                 Qt::CaseInsensitive,
-                                                                 QRegularExpression::UnanchoredWildcardConversion);
-        if(rx.match(path).hasMatch()) {
-            return *musicIcon;
-        }
+    if(isAudioFile(path)) {
+        return *musicIcon;
     }
 
     return QFileIconProvider::icon(info);

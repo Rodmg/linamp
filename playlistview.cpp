@@ -1,6 +1,7 @@
 #include "playlistview.h"
 #include "ui_playlistview.h"
 #include "filebrowsericonprovider.h"
+#include "util.h"
 #include <QScroller>
 #include <QFileIconProvider>
 #include <QStandardPaths>
@@ -40,8 +41,10 @@ PlaylistView::~PlaylistView()
 
 void PlaylistView::playlistPositionChanged(int currentItem)
 {
-    if (ui->playList)
+    if (ui->playList) {
         ui->playList->setCurrentIndex(m_playlistModel->index(currentItem, 0));
+        ui->playList->update(); // Force refresh for making sure play icon is updated correctly
+    }
 }
 
 void PlaylistView::clearPlaylist()
@@ -100,8 +103,7 @@ void PlaylistView::setupFileBrowserUi()
 {
     m_fileSystemModel = new QFileSystemModel(this);
     // filter only folders and audio files
-    QStringList filters;
-    filters << "*.mp3" << "*.flac" << "*.m4a" << "*.ogg" << "*.wma" << "*.wav" << "*.m3u";
+    QStringList filters = audioFileFilters();
     m_fileSystemModel->setNameFilters(filters);
     m_fileSystemModel->setNameFilterDisables(false); // Hide filtered files
 
@@ -111,6 +113,8 @@ void PlaylistView::setupFileBrowserUi()
 
     ui->fileBrowserListView->setModel(m_fileSystemModel);
     ui->fileBrowserListView->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui->fileBrowserListView->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+
     fbCd(HOME_PATH);
 
     // Add touch scroll to playList
@@ -159,8 +163,10 @@ void PlaylistView::fbAdd()
 
     for(QModelIndex index : selIndexes) {
         QUrl url = QUrl::fromLocalFile(m_fileSystemModel->filePath(index));
-        // TODO: filter only allowed audio files by extension
-        files.append(url);
+        // Filter only allowed audio files by extension
+        if(isAudioFile(url.fileName())) {
+            files.append(url);
+        }
     }
 
     // Clear selection

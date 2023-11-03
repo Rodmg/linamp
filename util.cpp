@@ -1,6 +1,7 @@
 #include "util.h"
 #include "qdatetime.h"
 
+#include <QRegularExpression>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
@@ -64,4 +65,27 @@ QString formatDuration(qint64 ms)
         format = "hh:mm:ss";
     QString durationStr = totalTime.toString(format);
     return durationStr;
+}
+
+QStringList audioFileFilters()
+{
+    QStringList filters;
+    filters << "*.mp3" << "*.flac" << "*.m4a" << "*.ogg" << "*.wma" << "*.wav" << "*.m3u";
+    return filters;
+}
+
+bool isAudioFile(QString path)
+{
+    QStringList filters = audioFileFilters();
+
+    for(const QString &filter : filters) {
+        QRegularExpression rx = QRegularExpression::fromWildcard(filter,
+                                                                 Qt::CaseInsensitive,
+                                                                 QRegularExpression::UnanchoredWildcardConversion);
+        if(rx.match(path).hasMatch()) {
+            return true;
+        }
+    }
+
+    return false;
 }

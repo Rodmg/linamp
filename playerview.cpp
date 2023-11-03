@@ -197,7 +197,8 @@ void PlayerView::open()
 
 
     QFileDialog fileDialog(this);
-    fileDialog.setNameFilter(tr("Audio (*.mp3 *.flac *.m4a *.ogg *.wma *.wav *.m3u)"));
+    QString filters = audioFileFilters().join(" ");
+    fileDialog.setNameFilter("Audio (" + filters + ")");
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog.setFileMode(QFileDialog::ExistingFiles);
     fileDialog.setWindowTitle(tr("Open Files"));
