@@ -540,6 +540,13 @@ bool QMediaPlaylist::moveMedia(int from, int to)
         return false;
 
     d->playlist.move(from, to);
+
+    // Do also playqueue
+    d->playqueue = QList(d->playlist);
+    if(shuffleEnabled) {
+        this->shuffle();
+    }
+
     emit mediaChanged(from, to);
     return true;
 }

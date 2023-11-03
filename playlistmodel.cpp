@@ -9,7 +9,6 @@
 #include <QFileInfo>
 #include <QUrl>
 #include <QMimeData>
-#include <QDebug>
 
 PlaylistModel::PlaylistModel(QObject *parent) : QAbstractItemModel(parent)
 {
@@ -139,16 +138,14 @@ QMediaPlaylist *PlaylistModel::playlist() const
 bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     Q_UNUSED(role);
-    m_data[index] = value;
+    Q_UNUSED(value);
     emit dataChanged(index, index);
     return true;
 }
 
 void PlaylistModel::beginInsertItems(int start, int end)
 {
-    m_data.clear();
     beginInsertRows(QModelIndex(), start, end);
-    qDebug() << ">>>>>beginInsertItems";
 }
 
 void PlaylistModel::endInsertItems()
@@ -158,9 +155,7 @@ void PlaylistModel::endInsertItems()
 
 void PlaylistModel::beginRemoveItems(int start, int end)
 {
-    m_data.clear();
     beginRemoveRows(QModelIndex(), start, end);
-    qDebug() << ">>>>>beginRemoveItems";
 }
 
 void PlaylistModel::endRemoveItems()
@@ -171,9 +166,7 @@ void PlaylistModel::endRemoveItems()
 
 void PlaylistModel::changeItems(int start, int end)
 {
-    m_data.clear();
     emit dataChanged(index(start, 0), index(end, ColumnCount));
-    qDebug() << ">>>>>changeItems";
 }
 
 Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
@@ -186,12 +179,12 @@ Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
 
 Qt::DropActions PlaylistModel::supportedDragActions() const
 {
-    return Qt::MoveAction;
+    return Qt::CopyAction;
 }
 
 Qt::DropActions PlaylistModel::supportedDropActions() const
 {
-    return Qt::MoveAction;
+    return Qt::CopyAction;
 }
 
 
@@ -210,7 +203,7 @@ bool PlaylistModel::canDropMimeData(const QMimeData *data, Qt::DropAction action
     Q_UNUSED(column);
     Q_UNUSED(parent);
 
-    if ( action != Qt::MoveAction || !data->hasFormat(PlaylistModel::MimeType))
+    if ( action != Qt::CopyAction || !data->hasFormat(PlaylistModel::MimeType) || row == -1)
         return false;
 
     return true;
@@ -224,8 +217,9 @@ QMimeData *PlaylistModel::mimeData(const QModelIndexList &indexes) const
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
     for (const QModelIndex &index : indexes) {
-        if (index.isValid()) {
-            QString location = m_playlist->media(index.row()).toString();
+        // Only "pick" first column, avoid multiple insertions
+        if (index.isValid() && index.column() == 0) {
+            QString location = QString::number(index.row());
             stream << location;
         }
     }
@@ -241,7 +235,7 @@ bool PlaylistModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
     if (action == Qt::IgnoreAction)
         return true;
-    else if (action  != Qt::MoveAction)
+    else if (action  != Qt::CopyAction)
         return false;
 
     QByteArray encodedData = data->data(PlaylistModel::MimeType);
@@ -257,13 +251,19 @@ bool PlaylistModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     }
 
     insertRows(row, rows, QModelIndex());
-    for (const QString &text : qAsConst(newItems))
+    for (const QString &originalIdx : qAsConst(newItems))
     {
-        QModelIndex idx = index(row, 0, QModelIndex());
-        setData(idx, text);
+        int newIndex = row;
 
-        QUrl url = QUrl(text);
-        m_playlist->insertMedia(idx.row(), url); // TODO better way to do this to avoid cuts in playback
+        // Special case when moving to the bottom of the list
+        int mediaCount = m_playlist->mediaCount();
+        int maxIndex = mediaCount - 1;
+        if(newIndex > maxIndex) {
+            newIndex = maxIndex;
+        }
+
+        m_playlist->moveMedia(originalIdx.toInt(), newIndex);
+        m_playlist->setCurrentIndex(newIndex); // TODO set selection instead of currentIndex
 
         row++;
     }

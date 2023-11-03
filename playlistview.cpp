@@ -100,9 +100,10 @@ void PlaylistView::setupPlayListUi()
     ui->playList->setDragEnabled(true);
     ui->playList->setAcceptDrops(true);
     ui->playList->setDropIndicatorShown(true);
-    ui->playList->setDragDropMode(QAbstractItemView::InternalMove);
-    ui->playList->setDefaultDropAction(Qt::MoveAction);
+    ui->playList->setDragDropMode(QAbstractItemView::DragDrop);
+    ui->playList->setDefaultDropAction(Qt::CopyAction);
     ui->playList->setDragDropOverwriteMode(false);
+    ui->playList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 }
 
 void PlaylistView::setupFileBrowserUi()

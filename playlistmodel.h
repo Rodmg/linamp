@@ -60,7 +60,6 @@ private slots:
 
 private:
     QScopedPointer<QMediaPlaylist> m_playlist;
-    QMap<QModelIndex, QVariant> m_data;
 };
 
 #endif // PLAYLISTMODEL_H
