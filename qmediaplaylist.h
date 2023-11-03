@@ -56,6 +56,7 @@ public:
 
     int mediaCount() const;
     bool isEmpty() const;
+    qint64 totalDuration() const;
 
     void addMedia(const QUrl &content);
     void addMedia(const QList<QUrl> &items);

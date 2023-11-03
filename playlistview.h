@@ -44,6 +44,8 @@ private slots:
 
     void fbItemClicked(const QModelIndex &index);
 
+    void updateTotalDuration();
+
 signals:
     void showPlayerClicked();
     void songSelected(const QModelIndex &index);

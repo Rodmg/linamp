@@ -32,6 +32,12 @@ PlaylistView::PlaylistView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(ui->fbSelectButton, &QPushButton::clicked, this, &PlaylistView::fbToggleSelect);
     connect(ui->fbAddButton, &QPushButton::clicked, this, &PlaylistView::fbAdd);
     connect(ui->fileBrowserListView, &QAbstractItemView::clicked, this, &PlaylistView::fbItemClicked);
+
+    connect(m_playlist, &QMediaPlaylist::mediaChanged, this, &PlaylistView::updateTotalDuration);
+    connect(m_playlist, &QMediaPlaylist::mediaInserted, this, &PlaylistView::updateTotalDuration);
+    connect(m_playlist, &QMediaPlaylist::mediaRemoved, this, &PlaylistView::updateTotalDuration);
+
+    updateTotalDuration();
 }
 
 PlaylistView::~PlaylistView()
@@ -198,4 +204,11 @@ void PlaylistView::fbItemClicked(const QModelIndex &index)
         fbCd(m_fileSystemModel->filePath(index));
     }
 }
+
+void PlaylistView::updateTotalDuration()
+{
+    qint64 total = m_playlist->totalDuration();
+    ui->plDuration->setText(formatDuration(total));
+}
+
 

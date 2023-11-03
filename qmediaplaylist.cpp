@@ -365,6 +365,23 @@ bool QMediaPlaylist::isEmpty() const
 }
 
 /*!
+  Returns the total duration of the playlist, by summing all track durations.
+ */
+qint64 QMediaPlaylist::totalDuration() const
+{
+    qint64 total = 0;
+    for(int i = 0; i < mediaCount(); i++) {
+        QUrl url = media(i);
+        if(m_mediaMetadata.contains(url)) {
+            QMediaMetaData meta = m_mediaMetadata.value(media(i));
+            total += meta.value(QMediaMetaData::Duration).toLongLong();
+        }
+    }
+    return total;
+}
+
+
+/*!
   Returns the media content at \a index in the playlist.
 */
 
