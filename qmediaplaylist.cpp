@@ -576,6 +576,8 @@ bool QMediaPlaylist::removeMedia(int start, int end)
         this->shuffle();
     }
 
+    vacuumMetadata();
+
     emit mediaRemoved(start, end);
     return true;
 }
@@ -592,6 +594,7 @@ void QMediaPlaylist::clear()
     emit mediaAboutToBeRemoved(0, size - 1);
     d->playlist.clear();
     d->playqueue.clear();
+    vacuumMetadata();
     emit mediaRemoved(0, size - 1);
 }
 
@@ -785,7 +788,6 @@ void QMediaPlaylist::previous()
 /*!
     Activate media content from playlist at position \a playlistPosition.
 */
-
 void QMediaPlaylist::setCurrentIndex(int playlistPosition)
 {
     Q_D(QMediaPlaylist);
@@ -800,7 +802,6 @@ void QMediaPlaylist::setCurrentIndex(int playlistPosition)
 /*!
     Activate media content from playlist at position \a playlistPosition.
 */
-
 void QMediaPlaylist::setCurrentQueueIndex(int playlistPosition)
 {
     Q_D(QMediaPlaylist);
@@ -812,6 +813,9 @@ void QMediaPlaylist::setCurrentQueueIndex(int playlistPosition)
     emit currentMediaChanged(currentMedia());
 }
 
+/*!
+    Loads media metadata
+ */
 void QMediaPlaylist::loadMetadata(const QUrl &url)
 {
     if(m_mediaMetadata.contains(url)) {
@@ -821,6 +825,21 @@ void QMediaPlaylist::loadMetadata(const QUrl &url)
     QMediaMetaData meta = parseMetaData(url);
 
     m_mediaMetadata.insert(url, meta);
+}
+
+/*!
+    Cleans unused metadata (for example, after removing media from the playlist)
+ */
+void QMediaPlaylist::vacuumMetadata()
+{
+    Q_D(const QMediaPlaylist);
+
+    for(const QUrl &key : m_mediaMetadata.keys()) {
+        if(!d->playlist.contains(key)) {
+            // Metadata not used, remove
+            m_mediaMetadata.remove(key);
+        }
+    }
 }
 
 

@@ -108,6 +108,7 @@ private:
     // Metadata for files in the playlist
     QMap<QUrl, QMediaMetaData> m_mediaMetadata;
     void loadMetadata(const QUrl &url);
+    void vacuumMetadata();
 };
 
 QT_END_NAMESPACE
