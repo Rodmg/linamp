@@ -94,7 +94,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
         QString playIcon = "   ";
         int currentIndex = m_playlist->currentIndex();
         if(currentIndex == index.row()) {
-            playIcon = " 🞂 ";
+            playIcon = " ▶ ";
         }
 
         switch(index.column()) {
