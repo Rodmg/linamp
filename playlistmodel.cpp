@@ -3,6 +3,7 @@
 
 #include "playlistmodel.h"
 #include "qmediaplaylist.h"
+#include "qsize.h"
 #include "util.h"
 
 #include <QFileInfo>
@@ -65,6 +66,23 @@ QModelIndex PlaylistModel::parent(const QModelIndex &child) const
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     Q_UNUSED(orientation);
+
+    if(role == Qt::SizeHintRole) {
+        switch(section) {
+        case Track:
+            return QSize(80, 40);
+        case Title:
+            return QSize(180, 40);
+        case Artist:
+            return QSize(180, 40);
+        case Album:
+            return QSize(180, 40);
+        case Duration:
+            return QSize(70, 40);
+        default:
+            return QVariant();
+        }
+    }
 
     if(role != Qt::DisplayRole)
         return QVariant();

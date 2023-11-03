@@ -615,6 +615,7 @@ QScrollBar::handle:horizontal {
 
 QTreeView::item {
 	height: 45px;
+	padding-right: 16px;
 }
 
 QTreeView::item:selected {

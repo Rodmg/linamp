@@ -95,7 +95,7 @@ void PlaylistView::setupPlayListUi()
     ui->playList->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::ResizeToContents);
     ui->playList->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::ResizeToContents);
     ui->playList->header()->setSectionResizeMode(4, QHeaderView::ResizeMode::Fixed);
-    ui->playList->header()->setDefaultSectionSize(64);
+    ui->playList->header()->setDefaultSectionSize(80);
 
     ui->playList->setDragEnabled(true);
     ui->playList->setAcceptDrops(true);
