@@ -95,7 +95,7 @@ private:
     void clearAudioOutput();
     void clear();
     bool atEnd() const override;
-    void parseMetaData();
+    void loadMetaData();
     void setError(Error error);
     void setMediaStatus(MediaStatus status);
 

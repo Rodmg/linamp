@@ -3,6 +3,7 @@
 
 #include "playlistmodel.h"
 #include "qmediaplaylist.h"
+#include "util.h"
 
 #include <QFileInfo>
 #include <QUrl>
@@ -61,6 +62,29 @@ QModelIndex PlaylistModel::parent(const QModelIndex &child) const
     return QModelIndex();
 }
 
+QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    Q_UNUSED(orientation);
+
+    if(role != Qt::DisplayRole)
+        return QVariant();
+
+    switch(section) {
+    case Track:
+        return "TRACK";
+    case Title:
+        return "TITLE";
+    case Artist:
+        return "ARTIST";
+    case Album:
+        return "ALBUM";
+    case Duration:
+        return "DURATION";
+    }
+    return QVariant();
+}
+
+
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 {
     if (index.isValid() && role == Qt::DisplayRole) {
@@ -76,7 +100,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
         case Album:
             return meta.value(QMediaMetaData::AlbumTitle);
         case Duration:
-            return meta.value(QMediaMetaData::Duration);
+            return formatDuration(meta.value(QMediaMetaData::Duration).toLongLong());
         }
     }
     return QVariant();

@@ -709,51 +709,15 @@ QScrollBar::handle:horizontal {
 	border: none;
  }
 
-/*QScrollBar:vertical {
-    background-color: #2c2b43;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
-	padding: -3px;
- }
- QScrollBar::handle:vertical {
-    width: 24px;
-	height: 54px;
-	max-height: 54px;
-	background-color: transparent;
-	border-image: url(:assets/scroll_handle.png);
-	background: none;
-	background-repeat: none;
- }
-QScrollBar::handle:vertical:pressed {
-	border-image: url(:assets/scroll_handle_p.png);
-}
- QScrollBar::add-line:vertical {
-     border: 2px solid grey;
-     background: #32CC99;
-     height: 20px;
-     subcontrol-position: bottom;
-     subcontrol-origin: margin;
- }
-
- QScrollBar::sub-line:vertical {
-     border: 2px solid grey;
-     background: #32CC99;
-     height: 20px;
-     subcontrol-position: top;
-     subcontrol-origin: margin;
- }
- QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
-     border: 2px solid grey;
-     width: 3px;
-     height: 3px;
-     background: white;
- }
-
- QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-     background: none;
- }*/</string>
+QHeaderView::section {
+    background-color: #bccdd5;
+    color: #333350;
+    border: none;
+	height: 28px;
+	font-size: 12pt;
+	font-weight: bold;
+	padding-right: 8px;
+}</string>
         </property>
         <property name="verticalScrollBarPolicy">
          <enum>Qt::ScrollBarAsNeeded</enum>

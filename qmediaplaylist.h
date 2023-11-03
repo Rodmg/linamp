@@ -26,8 +26,6 @@ public:
     enum Error { NoError, FormatError, FormatNotSupportedError, NetworkError, AccessDeniedError };
     Q_ENUM(Error)
 
-    static QMediaMetaData parseMetaData(const QUrl &url);
-
     explicit QMediaPlaylist(QObject *parent = nullptr);
     virtual ~QMediaPlaylist();
 

@@ -30,6 +30,8 @@ public:
                       const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &child) const override;
 
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     QMediaPlaylist *playlist() const;

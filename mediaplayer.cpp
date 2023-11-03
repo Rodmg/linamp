@@ -1,5 +1,6 @@
 #include "mediaplayer.h"
 #include "qurl.h"
+#include "util.h"
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
@@ -194,43 +195,8 @@ bool MediaPlayer::atEnd() const
            && isDecodingFinished;
 }
 
-void MediaPlayer::parseMetaData() {
-    TagLib::FileRef f(m_source.toLocalFile().toLocal8Bit().data());
-
-    if(!f.isNull() && f.tag()) {
-        TagLib::Tag *tag = f.tag();
-
-        QString title = QString::fromStdString(tag->title().toCString(true));
-        QString albumTitle = QString::fromStdString(tag->album().toCString(true));
-        QString artist = QString::fromStdString(tag->artist().toCString(true));
-        QString comment = QString::fromStdString(tag->comment().toCString(true));
-        QString genre = QString::fromStdString(tag->genre().toCString(true));
-        qint64 track = tag->track();
-        qint64 year = tag->year();
-
-        m_metaData = QMediaMetaData{};
-        m_metaData.insert(QMediaMetaData::Title, title);
-        m_metaData.insert(QMediaMetaData::AlbumTitle, albumTitle);
-        m_metaData.insert(QMediaMetaData::AlbumArtist, artist);
-        m_metaData.insert(QMediaMetaData::Comment, comment);
-        m_metaData.insert(QMediaMetaData::Genre, genre);
-        m_metaData.insert(QMediaMetaData::TrackNumber, track);
-        m_metaData.insert(QMediaMetaData::Url, m_source);
-        m_metaData.insert(QMediaMetaData::Date, year);
-    }
-
-    if(!f.isNull() && f.audioProperties()) {
-        TagLib::AudioProperties *properties = f.audioProperties();
-
-        qint64 duration = properties->lengthInMilliseconds();
-        qint64 bitrate = properties->bitrate() * 1000;
-        qint64 sampleRate = properties->sampleRate();
-
-        //m_metaData.insert(QMediaMetaData::MediaType, artist); // TODO
-        m_metaData.insert(QMediaMetaData::AudioBitRate, bitrate);
-        m_metaData.insert(QMediaMetaData::AudioCodec, sampleRate); // Using AudioCodec as sample rate for now
-        m_metaData.insert(QMediaMetaData::Duration, duration);
-    }
+void MediaPlayer::loadMetaData() {
+    m_metaData = parseMetaData(m_source);
 
     setMediaStatus(MediaPlayer::LoadedMedia);
     emit metaDataChanged();
@@ -421,7 +387,7 @@ void MediaPlayer::setSource(const QUrl &source)
     m_source = source;
     m_decoder->setSource(m_source);
     m_decoder->start();
-    parseMetaData();
+    loadMetaData();
 }
 
 void MediaPlayer::clearSource()

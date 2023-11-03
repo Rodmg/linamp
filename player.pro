@@ -27,7 +27,7 @@ HEADERS = \
     qplaylistfileparser.h \
     spectrumwidget.h \
     titlebar.h \
-    touchfiledialog.h
+    util.h
 
 SOURCES = main.cpp \
     controlbuttonswidget.cpp \
@@ -48,7 +48,7 @@ SOURCES = main.cpp \
     qplaylistfileparser.cpp \
     spectrumwidget.cpp \
     titlebar.cpp \
-    touchfiledialog.cpp
+    util.cpp
 
 target.path = $$[QT_INSTALL_EXAMPLES]/multimedia/player
 INSTALLS += target

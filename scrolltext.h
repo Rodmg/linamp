@@ -14,12 +14,11 @@ class ScrollText : public QWidget
 
 public:
     explicit ScrollText(QWidget *parent = 0);
+    QString text() const;
+    QString separator() const;
 
 public slots:
-    QString text() const;
     void setText(QString text);
-
-    QString separator() const;
     void setSeparator(QString separator);
 
 

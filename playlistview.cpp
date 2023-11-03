@@ -77,7 +77,17 @@ void PlaylistView::setupPlayListUi()
 
     ui->playList->setModel(m_playlistModel);
     ui->playList->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
-    //ui->playList->setSortingEnabled(true);
+
+    ui->playList->setSortingEnabled(false);
+    ui->playList->setIndentation(0);
+    ui->playList->setAllColumnsShowFocus(false);
+    ui->playList->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Fixed);
+    ui->playList->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::ResizeToContents);
+    ui->playList->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::ResizeToContents);
+    ui->playList->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::ResizeToContents);
+    ui->playList->header()->setSectionResizeMode(4, QHeaderView::ResizeMode::Fixed);
+    ui->playList->header()->setDefaultSectionSize(64);
+
     ui->playList->setDragEnabled(true);
     ui->playList->setAcceptDrops(true);
     ui->playList->setDropIndicatorShown(true);

@@ -4,7 +4,7 @@
 #include "playlistmodel.h"
 #include "qmediaplaylist.h"
 #include "scale.h"
-#include "touchfiledialog.h"
+#include "util.h"
 
 #include <QApplication>
 #include <QAudioDevice>
@@ -196,7 +196,7 @@ void PlayerView::open()
          << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).first());
 
 
-    TouchFileDialog fileDialog(this);
+    QFileDialog fileDialog(this);
     fileDialog.setNameFilter(tr("Audio (*.mp3 *.flac *.m4a *.ogg *.wma *.wav *.m3u)"));
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog.setFileMode(QFileDialog::ExistingFiles);
@@ -207,9 +207,6 @@ void PlayerView::open()
     fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
     fileDialog.setViewMode(QFileDialog::Detail);
     fileDialog.setSidebarUrls(urls);
-
-    fileDialog.setStyleSheet(getStylesheet("filedialog"));
-
 
     #ifdef IS_EMBEDDED
     fileDialog.setWindowState(Qt::WindowFullScreen);
@@ -270,13 +267,11 @@ void PlayerView::metaDataChanged()
     QString title = metaData.value(QMediaMetaData::Title).toString().toUpper();
 
     //  Calculate duration
-    qint64 duration = metaData.value(QMediaMetaData::Duration).toLongLong()/1000;
+    qint64 ms = metaData.value(QMediaMetaData::Duration).toLongLong();
+    qint64 duration = ms/1000;
     QTime totalTime((duration / 3600) % 60, (duration / 60) % 60, duration % 60,
                     (duration * 1000) % 1000);
-    QString format = "mm:ss";
-    if (duration > 3600)
-        format = "hh:mm:ss";
-    QString durationStr = totalTime.toString(format);
+    QString durationStr = formatDuration(ms);
 
     QString trackInfo = "";
 
@@ -487,16 +482,11 @@ void PlayerView::updateDurationInfo(qint64 currentInfo)
 {
     QString tStr, tDisplayStr;
     if (currentInfo || m_duration) {
+        tStr = formatDuration(currentInfo) + " / " + formatDuration(m_duration);
+
         QTime currentTime((currentInfo / 3600) % 60, (currentInfo / 60) % 60, currentInfo % 60,
                           (currentInfo * 1000) % 1000);
-        QTime totalTime((m_duration / 3600) % 60, (m_duration / 60) % 60, m_duration % 60,
-                        (m_duration * 1000) % 1000);
-        QString format = "mm:ss";
-        if (m_duration > 3600)
-            format = "hh:mm:ss";
-        tStr = currentTime.toString(format) + " / " + totalTime.toString(format);
-        format = "m ss";
-        tDisplayStr = currentTime.toString(format);
+        tDisplayStr = currentTime.toString("m ss");
     }
     ui->progressTimeLabel->setText(tDisplayStr);
 }

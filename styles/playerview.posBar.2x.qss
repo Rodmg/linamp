@@ -1,6 +1,6 @@
 QSlider::handle:horizontal {
         width: 56px;
-        height: 18px;
+        height: 20px;
         background-color: transparent;
         border-image: url(:assets/posHandle.png);
         background: none;
@@ -17,9 +17,12 @@ QSlider::groove:horizontal {
 
 #posBar {
         background-color: #2c2b43;
-        border-top: 2px solid #26253c;
+        border-top: 4px solid #26253c;
         border-right: 2px solid #6d6d7f;
         border-bottom: 2px solid #6d6d7f;
-        border-left: 2px solid #26253c;
-        padding: -2px;
+        border-left: 4px solid #26253c;
+        padding-top: -4px;
+        padding-right: -2px;
+        padding-bottom: -2px;
+        padding-left: -4px;
 }
