@@ -263,7 +263,7 @@ bool PlaylistModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         }
 
         m_playlist->moveMedia(originalIdx.toInt(), newIndex);
-        m_playlist->setCurrentIndex(newIndex); // TODO set selection instead of currentIndex
+        //m_playlist->setCurrentIndex(newIndex); // TODO set selection instead of currentIndex
 
         row++;
     }

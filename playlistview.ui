@@ -818,6 +818,56 @@ QHeaderView::section {
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="editButton">
+            <property name="minimumSize">
+             <size>
+              <width>84</width>
+              <height>54</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>85</width>
+              <height>54</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Bitstream Vera Sans Mono</family>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">#editButton {
+	color: #333350;
+	background-color: #bdced6;
+	border: 4px solid #4a5a6b;
+	border-radius: none;
+}
+
+#editButton:pressed {
+	color: #080810;
+	background-color: #7b8c9c;
+	border: 4px solid #080810;
+}
+
+#editButton:checked {
+	background-color: #00d600;
+}</string>
+            </property>
+            <property name="text">
+             <string>EDIT</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="removeButton">
             <property name="minimumSize">
              <size>

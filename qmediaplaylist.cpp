@@ -539,6 +539,30 @@ bool QMediaPlaylist::moveMedia(int from, int to)
     if (from < 0 || from > d->playlist.count() || to < 0 || to > d->playlist.count())
         return false;
 
+    // Nothing to do here
+    if(from == to)
+        return false;
+
+    // Get the current playing media position and update after change
+    int currentPlayingPos = d->currentPos();
+    int newPlayingPos = currentPlayingPos;
+    // If currentPlayingPos is between the movement positions, it will change
+    if(currentPlayingPos == from) {
+        // Special case, current playing item is the one moving
+        newPlayingPos = to;
+    }
+    // Case when moving down
+    if(from < to && currentPlayingPos > from && currentPlayingPos <= to) {
+        // Everything in between moves up
+        newPlayingPos = currentPlayingPos - 1;
+    }
+    // Case when moving up
+    if(from > to && currentPlayingPos >= to && currentPlayingPos < from) {
+        // Everything in between moves down
+        newPlayingPos = currentPlayingPos + 1;
+    }
+
+    // Do te moves
     d->playlist.move(from, to);
 
     // Do also playqueue
@@ -547,7 +571,11 @@ bool QMediaPlaylist::moveMedia(int from, int to)
         this->shuffle();
     }
 
-    emit mediaChanged(from, to);
+    // Set new position
+    d->setCurrentPos(newPlayingPos);
+
+    emit mediaChanged(0, d->playlist.count());
+    emit currentSelectionChanged(to); // highlight destination
     return true;
 }
 
@@ -574,6 +602,18 @@ bool QMediaPlaylist::removeMedia(int start, int end)
     start = qBound(0, start, d->playlist.size() - 1);
     end = qBound(0, end, d->playlist.size() - 1);
 
+    // Get the current playing media position and update after change
+    int currentPlayingPos = d->currentPos();
+    int newPlayingPos = currentPlayingPos;
+    // If currently playing position is between or at start or end, set at the begining
+    if(currentPlayingPos >= start && currentPlayingPos <= end) {
+        newPlayingPos = -1;
+    }
+    // If current playing position is after end, it will move up
+    if(currentPlayingPos > end) {
+        newPlayingPos = currentPlayingPos - (end - start) - 1;
+    }
+
     emit mediaAboutToBeRemoved(start, end);
     d->playlist.remove(start, end - start + 1);
 
@@ -585,7 +625,11 @@ bool QMediaPlaylist::removeMedia(int start, int end)
 
     vacuumMetadata();
 
+    // Set new position
+    d->setCurrentPos(newPlayingPos);
+
     emit mediaRemoved(start, end);
+    emit mediaChanged(0, d->playlist.count());
     return true;
 }
 

@@ -2,7 +2,6 @@
 #include "ui_playlistview.h"
 #include "filebrowsericonprovider.h"
 #include "util.h"
-#include <QScroller>
 #include <QFileIconProvider>
 #include <QStandardPaths>
 
@@ -22,7 +21,7 @@ PlaylistView::PlaylistView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(ui->goPlayerButton, &QPushButton::clicked, this, &PlaylistView::showPlayerClicked);
     connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this, &PlaylistView::playlistPositionChanged);
 
-    connect(ui->playList, &QAbstractItemView::clicked, this, &PlaylistView::songSelected);
+    connect(ui->playList, &QAbstractItemView::clicked, this, &PlaylistView::handleSongSelected);
 
     connect(ui->clearButton, &QPushButton::clicked, this, &PlaylistView::clearPlaylist);
     connect(ui->removeButton, &QPushButton::clicked, this, &PlaylistView::removeItem);
@@ -36,6 +35,9 @@ PlaylistView::PlaylistView(QWidget *parent, PlaylistModel *playlistModel) :
     connect(m_playlist, &QMediaPlaylist::mediaChanged, this, &PlaylistView::updateTotalDuration);
     connect(m_playlist, &QMediaPlaylist::mediaInserted, this, &PlaylistView::updateTotalDuration);
     connect(m_playlist, &QMediaPlaylist::mediaRemoved, this, &PlaylistView::updateTotalDuration);
+    connect(m_playlist, &QMediaPlaylist::currentSelectionChanged, this, &PlaylistView::handleSelectionChanged);
+
+    connect(ui->editButton, &QPushButton::clicked, this, &PlaylistView::toggleEditMode);
 
     updateTotalDuration();
 }
@@ -80,9 +82,9 @@ void PlaylistView::setupPlayListUi()
     sp.setScrollMetric(QScrollerProperties::MousePressEventDelay, 1.0);
     sp.setScrollMetric(QScrollerProperties::OvershootDragResistanceFactor, 0.3);
     sp.setScrollMetric(QScrollerProperties::OvershootScrollDistanceFactor, 0.1);
-    QScroller* playlistViewScroller = QScroller::scroller(ui->playList);
-    playlistViewScroller->grabGesture(ui->playList, QScroller::LeftMouseButtonGesture);
-    playlistViewScroller->setScrollerProperties(sp);
+    m_playlistViewScroller = QScroller::scroller(ui->playList);
+    m_playlistViewScroller->grabGesture(ui->playList, QScroller::LeftMouseButtonGesture);
+    m_playlistViewScroller->setScrollerProperties(sp);
 
     ui->playList->setModel(m_playlistModel);
     ui->playList->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
@@ -97,13 +99,14 @@ void PlaylistView::setupPlayListUi()
     ui->playList->header()->setSectionResizeMode(4, QHeaderView::ResizeMode::Fixed);
     ui->playList->header()->setDefaultSectionSize(80);
 
-    ui->playList->setDragEnabled(true);
-    ui->playList->setAcceptDrops(true);
     ui->playList->setDropIndicatorShown(true);
     ui->playList->setDragDropMode(QAbstractItemView::DragDrop);
     ui->playList->setDefaultDropAction(Qt::CopyAction);
     ui->playList->setDragDropOverwriteMode(false);
     ui->playList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    // Disable drag and drop until we enable edit mode
+    ui->playList->setDragEnabled(false);
+    ui->playList->setAcceptDrops(false);
 }
 
 void PlaylistView::setupFileBrowserUi()
@@ -212,4 +215,35 @@ void PlaylistView::updateTotalDuration()
     ui->plDuration->setText(formatDuration(total));
 }
 
+void PlaylistView::handleSongSelected(const QModelIndex &index)
+{
+    bool inEditMode = ui->editButton->isChecked();
+    if(!inEditMode) {
+        emit songSelected(index);
+    }
+}
 
+void PlaylistView::toggleEditMode()
+{
+    bool isEnabled = ui->editButton->isChecked();
+
+    if(isEnabled) {
+        ui->playList->setDragEnabled(true);
+        ui->playList->setAcceptDrops(true);
+        m_playlistViewScroller->ungrabGesture(ui->playList);
+    } else {
+        ui->playList->setDragEnabled(false);
+        ui->playList->setAcceptDrops(false);
+        m_playlistViewScroller->grabGesture(ui->playList, QScroller::LeftMouseButtonGesture);
+    }
+}
+
+void PlaylistView::handleSelectionChanged(int index)
+{
+    if(index < 0)
+        return;
+    auto idx = m_playlistModel->index(index, 0);
+    ui->playList->selectionModel()->setCurrentIndex(idx,
+                                                    QItemSelectionModel::SelectionFlag::Rows |
+                                                    QItemSelectionModel::SelectionFlag::SelectCurrent);
+}

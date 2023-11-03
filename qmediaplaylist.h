@@ -91,6 +91,9 @@ signals:
     void playbackModeChanged(QMediaPlaylist::PlaybackMode mode);
     void currentMediaChanged(const QUrl &);
 
+    // Emited when we want to inform the view to select a different index without playinf
+    void currentSelectionChanged(int index);
+
     void mediaAboutToBeInserted(int start, int end);
     void mediaInserted(int start, int end);
     void mediaAboutToBeRemoved(int start, int end);
