@@ -42,15 +42,18 @@
    </property>
    <item>
     <widget class="QFrame" name="sidebarContainer">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="minimumSize">
       <size>
-       <width>96</width>
+       <width>0</width>
        <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>96</width>
+       <width>0</width>
        <height>16777215</height>
       </size>
      </property>
@@ -84,6 +87,9 @@
       </property>
       <item>
        <widget class="QPushButton" name="filesButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
@@ -131,52 +137,10 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="playlistsButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">#playlistsButton {
-	border: none;
-	border-radius: 0px;
-	background: solid;
-	background-color: transparent;
-}
-
-#playlistsButton:checked {
-	background-color: #c81c22;
-}
-
-#playlistsButton:pressed {
-	border: none;
-	border-radius: 0px;
-	background: solid;
-	background-color: transparent;
-}</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="uiassets.qrc">
-          <normaloff>:/assets/playlistsIcon.png</normaloff>:/assets/playlistsIcon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>64</width>
-          <height>64</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="spotifyButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
