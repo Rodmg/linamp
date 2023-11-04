@@ -11,7 +11,7 @@
 #include <QDir>
 #include <QUrl>
 
-#define APP_VERSION_STR "0.1.0"
+#define APP_VERSION_STR "1.0.0"
 
 int main(int argc, char *argv[])
 {
