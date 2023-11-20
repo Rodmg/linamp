@@ -140,6 +140,7 @@ void MainWindow::showShutdownModal()
     msgBox.setInformativeText("Turn off Linamp?");
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Cancel);
+    msgBox.setWindowFlags(Qt::FramelessWindowHint);
     int ret = msgBox.exec();
 
     switch (ret) {
