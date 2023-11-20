@@ -153,6 +153,9 @@ void MainWindow::showShutdownModal()
 
 void MainWindow::shutdown()
 {
+    QString appPath = QCoreApplication::applicationDirPath();
+    QString cmd = appPath + "/shutdown.sh";
+
     shutdownProcess = new QProcess(this);
-    shutdownProcess->start("/usr/bin/sudo" "shutdown -r now");
+    shutdownProcess->start(cmd);
 }

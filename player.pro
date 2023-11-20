@@ -68,4 +68,5 @@ RESOURCES += \
 DISTFILES += \
     README.md \
     scale-skin.sh \
+    shutdown.sh \
     styles/controlbuttonswidget.shuffleButton.4x.qss
