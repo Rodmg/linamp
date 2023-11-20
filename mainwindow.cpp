@@ -13,6 +13,7 @@
 
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QMessageBox>
 
 #ifdef IS_EMBEDDED
 const unsigned int WINDOW_W = 320 * UI_SCALE;
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(controlButtons, &ControlButtonsWidget::openClicked, player,  &PlayerView::showPlaylistClicked);
     connect(controlButtons, &ControlButtonsWidget::repeatClicked, player, &PlayerView::repeatButtonClicked);
     connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleButtonClicked);
+    connect(controlButtons, &ControlButtonsWidget::logoClicked, this, &MainWindow::showShutdownModal);
 
     // Prepare player main view
     #ifdef IS_EMBEDDED
@@ -129,4 +131,28 @@ void MainWindow::showPlayer()
 void MainWindow::showPlaylist()
 {
     viewStack->setCurrentIndex(1);
+}
+
+void MainWindow::showShutdownModal()
+{
+    QMessageBox msgBox;
+    msgBox.setText("Shutdown");
+    msgBox.setInformativeText("Turn off Linamp?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    int ret = msgBox.exec();
+
+    switch (ret) {
+    case QMessageBox::Yes:
+        shutdown();
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::shutdown()
+{
+    shutdownProcess = new QProcess(this);
+    shutdownProcess->start("/usr/sbin/halt");
 }

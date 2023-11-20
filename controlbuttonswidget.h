@@ -28,6 +28,7 @@ signals:
     void openClicked();
     void repeatClicked(bool checked);
     void shuffleClicked(bool checked);
+    void logoClicked();
 };
 
 #endif // CONTROLBUTTONSWIDGET_H

@@ -115,5 +115,6 @@
         <file>assets/fb_musicIcon.png</file>
         <file>assets/fb_folderIcon_selected.png</file>
         <file>assets/fb_musicIcon_selected.png</file>
+        <file>assets/logoButton.png</file>
     </qresource>
 </RCC>

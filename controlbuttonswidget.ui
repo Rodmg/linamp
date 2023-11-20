@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>222</width>
+    <width>320</width>
     <height>18</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
@@ -18,7 +24,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>222</width>
+    <width>320</width>
     <height>18</height>
    </size>
   </property>
@@ -88,21 +94,51 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QPushButton" name="backButton">
+    <widget class="QWidget" name="playControlsContainer" native="true">
      <property name="minimumSize">
       <size>
-       <width>22</width>
-       <height>18</height>
+       <width>222</width>
+       <height>17</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>22</width>
+       <width>222</width>
        <height>18</height>
       </size>
      </property>
-     <property name="styleSheet">
-      <string notr="true">#backButton {
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="backButton">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#backButton {
 	background-color: transparent;
 	border-image: url(:assets/prev.png);
 	background: none;
@@ -112,28 +148,28 @@
 #backButton:pressed {
 	border-image: url(:assets/prev_p.png);
 }</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="playButton">
-     <property name="minimumSize">
-      <size>
-       <width>22</width>
-       <height>18</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>22</width>
-       <height>18</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">#playButton {
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="playButton">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#playButton {
 	background-color: transparent;
 	border-image: url(:assets/play.png);
 	background: none;
@@ -143,28 +179,28 @@
 #playButton:pressed {
 	border-image: url(:assets/play_p.png);
 }</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pauseButton">
-     <property name="minimumSize">
-      <size>
-       <width>22</width>
-       <height>18</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>22</width>
-       <height>18</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">#pauseButton {
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pauseButton">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#pauseButton {
 	background-color: transparent;
 	border-image: url(:assets/pause.png);
 	background: none;
@@ -174,28 +210,28 @@
 #pauseButton:pressed {
 	border-image: url(:assets/pause_p.png);
 }</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="stopButton">
-     <property name="minimumSize">
-      <size>
-       <width>22</width>
-       <height>18</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>22</width>
-       <height>18</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">#stopButton {
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stopButton">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#stopButton {
 	background-color: transparent;
 	border-image: url(:assets/stop.png);
 	background: none;
@@ -205,28 +241,28 @@
 #stopButton:pressed {
 	border-image: url(:assets/stop_p.png);
 }</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="nextButton">
-     <property name="minimumSize">
-      <size>
-       <width>22</width>
-       <height>18</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>22</width>
-       <height>18</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">#nextButton {
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="nextButton">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#nextButton {
 	background-color: transparent;
 	border-image: url(:assets/next.png);
 	background: none;
@@ -236,44 +272,44 @@
 #nextButton:pressed {
 	border-image: url(:assets/next_p.png);
 }</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer1">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::MinimumExpanding</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>6</width>
-       <height>17</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
-    <widget class="QPushButton" name="openButton">
-     <property name="minimumSize">
-      <size>
-       <width>22</width>
-       <height>16</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>22</width>
-       <height>16</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">#openButton {
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer1">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::MinimumExpanding</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>6</width>
+          <height>1</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="openButton">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#openButton {
 	background-color: transparent;
 	border-image: url(:assets/open.png);
 	background: none;
@@ -283,44 +319,44 @@
 #openButton:pressed {
 	border-image: url(:assets/open_p.png);
 }</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::MinimumExpanding</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>7</width>
-       <height>17</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="shuffleButton">
-     <property name="minimumSize">
-      <size>
-       <width>47</width>
-       <height>15</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>47</width>
-       <height>15</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QCheckBox {
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::MinimumExpanding</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>7</width>
+          <height>1</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="shuffleButton">
+        <property name="minimumSize">
+         <size>
+          <width>47</width>
+          <height>15</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>47</width>
+          <height>15</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QCheckBox {
     spacing: 0px;
 }
 
@@ -360,28 +396,28 @@ QCheckBox::indicator:indeterminate:hover {
 QCheckBox::indicator:indeterminate:pressed {
     image:  url(:assets/shuffle_off_p.png);
 }</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="repeatButton">
-     <property name="minimumSize">
-      <size>
-       <width>28</width>
-       <height>15</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>28</width>
-       <height>15</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QCheckBox {
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="repeatButton">
+        <property name="minimumSize">
+         <size>
+          <width>28</width>
+          <height>15</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>15</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QCheckBox {
     spacing: 0px;
 }
 
@@ -420,6 +456,56 @@ QCheckBox::indicator:indeterminate:hover {
 
 QCheckBox::indicator:indeterminate:pressed {
     image:  url(:assets/repeat_off_p.png);
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Expanding</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>1</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QPushButton" name="logoButton">
+     <property name="minimumSize">
+      <size>
+       <width>18</width>
+       <height>18</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>18</width>
+       <height>18</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#logoButton {
+	background-color: transparent;
+	border-image: url(:assets/logoButton.png);
+	background: none;
+	background-repeat: none;
+}
+
+#logoButton:pressed {
+	border-image: url(:assets/logoButton.png);
 }</string>
      </property>
      <property name="text">

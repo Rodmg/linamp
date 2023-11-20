@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStackedLayout>
+#include <QProcess>
 #include "controlbuttonswidget.h"
 #include "playerview.h"
 #include "playlistview.h"
@@ -25,10 +26,13 @@ public:
 public slots:
     void showPlayer();
     void showPlaylist();
+    void showShutdownModal();
 
 private:
     QMediaPlaylist *m_playlist = nullptr;
     PlaylistModel *m_playlistModel = nullptr;
+    QProcess *shutdownProcess = nullptr;
+    void shutdown();
 
 };
 
