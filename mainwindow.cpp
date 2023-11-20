@@ -154,5 +154,5 @@ void MainWindow::showShutdownModal()
 void MainWindow::shutdown()
 {
     shutdownProcess = new QProcess(this);
-    shutdownProcess->start("/usr/sbin/halt");
+    shutdownProcess->start("/usr/bin/sudo" "shutdown -r now");
 }
