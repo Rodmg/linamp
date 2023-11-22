@@ -383,6 +383,13 @@ void MediaPlayer::setSource(const QUrl &source)
     clear();
     QAudioDevice info(QMediaDevices::defaultAudioOutput());
     QAudioFormat format = info.preferredFormat();
+    if(!format.isValid()) {
+        qDebug() << "WARNING: Audio format in default audio output is not defined, using defaults";
+        format.setSampleFormat(QAudioFormat::Int16);
+        format.setSampleRate(48000);
+        format.setChannelConfig(QAudioFormat::ChannelConfigStereo);
+        format.setChannelCount(2);
+    }
     init(format);
     m_source = source;
     m_decoder->setSource(m_source);
