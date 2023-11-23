@@ -25,6 +25,8 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     // Load custom fonts
     QFontDatabase::addApplicationFont(":/assets/bignumbers.ttf");
 
+    m_system_audio = new SystemAudioControl(this);
+
     // Setup UI
     ui->setupUi(this);
     scale();
@@ -55,11 +57,13 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
 
     // Set volume slider
     ui->volumeSlider->setRange(0, 100);
-    this->setVolumeSlider(m_player->volume());
+    this->setVolumeSlider(m_system_audio->getVolume());
+    connect(m_system_audio, &SystemAudioControl::volumeChanged, this, &PlayerView::setVolumeSlider);
 
     // Set Balance Slider
-    ui->balanceSlider->setRange(0, 100);
-    ui->balanceSlider->setValue(50);
+    ui->balanceSlider->setRange(-100, 100);
+    this->setBalanceSlider(m_system_audio->getBalance());
+    connect(m_system_audio, &SystemAudioControl::balanceChanged, this, &PlayerView::setBalanceSlider);
 
     // Reset time counter
     ui->progressTimeLabel->setText("");
@@ -68,10 +72,11 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     setPlaybackState(m_player->playbackState());
 
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
+    connect(ui->balanceSlider, &QSlider::valueChanged, this, &PlayerView::balanceChanged);
     connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
 
     connect(m_player, &MediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
-    connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
+    //connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
 
     // Setup spectrum widget
     connect(m_player, &MediaPlayer::newData, this, &PlayerView::handleSpectrumData);
@@ -492,21 +497,30 @@ void PlayerView::updateDurationInfo(qint64 currentInfo)
     ui->progressTimeLabel->setText(tDisplayStr);
 }
 
-void PlayerView::setVolumeSlider(float volume)
+void PlayerView::setVolumeSlider(int volume)
 {
-    qreal logarithmicVolume = QAudio::convertVolume(volume, QAudio::LinearVolumeScale,
-                                                    QAudio::LogarithmicVolumeScale);
+    ui->volumeSlider->setValue(volume);
+}
 
-    ui->volumeSlider->setValue(qRound(logarithmicVolume * 100));
+void PlayerView::setBalanceSlider(int balance)
+{
+    ui->balanceSlider->setValue(balance);
 }
 
 void PlayerView::volumeChanged()
 {
-    qreal linearVolume =
-        QAudio::convertVolume(ui->volumeSlider->value() / qreal(100),
-                              QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
+    m_system_audio->setVolume(ui->volumeSlider->value());
+}
 
-    m_player->setVolume(linearVolume);
+void PlayerView::balanceChanged()
+{
+    // Snap slider to the center if it falls near to it
+    int val = ui->balanceSlider->value();
+    if(val > -20 && val < 20) {
+        val = 0;
+        ui->balanceSlider->setValue(val);
+    }
+    m_system_audio->setBalance(val);
 }
 
 void PlayerView::handlePrevious()

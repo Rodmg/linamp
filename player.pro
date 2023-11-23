@@ -6,7 +6,7 @@ QT += network \
       multimediawidgets \
       widgets
 
-LIBS += -ltag
+LIBS += -ltag -lasound
 
 HEADERS = \
     controlbuttonswidget.h \
@@ -26,6 +26,7 @@ HEADERS = \
     qmediaplaylist_p.h \
     qplaylistfileparser.h \
     spectrumwidget.h \
+    systemaudiocontrol.h \
     titlebar.h \
     util.h
 
@@ -47,6 +48,7 @@ SOURCES = main.cpp \
     qmediaplaylist_p.cpp \
     qplaylistfileparser.cpp \
     spectrumwidget.cpp \
+    systemaudiocontrol.cpp \
     titlebar.cpp \
     util.cpp
 

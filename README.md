@@ -5,9 +5,10 @@ Music player for embedded project.
 ## Requirements
 
 - taglib 1.11.1 or newer
+- libasound2-dev
 
 ```
-sudo apt install libtag1-dev
+sudo apt install libtag1-dev libasound2-dev
 ```
 
 ## Development

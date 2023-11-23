@@ -5,6 +5,7 @@
 #include "playlistmodel.h"
 #include "mediaplayer.h"
 #include "spectrumwidget.h"
+#include "systemaudiocontrol.h"
 
 #include <QMediaMetaData>
 #include <QAudioOutput>
@@ -35,7 +36,8 @@ public:
     bool isPlayerAvailable() const;
 
 public slots:
-    void setVolumeSlider(float volume);
+    void setVolumeSlider(int volume);
+    void setBalanceSlider(int balance);
     void jump(const QModelIndex &index);
     void open();
     void addToPlaylist(const QList<QUrl> &urls);
@@ -76,12 +78,14 @@ private:
     void handleCursor(MediaPlayer::MediaStatus status);
     void updateDurationInfo(qint64 currentInfo);
     void volumeChanged();
+    void balanceChanged();
     void handlePrevious();
     void handleNext();
     QString trackName(const QMediaMetaData &metaData, int index);
 
     MediaPlayer *m_player = nullptr;
     QMediaPlaylist *m_playlist = nullptr;
+    SystemAudioControl *m_system_audio = nullptr;
 
     PlaylistModel *m_playlistModel = nullptr;
     QString m_trackInfo;
