@@ -1,9 +1,10 @@
 #include <QTime>
-#include <QApplication>
 #include <QFileDialog>
 
 #include "audiosourcefile.h"
 #include "util.h"
+
+//#define DISPLAY_BUFFERING
 
 
 AudioSourceFile::AudioSourceFile(QObject *parent, PlaylistModel *playlistModel)
@@ -144,13 +145,14 @@ void AudioSourceFile::handleMediaStatusChanged(MediaPlayer::MediaStatus status)
         break;
     case MediaPlayer::BufferingMedia:
     case MediaPlayer::BufferedMedia:
-        setStatusInfo(tr("Buffering %1%").arg(qRound(m_player->bufferProgress() * 100.)));
+        #ifdef DISPLAY_BUFFERING
+        setStatusInfo(tr("Buffering %1%").arg(qRound(m_player->bufferProgress())));
+        #endif
         break;
     case MediaPlayer::StalledMedia:
-        setStatusInfo(tr("Stalled %1%").arg(qRound(m_player->bufferProgress() * 100.)));
+        setStatusInfo(tr("Stalled %1%").arg(qRound(m_player->bufferProgress())));
         break;
     case MediaPlayer::EndOfMedia:
-        //QApplication::alert(this);
         handleNext();
         break;
     case MediaPlayer::InvalidMedia:
@@ -162,10 +164,14 @@ void AudioSourceFile::handleMediaStatusChanged(MediaPlayer::MediaStatus status)
 void AudioSourceFile::handleBufferingProgress(float progress)
 {
 
-    if (m_player->mediaStatus() == MediaPlayer::StalledMedia)
-        setStatusInfo(tr("Stalled %1%").arg(qRound(progress * 100.)));
-    else
-        setStatusInfo(tr("Buffering %1%").arg(qRound(progress * 100.)));
+    if (m_player->mediaStatus() == MediaPlayer::StalledMedia) {
+        setStatusInfo(tr("Stalled %1%").arg(qRound(progress)));
+    }
+    else {
+        #ifdef DISPLAY_BUFFERING
+        setStatusInfo(tr("Buffering %1%").arg(qRound(progress)));
+        #endif
+    }
 }
 
 void AudioSourceFile::handleMediaError()
@@ -181,7 +187,7 @@ void AudioSourceFile::setStatusInfo(const QString &info)
     m_statusInfo = info;
 
     if (!m_statusInfo.isEmpty())
-        emit messageSet(QString("%1 | %2").arg(m_statusInfo), 5000);
+        emit messageSet(QString("%1").arg(m_statusInfo), 1000);
     else
         emit messageClear();
 }

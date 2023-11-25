@@ -55,8 +55,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(controlButtons, &ControlButtonsWidget::nextClicked, player, &PlayerView::nextClicked);
     connect(controlButtons, &ControlButtonsWidget::previousClicked, player, &PlayerView::previousClicked);
     connect(controlButtons, &ControlButtonsWidget::openClicked, player,  &PlayerView::showPlaylistClicked);
-    //TOSO connect(controlButtons, &ControlButtonsWidget::repeatClicked, player, &PlayerView::repeatButtonClicked);
-    //TODO connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleButtonClicked);
+    connect(controlButtons, &ControlButtonsWidget::repeatClicked, player, &PlayerView::repeatClicked);
+    connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleClicked);
     connect(controlButtons, &ControlButtonsWidget::logoClicked, this, &MainWindow::showShutdownModal);
 
     // Prepare player main view

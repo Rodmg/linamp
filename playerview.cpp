@@ -59,6 +59,9 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     spectrumLayout->setSpacing(0);
     ui->spectrumContainer->setLayout(spectrumLayout);
 
+    // Setup message functionality
+    messageTimer = new QTimer(this);
+    connect(messageTimer, &QTimer::timeout, this, &PlayerView::clearMessage);
 }
 
 PlayerView::~PlayerView()
@@ -265,13 +268,15 @@ void PlayerView::setRepeatEnabled(bool enabled)
 
 void PlayerView::setMessage(QString message, qint64 timeout)
 {
-    //ui->songInfoLabel->setText(message);
-    // TODO timeout
+    ui->songInfoLabel->setText(message);
+    messageTimer->setSingleShot(true);
+    messageTimer->start(timeout);
 }
 
 void PlayerView::clearMessage()
 {
     ui->songInfoLabel->setText(m_trackInfo);
+    messageTimer->stop();
 }
 
 /////////////

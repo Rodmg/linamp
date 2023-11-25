@@ -8,6 +8,7 @@
 #include <QMediaMetaData>
 #include <QAudioOutput>
 #include <QWidget>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 class QAbstractItemView;
@@ -62,10 +63,13 @@ signals:
     void repeatClicked();
     void menuClicked();
 
+    void showPlaylistClicked();
+
 private:
     Ui::PlayerView *ui;
     void scale();
     SpectrumWidget *spectrum = nullptr;
+    QTimer *messageTimer = nullptr;
 
     QString m_trackInfo;
     QString m_statusInfo;
@@ -81,12 +85,6 @@ private:
 
 private slots:
     void handleBalanceChanged();
-
-    //////////
-
-
-signals:
-    void showPlaylistClicked();
 
 };
 

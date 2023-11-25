@@ -17,17 +17,36 @@ AudioSourceCoordinator::AudioSourceCoordinator(QObject *parent, PlayerView *play
 
 }
 
-void AudioSourceCoordinator::setSource(int source)
+void AudioSourceCoordinator::setSource(int newSource)
 {
-    // TODO
     if(currentSource >= 0) {
         // deactivate old source
         sources[currentSource]->deactivate();
-
         // disconnect slots
+        disconnect(view, &PlayerView::positionChanged, sources[currentSource], &AudioSource::handleSeek);
+        disconnect(view, &PlayerView::previousClicked, sources[currentSource], &AudioSource::handlePrevious);
+        disconnect(view, &PlayerView::playClicked, sources[currentSource], &AudioSource::handlePlay);
+        disconnect(view, &PlayerView::pauseClicked, sources[currentSource], &AudioSource::handlePause);
+        disconnect(view, &PlayerView::stopClicked, sources[currentSource], &AudioSource::handleStop);
+        disconnect(view, &PlayerView::nextClicked, sources[currentSource], &AudioSource::handleNext);
+        disconnect(view, &PlayerView::openClicked, sources[currentSource], &AudioSource::handleOpen);
+        disconnect(view, &PlayerView::shuffleClicked, sources[currentSource], &AudioSource::handleShuffle);
+        disconnect(view, &PlayerView::repeatClicked, sources[currentSource], &AudioSource::handleRepeat);
+
+        disconnect(sources[currentSource], &AudioSource::playbackStateChanged, view, &PlayerView::setPlaybackState);
+        disconnect(sources[currentSource], &AudioSource::positionChanged, view, &PlayerView::setPosition);
+        disconnect(sources[currentSource], &AudioSource::dataEmitted, view, &PlayerView::setSpectrumData);
+        disconnect(sources[currentSource], &AudioSource::metadataChanged, view, &PlayerView::setMetadata);
+        disconnect(sources[currentSource], &AudioSource::durationChanged, view, &PlayerView::setDuration);
+        disconnect(sources[currentSource], &AudioSource::eqEnabledChanged, view, &PlayerView::setEqEnabled);
+        disconnect(sources[currentSource], &AudioSource::plEnabledChanged, view, &PlayerView::setPlEnabled);
+        disconnect(sources[currentSource], &AudioSource::shuffleEnabledChanged, view, &PlayerView::setShuffleEnabled);
+        disconnect(sources[currentSource], &AudioSource::repeatEnabledChanged, view, &PlayerView::setRepeatEnabled);
+        disconnect(sources[currentSource], &AudioSource::messageSet, view, &PlayerView::setMessage);
+        disconnect(sources[currentSource], &AudioSource::messageClear, view, &PlayerView::clearMessage);
     }
 
-    currentSource = source;
+    currentSource = newSource;
     // connect slots to new source
     connect(view, &PlayerView::positionChanged, sources[currentSource], &AudioSource::handleSeek);
     connect(view, &PlayerView::previousClicked, sources[currentSource], &AudioSource::handlePrevious);
@@ -58,11 +77,21 @@ void AudioSourceCoordinator::setSource(int source)
 void AudioSourceCoordinator::setVolume(int volume)
 {
     system_audio->setVolume(volume);
+    view->setMessage(QString("VOLUME: %1%").arg(volume), 500);
 }
 
 void AudioSourceCoordinator::setBalance(int balance)
 {
     system_audio->setBalance(balance);
+    QString message;
+    if(balance == 0) {
+        message = "BALANCE: CENTER";
+    } else {
+        message = QString("BALANCE: %1% %2")
+                      .arg(abs(balance))
+                      .arg(balance < 0 ? "LEFT" : "RIGHT");
+    }
+    view->setMessage(message, 500);
 }
 
 void AudioSourceCoordinator::addSource(AudioSource *source, bool activate)
