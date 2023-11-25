@@ -14,7 +14,7 @@ public:
 signals:
     void playbackStateChanged(MediaPlayer::PlaybackState state);
     void positionChanged(qint64 progress);
-    void dataEmitted(const QByteArray& data);
+    void dataEmitted(const QByteArray& data, QAudioFormat format);
     void metadataChanged(QMediaMetaData metadata);
     void durationChanged(qint64 duration);
     void eqEnabledChanged(bool enabled);

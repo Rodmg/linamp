@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QStackedLayout>
 #include <QProcess>
+#include "audiosourcecoordinator.h"
+#include "audiosourcefile.h"
 #include "controlbuttonswidget.h"
 #include "playerview.h"
 #include "playlistview.h"
@@ -22,6 +24,8 @@ public:
     PlayerView *player;
     ControlButtonsWidget *controlButtons;
     PlaylistView *playlist;
+    AudioSourceCoordinator *coordinator;
+    AudioSourceFile *fileSource;
 
 public slots:
     void showPlayer();

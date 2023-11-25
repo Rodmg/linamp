@@ -31,11 +31,18 @@ public slots:
 
     void jump(const QModelIndex &index);
 
+    void open();
+    void addToPlaylist(const QList<QUrl> &urls);
+
 private slots:
     void handleMetaDataChanged();
     void handleMediaStatusChanged(MediaPlayer::MediaStatus status);
     void handleBufferingProgress(float progress);
     void handleMediaError();
+    void handlePlaylistPositionChanged(int);
+    void handlePlaylistMediaRemoved(int, int);
+    void handleSpectrumData(const QByteArray& data);
+
 
 private:
     MediaPlayer *m_player = nullptr;

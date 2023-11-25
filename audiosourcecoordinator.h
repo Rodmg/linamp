@@ -12,6 +12,8 @@ class AudioSourceCoordinator : public QObject
 public:
     explicit AudioSourceCoordinator(QObject *parent = nullptr, PlayerView *playerView = nullptr);
 
+    void addSource(AudioSource *source, bool activate = false);
+
 signals:
     void sourceChanged(int source);
 
@@ -22,7 +24,7 @@ public slots:
 
 private:
     QList<AudioSource*> sources;
-    int currentSource = 0;
+    int currentSource = -1;
 
     SystemAudioControl *system_audio = nullptr;
     PlayerView *view = nullptr;

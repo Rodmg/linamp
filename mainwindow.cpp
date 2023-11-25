@@ -37,13 +37,17 @@ MainWindow::MainWindow(QWidget *parent)
     playlist = new PlaylistView(this, m_playlistModel);
     playlist->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
 
+    coordinator = new AudioSourceCoordinator(this, player);
+    fileSource = new AudioSourceFile(this, m_playlistModel);
+    coordinator->addSource(fileSource, true);
+
     controlButtons = new ControlButtonsWidget(this);
 
     // Connect events
     connect(player, &PlayerView::showPlaylistClicked, this, &MainWindow::showPlaylist);
     connect(playlist, &PlaylistView::showPlayerClicked, this, &MainWindow::showPlayer);
-    connect(playlist, &PlaylistView::songSelected, player, &PlayerView::jump);
-    connect(playlist, &PlaylistView::addSelectedFilesClicked, player, &PlayerView::addToPlaylist);
+    connect(playlist, &PlaylistView::songSelected, fileSource, &AudioSourceFile::jump);
+    connect(playlist, &PlaylistView::addSelectedFilesClicked, fileSource, &AudioSourceFile::addToPlaylist);
 
     connect(controlButtons, &ControlButtonsWidget::playClicked, player, &PlayerView::playClicked);
     connect(controlButtons, &ControlButtonsWidget::pauseClicked, player, &PlayerView::pauseClicked);
@@ -51,8 +55,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(controlButtons, &ControlButtonsWidget::nextClicked, player, &PlayerView::nextClicked);
     connect(controlButtons, &ControlButtonsWidget::previousClicked, player, &PlayerView::previousClicked);
     connect(controlButtons, &ControlButtonsWidget::openClicked, player,  &PlayerView::showPlaylistClicked);
-    connect(controlButtons, &ControlButtonsWidget::repeatClicked, player, &PlayerView::repeatButtonClicked);
-    connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleButtonClicked);
+    //TOSO connect(controlButtons, &ControlButtonsWidget::repeatClicked, player, &PlayerView::repeatButtonClicked);
+    //TODO connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleButtonClicked);
     connect(controlButtons, &ControlButtonsWidget::logoClicked, this, &MainWindow::showShutdownModal);
 
     // Prepare player main view

@@ -1,5 +1,6 @@
 #include "util.h"
 #include "qdatetime.h"
+#include "qfileinfo.h"
 
 #include <QRegularExpression>
 #include <taglib/fileref.h>
@@ -88,4 +89,13 @@ bool isAudioFile(QString path)
     }
 
     return false;
+}
+
+bool isPlaylist(const QUrl &url)
+{
+    if (!url.isLocalFile())
+        return false;
+    const QFileInfo fileInfo(url.toLocalFile());
+    return fileInfo.exists()
+           && !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
 }

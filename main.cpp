@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
         QList<QUrl> urls;
         for (auto &a : parser.positionalArguments())
             urls.append(QUrl::fromUserInput(a, QDir::currentPath()));
-        window.player->addToPlaylist(urls);
+        //window.player->addToPlaylist(urls);
     }
 
     #ifdef IS_EMBEDDED

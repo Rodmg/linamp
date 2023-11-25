@@ -1,5 +1,6 @@
 #include <QTime>
 #include <QApplication>
+#include <QFileDialog>
 
 #include "audiosourcefile.h"
 #include "util.h"
@@ -22,23 +23,23 @@ AudioSourceFile::AudioSourceFile(QObject *parent, PlaylistModel *playlistModel)
     m_playlist = m_playlistModel->playlist();
 
     connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this,
-            &PlayerView::playlistPositionChanged);
+            &AudioSourceFile::handlePlaylistPositionChanged);
     connect(m_playlist, &QMediaPlaylist::mediaAboutToBeRemoved, this,
-            &PlayerView::playlistMediaRemoved);
+            &AudioSourceFile::handlePlaylistMediaRemoved);
 
     connect(m_player, &MediaPlayer::playbackStateChanged, this, &AudioSourceFile::playbackStateChanged);
 
     // Emit data for spectrum analyzer
-    connect(m_player, &MediaPlayer::newData, this, &AudioSourceFile::dataEmitted);
+    connect(m_player, &MediaPlayer::newData, this, &AudioSourceFile::handleSpectrumData);
 
 }
 
 void AudioSourceFile::activate()
 {
     emit playbackStateChanged(m_player->playbackState());
-    emit positionChanged(0);
-    // emit metadataChanged(...) TODO get current playlist file meta
-    // emit durationChanged(...)
+    emit positionChanged(m_player->position());
+    emit metadataChanged(m_player->metaData());
+    emit durationChanged(m_player->duration());
     emit eqEnabledChanged(false);
     emit plEnabledChanged(true);
     emit shuffleEnabledChanged(shuffleEnabled);
@@ -183,4 +184,88 @@ void AudioSourceFile::setStatusInfo(const QString &info)
         emit messageSet(QString("%1 | %2").arg(m_statusInfo), 5000);
     else
         emit messageClear();
+}
+
+void AudioSourceFile::handlePlaylistPositionChanged(int)
+{
+    m_player->setSource(m_playlist->currentQueueMedia());
+
+    if (shouldBePlaying) {
+        m_player->play();
+    }
+}
+
+void AudioSourceFile::handlePlaylistMediaRemoved(int from, int to)
+{
+    // Stop only if currently playing file was removed
+    int playingIndex = m_playlist->currentIndex();
+    if(playingIndex >= from && playingIndex <= to) {
+        shouldBePlaying = false;
+        m_player->stop();
+        m_player->clearSource();
+    }
+}
+
+void AudioSourceFile::jump(const QModelIndex &index)
+{
+    if (index.isValid()) {
+        m_playlist->setCurrentIndex(index.row());
+        shouldBePlaying = true;
+        m_player->play();
+    }
+}
+
+void AudioSourceFile::open()
+{
+
+    /*
+    QList<QUrl> urls;
+    urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first())
+         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first())
+         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).first());
+
+
+    QFileDialog fileDialog(this);
+    QString filters = audioFileFilters().join(" ");
+    fileDialog.setNameFilter("Audio (" + filters + ")");
+    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog.setFileMode(QFileDialog::ExistingFiles);
+    fileDialog.setWindowTitle(tr("Open Files"));
+    fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation)
+                                .value(0, QDir::homePath()));
+    fileDialog.setOption(QFileDialog::ReadOnly, true);
+    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog.setViewMode(QFileDialog::Detail);
+    fileDialog.setSidebarUrls(urls);
+
+#ifdef IS_EMBEDDED
+    fileDialog.setWindowState(Qt::WindowFullScreen);
+#endif
+
+    if (fileDialog.exec() == QDialog::Accepted)
+        addToPlaylist(fileDialog.selectedUrls());
+*/
+}
+
+void AudioSourceFile::addToPlaylist(const QList<QUrl> &urls)
+{
+    const int previousMediaCount = m_playlist->mediaCount();
+    for (auto &url : urls) {
+        if (isPlaylist(url))
+            m_playlist->load(url);
+        else
+            m_playlist->addMedia(url);
+    }
+    if (m_playlist->mediaCount() > previousMediaCount) {
+        // Start playing only if not already playing
+        if(m_player->playbackState() == MediaPlayer::PlaybackState::StoppedState) {
+            auto index = m_playlistModel->index(previousMediaCount, 0);
+            jump(index);
+        }
+    }
+}
+
+void AudioSourceFile::handleSpectrumData(const QByteArray& data)
+{
+    emit dataEmitted(data, m_player->format());
 }

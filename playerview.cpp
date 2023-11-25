@@ -2,7 +2,6 @@
 #include "ui_playerview.h"
 
 #include "playlistmodel.h"
-#include "qmediaplaylist.h"
 #include "scale.h"
 #include "util.h"
 
@@ -25,68 +24,41 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     // Load custom fonts
     QFontDatabase::addApplicationFont(":/assets/bignumbers.ttf");
 
-    m_system_audio = new SystemAudioControl(this);
-
     // Setup UI
     ui->setupUi(this);
     scale();
 
-    //! [create-objs]
-    m_player = new MediaPlayer(this);
+    // Setup spectrum analyzer
     spectrum = new SpectrumWidget(this);
-    //! [create-objs]
-    connect(m_player, &MediaPlayer::durationChanged, this, &PlayerView::durationChanged);
-    connect(m_player, &MediaPlayer::positionChanged, this, &PlayerView::positionChanged);
-    connect(m_player, QOverload<>::of(&MediaPlayer::metaDataChanged), this,
-            &PlayerView::metaDataChanged);
-    connect(m_player, &MediaPlayer::mediaStatusChanged, this, &PlayerView::statusChanged);
-    connect(m_player, &MediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
-    connect(m_player, &MediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
-
-    m_playlistModel = playlistModel;
-    m_playlist = m_playlistModel->playlist();
-    //! [2]
-    connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this,
-            &PlayerView::playlistPositionChanged);
-    connect(m_playlist, &QMediaPlaylist::mediaAboutToBeRemoved, this,
-            &PlayerView::playlistMediaRemoved);
 
     // duration slider and label
-    ui->posBar->setRange(0, m_player->duration());
-    connect(ui->posBar, &QSlider::sliderMoved, this, &PlayerView::seek);
+    ui->posBar->setRange(0, 0);
+    connect(ui->posBar, &QSlider::sliderMoved, this, &PlayerView::positionChanged);
 
     // Set volume slider
     ui->volumeSlider->setRange(0, 100);
-    this->setVolumeSlider(m_system_audio->getVolume());
-    connect(m_system_audio, &SystemAudioControl::volumeChanged, this, &PlayerView::setVolumeSlider);
+    connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
 
     // Set Balance Slider
     ui->balanceSlider->setRange(-100, 100);
-    this->setBalanceSlider(m_system_audio->getBalance());
-    connect(m_system_audio, &SystemAudioControl::balanceChanged, this, &PlayerView::setBalanceSlider);
+    connect(ui->balanceSlider, &QSlider::valueChanged, this, &PlayerView::handleBalanceChanged);
 
     // Reset time counter
     ui->progressTimeLabel->setText("");
 
     // Set play status icon
-    setPlaybackState(m_player->playbackState());
+    setPlaybackState(MediaPlayer::StoppedState);
 
-    connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
-    connect(ui->balanceSlider, &QSlider::valueChanged, this, &PlayerView::balanceChanged);
+    connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::plClicked);
     connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
 
-    connect(m_player, &MediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
-    //connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
-
     // Setup spectrum widget
-    connect(m_player, &MediaPlayer::newData, this, &PlayerView::handleSpectrumData);
     QVBoxLayout *spectrumLayout = new QVBoxLayout;
     spectrumLayout->addWidget(spectrum);
     spectrumLayout->setContentsMargins(0, 0, 0, 0);
     spectrumLayout->setSpacing(0);
     ui->spectrumContainer->setLayout(spectrumLayout);
 
-    metaDataChanged();
 }
 
 PlayerView::~PlayerView()
@@ -179,333 +151,6 @@ void PlayerView::scale()
     ui->spectrumContainer->setGeometry(scGeo.x()*UI_SCALE, scGeo.y()*UI_SCALE, scGeo.width()*UI_SCALE, scGeo.height()*UI_SCALE);
 }
 
-void PlayerView::open()
-{
-
-    QList<QUrl> urls;
-    urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first())
-         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first())
-         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).first());
-
-
-    QFileDialog fileDialog(this);
-    QString filters = audioFileFilters().join(" ");
-    fileDialog.setNameFilter("Audio (" + filters + ")");
-    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-    fileDialog.setFileMode(QFileDialog::ExistingFiles);
-    fileDialog.setWindowTitle(tr("Open Files"));
-    fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation)
-                                .value(0, QDir::homePath()));
-    fileDialog.setOption(QFileDialog::ReadOnly, true);
-    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-    fileDialog.setViewMode(QFileDialog::Detail);
-    fileDialog.setSidebarUrls(urls);
-
-    #ifdef IS_EMBEDDED
-    fileDialog.setWindowState(Qt::WindowFullScreen);
-    #endif
-
-    if (fileDialog.exec() == QDialog::Accepted)
-        addToPlaylist(fileDialog.selectedUrls());
-}
-
-static bool isPlaylist(const QUrl &url) // Check for ".m3u" playlists.
-{
-    if (!url.isLocalFile())
-        return false;
-    const QFileInfo fileInfo(url.toLocalFile());
-    return fileInfo.exists()
-           && !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
-}
-
-void PlayerView::addToPlaylist(const QList<QUrl> &urls)
-{
-    const int previousMediaCount = m_playlist->mediaCount();
-    for (auto &url : urls) {
-        if (isPlaylist(url))
-            m_playlist->load(url);
-        else
-            m_playlist->addMedia(url);
-    }
-    if (m_playlist->mediaCount() > previousMediaCount) {
-        // Start playing only if not already playing
-        if(m_player->playbackState() == MediaPlayer::PlaybackState::StoppedState) {
-            auto index = m_playlistModel->index(previousMediaCount, 0);
-            jump(index);
-        }
-    }
-}
-
-void PlayerView::durationChanged(qint64 duration)
-{
-    m_duration = duration / 1000;
-    ui->posBar->setMaximum(duration);
-}
-
-void PlayerView::positionChanged(qint64 progress)
-{
-    if (!ui->posBar->isSliderDown())
-        ui->posBar->setValue(progress);
-
-    updateDurationInfo(progress / 1000);
-}
-
-void PlayerView::metaDataChanged()
-{
-    auto metaData = m_player->metaData();
-
-    // Generate track info string
-    QString artist = metaData.value(QMediaMetaData::AlbumArtist).toString().toUpper();
-    QString album = metaData.value(QMediaMetaData::AlbumTitle).toString().toUpper();
-    QString title = metaData.value(QMediaMetaData::Title).toString().toUpper();
-
-    //  Calculate duration
-    qint64 ms = metaData.value(QMediaMetaData::Duration).toLongLong();
-    qint64 duration = ms/1000;
-    QTime totalTime((duration / 3600) % 60, (duration / 60) % 60, duration % 60,
-                    (duration * 1000) % 1000);
-    QString durationStr = formatDuration(ms);
-
-    QString trackInfo = "";
-
-    if(artist.length()) trackInfo.append(QString("%1 - ").arg(artist));
-    if(album.length()) trackInfo.append(QString("%1 - ").arg(album));
-    if(title.length()) trackInfo.append(title);
-    if(totalTime > QTime(0, 0, 0)) trackInfo.append(QString(" (%1)").arg(durationStr));
-
-    setTrackInfo(trackInfo);
-
-    // Set kbps
-    int bitrate = metaData.value(QMediaMetaData::AudioBitRate).toInt()/1000;
-    ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
-
-    // Set kHz
-    int khz = metaData.value(QMediaMetaData::AudioCodec).toInt()/1000;
-    ui->khzValueLabel->setText(khz > 0 ? QString::number(khz) : "");
-}
-
-void PlayerView::previousClicked()
-{
-    // Go to previous track if we are within the first 5 seconds of playback
-    // Otherwise, seek to the beginning.
-    if (m_player->position() <= 5000) {
-        handlePrevious();
-    } else {
-        m_player->setPosition(0);
-    }
-}
-
-void PlayerView::nextClicked()
-{
-    handleNext();
-}
-
-void PlayerView::playClicked()
-{
-    shouldBePlaying = true;
-    m_player->play();
-}
-
-void PlayerView::pauseClicked()
-{
-    shouldBePlaying = false;
-    m_player->pause();
-}
-
-void PlayerView::stopClicked()
-{
-    shouldBePlaying = false;
-    m_player->stop();
-}
-
-void PlayerView::repeatButtonClicked(bool checked)
-{
-    repeatEnabled = checked;
-    QMediaPlaylist::PlaybackMode mode = QMediaPlaylist::PlaybackMode::Sequential;
-    if(repeatEnabled) mode = QMediaPlaylist::PlaybackMode::Loop;
-    m_playlist->setPlaybackMode(mode);
-}
-
-void PlayerView::shuffleButtonClicked(bool checked)
-{
-    shuffleEnabled = checked;
-    m_playlist->setShuffle(shuffleEnabled);
-}
-
-void PlayerView::jump(const QModelIndex &index)
-{
-    if (index.isValid()) {
-        m_playlist->setCurrentIndex(index.row());
-        shouldBePlaying = true;
-        m_player->play();
-    }
-}
-
-void PlayerView::playlistPositionChanged(int)
-{
-    m_player->setSource(m_playlist->currentQueueMedia());
-
-    if (shouldBePlaying) {
-        m_player->play();
-    }
-}
-
-void PlayerView::playlistMediaRemoved(int from, int to)
-{
-    // Stop only if currently playing file was removed
-    int playingIndex = m_playlist->currentIndex();
-    if(playingIndex >= from && playingIndex <= to) {
-        shouldBePlaying = false;
-        m_player->stop();
-        m_player->clearSource();
-    }
-}
-
-void PlayerView::seek(int mseconds)
-{
-    m_player->setPosition(mseconds);
-}
-
-void PlayerView::statusChanged(MediaPlayer::MediaStatus status)
-{
-    handleCursor(status);
-
-    // handle status message
-    switch (status) {
-    case MediaPlayer::NoMedia:
-    case MediaPlayer::LoadedMedia:
-        setStatusInfo(QString());
-        break;
-    case MediaPlayer::LoadingMedia:
-        setStatusInfo(tr("Loading..."));
-        break;
-    case MediaPlayer::BufferingMedia:
-    case MediaPlayer::BufferedMedia:
-        setStatusInfo(tr("Buffering %1%").arg(qRound(m_player->bufferProgress() * 100.)));
-        break;
-    case MediaPlayer::StalledMedia:
-        setStatusInfo(tr("Stalled %1%").arg(qRound(m_player->bufferProgress() * 100.)));
-        break;
-    case MediaPlayer::EndOfMedia:
-        QApplication::alert(this);
-        handleNext();
-        break;
-    case MediaPlayer::InvalidMedia:
-        displayErrorMessage();
-        break;
-    }
-}
-
-void PlayerView::handleCursor(MediaPlayer::MediaStatus status)
-{
-#ifndef QT_NO_CURSOR
-    if (status == MediaPlayer::LoadingMedia || status == MediaPlayer::BufferingMedia
-        || status == MediaPlayer::StalledMedia)
-        setCursor(QCursor(Qt::BusyCursor));
-    else
-        unsetCursor();
-#endif
-}
-
-void PlayerView::bufferingProgress(float progress)
-{
-    if (m_player->mediaStatus() == MediaPlayer::StalledMedia)
-        setStatusInfo(tr("Stalled %1%").arg(qRound(progress * 100.)));
-    else
-        setStatusInfo(tr("Buffering %1%").arg(qRound(progress * 100.)));
-}
-
-void PlayerView::handleSpectrumData(const QByteArray& data)
-{
-    spectrum->setData(data, m_player->format());
-}
-
-
-void PlayerView::setTrackInfo(const QString &info)
-{
-    m_trackInfo = info;
-
-    ui->songInfoLabel->setText(info);
-
-    if (!m_statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));
-    else
-        setWindowTitle(m_trackInfo);
-}
-
-void PlayerView::setStatusInfo(const QString &info)
-{
-    m_statusInfo = info;
-
-    if (!m_statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));
-    else
-        setWindowTitle(m_trackInfo);
-}
-
-void PlayerView::displayErrorMessage()
-{
-    if (m_player->error() == MediaPlayer::NoError)
-        return;
-    setStatusInfo(m_player->errorString());
-    qDebug() << m_player->errorString();
-}
-
-void PlayerView::updateDurationInfo(qint64 currentInfo)
-{
-    QString tStr, tDisplayStr;
-    if (currentInfo || m_duration) {
-        tStr = formatDuration(currentInfo) + " / " + formatDuration(m_duration);
-
-        QTime currentTime((currentInfo / 3600) % 60, (currentInfo / 60) % 60, currentInfo % 60,
-                          (currentInfo * 1000) % 1000);
-        tDisplayStr = currentTime.toString("m ss");
-    }
-    ui->progressTimeLabel->setText(tDisplayStr);
-}
-
-void PlayerView::setVolumeSlider(int volume)
-{
-    ui->volumeSlider->setValue(volume);
-}
-
-void PlayerView::setBalanceSlider(int balance)
-{
-    ui->balanceSlider->setValue(balance);
-}
-
-void PlayerView::volumeChanged()
-{
-    m_system_audio->setVolume(ui->volumeSlider->value());
-}
-
-void PlayerView::balanceChanged()
-{
-    // Snap slider to the center if it falls near to it
-    int val = ui->balanceSlider->value();
-    if(val > -20 && val < 20) {
-        val = 0;
-        ui->balanceSlider->setValue(val);
-    }
-    m_system_audio->setBalance(val);
-}
-
-void PlayerView::handlePrevious()
-{
-    // If is first item in playlist, do nothing
-    // That's handled by QMediaPlaylist
-    m_playlist->previous();
-}
-
-void PlayerView::handleNext()
-{
-    // If is last item in playlist:
-    // If repeat enabled, go to first
-    // If not, do nothing
-    // That's handled by QMediaPlaylist
-    m_playlist->next();
-}
-
 void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
 {
     QString imageSrc;
@@ -531,4 +176,138 @@ void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
     scene->addPixmap(image);
     scene->setSceneRect(image.rect());
     ui->playStatusIcon->setScene(scene);
+}
+
+void PlayerView::setPosition(qint64 progress)
+{
+    if (!ui->posBar->isSliderDown())
+        ui->posBar->setValue(progress);
+
+    updateDurationInfo(progress / 1000);
+}
+
+void PlayerView::setSpectrumData(const QByteArray& data, QAudioFormat format)
+{
+    spectrum->setData(data, format);
+}
+
+void PlayerView::setMetadata(QMediaMetaData metadata)
+{
+    // Generate track info string
+    QString artist = metadata.value(QMediaMetaData::AlbumArtist).toString().toUpper();
+    QString album = metadata.value(QMediaMetaData::AlbumTitle).toString().toUpper();
+    QString title = metadata.value(QMediaMetaData::Title).toString().toUpper();
+
+    //  Calculate duration
+    qint64 ms = metadata.value(QMediaMetaData::Duration).toLongLong();
+    qint64 duration = ms/1000;
+    QTime totalTime((duration / 3600) % 60, (duration / 60) % 60, duration % 60,
+                    (duration * 1000) % 1000);
+    QString durationStr = formatDuration(ms);
+
+    QString trackInfo = "";
+
+    if(artist.length()) trackInfo.append(QString("%1 - ").arg(artist));
+    if(album.length()) trackInfo.append(QString("%1 - ").arg(album));
+    if(title.length()) trackInfo.append(title);
+    if(totalTime > QTime(0, 0, 0)) trackInfo.append(QString(" (%1)").arg(durationStr));
+
+    setTrackInfo(trackInfo);
+
+    // Set kbps
+    int bitrate = metadata.value(QMediaMetaData::AudioBitRate).toInt()/1000;
+    ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
+
+    // Set kHz
+    int khz = metadata.value(QMediaMetaData::AudioCodec).toInt()/1000;
+    ui->khzValueLabel->setText(khz > 0 ? QString::number(khz) : "");
+}
+
+void PlayerView::setDuration(qint64 duration)
+{
+    m_duration = duration / 1000;
+    ui->posBar->setMaximum(duration);
+}
+
+void PlayerView::setVolume(int volume)
+{
+    ui->volumeSlider->setValue(volume);
+}
+
+void PlayerView::setBalance(int balance)
+{
+    ui->balanceSlider->setValue(balance);
+}
+
+void PlayerView::setEqEnabled(bool enabled)
+{
+    eqEnabled = enabled;
+    ui->eqButton->setChecked(eqEnabled);
+}
+
+void PlayerView::setPlEnabled(bool enabled)
+{
+    plEnabled = enabled;
+    ui->playlistButton->setChecked(plEnabled);
+}
+
+void PlayerView::setShuffleEnabled(bool enabled)
+{
+    shuffleEnabled = enabled;
+    // TODO set controlbuttonswidget shuffle button state
+}
+
+void PlayerView::setRepeatEnabled(bool enabled)
+{
+    repeatEnabled = enabled;
+    // TODO set controlbuttonswidget repeat button state
+}
+
+void PlayerView::setMessage(QString message, qint64 timeout)
+{
+    //ui->songInfoLabel->setText(message);
+    // TODO timeout
+}
+
+void PlayerView::clearMessage()
+{
+    ui->songInfoLabel->setText(m_trackInfo);
+}
+
+/////////////
+
+void PlayerView::updateDurationInfo(qint64 currentInfo)
+{
+    QString tStr, tDisplayStr;
+    if (currentInfo || m_duration) {
+        tStr = formatDuration(currentInfo) + " / " + formatDuration(m_duration);
+
+        QTime currentTime((currentInfo / 3600) % 60, (currentInfo / 60) % 60, currentInfo % 60,
+                          (currentInfo * 1000) % 1000);
+        tDisplayStr = currentTime.toString("m ss");
+    }
+    ui->progressTimeLabel->setText(tDisplayStr);
+}
+
+void PlayerView::setTrackInfo(const QString &info)
+{
+    m_trackInfo = info;
+
+    ui->songInfoLabel->setText(info);
+
+    if (!m_statusInfo.isEmpty())
+        setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));
+    else
+        setWindowTitle(m_trackInfo);
+}
+
+void PlayerView::handleBalanceChanged()
+{
+    // Snap slider to the center if it falls near to it
+    int val = ui->balanceSlider->value();
+    if(val > -20 && val < 20) {
+        val = 0;
+        ui->balanceSlider->setValue(val);
+    }
+    emit balanceChanged(val);
 }
