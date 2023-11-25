@@ -9,6 +9,9 @@ QT += network \
 LIBS += -ltag -lasound
 
 HEADERS = \
+    audiosource.h \
+    audiosourcecoordinator.h \
+    audiosourcefile.h \
     controlbuttonswidget.h \
     desktopbasewindow.h \
     desktopplayerwindow.h \
@@ -31,6 +34,9 @@ HEADERS = \
     util.h
 
 SOURCES = main.cpp \
+    audiosource.cpp \
+    audiosourcecoordinator.cpp \
+    audiosourcefile.cpp \
     controlbuttonswidget.cpp \
     desktopbasewindow.cpp \
     desktopplayerwindow.cpp \

@@ -86,14 +86,6 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     spectrumLayout->setSpacing(0);
     ui->spectrumContainer->setLayout(spectrumLayout);
 
-
-    if (!isPlayerAvailable()) {
-        QMessageBox::warning(this, tr("Service not available"),
-                             tr("The QMediaPlayer object does not have a valid service.\n"
-                                "Please check the media service plugins are installed."));
-        // Should disable ui here...
-    }
-
     metaDataChanged();
 }
 
@@ -185,11 +177,6 @@ void PlayerView::scale()
 
     QRect scGeo = ui->spectrumContainer->geometry();
     ui->spectrumContainer->setGeometry(scGeo.x()*UI_SCALE, scGeo.y()*UI_SCALE, scGeo.width()*UI_SCALE, scGeo.height()*UI_SCALE);
-}
-
-bool PlayerView::isPlayerAvailable() const
-{
-    return true; //m_player->isAvailable();
 }
 
 void PlayerView::open()
@@ -295,26 +282,6 @@ void PlayerView::metaDataChanged()
     // Set kHz
     int khz = metaData.value(QMediaMetaData::AudioCodec).toInt()/1000;
     ui->khzValueLabel->setText(khz > 0 ? QString::number(khz) : "");
-}
-
-QString PlayerView::trackName(const QMediaMetaData &metaData, int index)
-{
-    QString name;
-    QString title = metaData.stringValue(QMediaMetaData::Title);
-    QLocale::Language lang = metaData.value(QMediaMetaData::Language).value<QLocale::Language>();
-
-    if (title.isEmpty()) {
-        if (lang == QLocale::Language::AnyLanguage)
-            name = tr("Track %1").arg(index + 1);
-        else
-            name = QLocale::languageToString(lang);
-    } else {
-        if (lang == QLocale::Language::AnyLanguage)
-            name = title;
-        else
-            name = QString("%1 - [%2]").arg(title, QLocale::languageToString(lang));
-    }
-    return name;
 }
 
 void PlayerView::previousClicked()

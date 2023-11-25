@@ -33,8 +33,6 @@ public:
     explicit PlayerView(QWidget *parent = nullptr, PlaylistModel *playlistModel = nullptr);
     ~PlayerView();
 
-    bool isPlayerAvailable() const;
-
 public slots:
     void setVolumeSlider(int volume);
     void setBalanceSlider(int balance);
@@ -81,7 +79,6 @@ private:
     void balanceChanged();
     void handlePrevious();
     void handleNext();
-    QString trackName(const QMediaMetaData &metaData, int index);
 
     MediaPlayer *m_player = nullptr;
     QMediaPlaylist *m_playlist = nullptr;

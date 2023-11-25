@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     MainWindow window;
-    if (!parser.positionalArguments().isEmpty() && window.player->isPlayerAvailable()) {
+    if (!parser.positionalArguments().isEmpty()) {
         QList<QUrl> urls;
         for (auto &a : parser.positionalArguments())
             urls.append(QUrl::fromUserInput(a, QDir::currentPath()));
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     }
 
     #ifdef IS_EMBEDDED
-    window.setWindowState(Qt::WindowFullScreen);
+    //window.setWindowState(Qt::WindowFullScreen);
     #endif
     window.show();
 
