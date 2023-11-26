@@ -15,6 +15,9 @@ class AudioSourceFile : public AudioSource
 public:
     explicit AudioSourceFile(QObject *parent = nullptr, PlaylistModel *playlistModel = nullptr);
 
+signals:
+    void showPlaylistRequested();
+
 public slots:
     void activate();
     void deactivate();
@@ -31,7 +34,6 @@ public slots:
 
     void jump(const QModelIndex &index);
 
-    void open();
     void addToPlaylist(const QList<QUrl> &urls);
 
 private slots:

@@ -86,3 +86,13 @@ void ControlButtonsWidget::scale()
     this->setMaximumHeight(this->maximumHeight() * UI_SCALE);
     this->setMinimumHeight(this->minimumHeight() * UI_SCALE);
 }
+
+void ControlButtonsWidget::setShuffleEnabled(bool enabled)
+{
+    ui->shuffleButton->setChecked(enabled);
+}
+
+void ControlButtonsWidget::setRepeatEnabled(bool enabled)
+{
+    ui->repeatButton->setChecked(enabled);
+}

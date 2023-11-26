@@ -4,9 +4,11 @@
 #include <QMainWindow>
 #include <QStackedLayout>
 #include <QProcess>
+#include "audiosourcebluetooth.h"
 #include "audiosourcecoordinator.h"
 #include "audiosourcefile.h"
 #include "controlbuttonswidget.h"
+#include "mainmenuview.h"
 #include "playerview.h"
 #include "playlistview.h"
 #include "qmediaplaylist.h"
@@ -24,13 +26,17 @@ public:
     PlayerView *player;
     ControlButtonsWidget *controlButtons;
     PlaylistView *playlist;
+    MainMenuView *menu;
     AudioSourceCoordinator *coordinator;
     AudioSourceFile *fileSource;
+    AudioSourceBluetooth *btSource;
 
 public slots:
     void showPlayer();
     void showPlaylist();
+    void showMenu();
     void showShutdownModal();
+    void open();
 
 private:
     QMediaPlaylist *m_playlist = nullptr;

@@ -1241,15 +1241,15 @@ QCheckBox::indicator {
 }
 
 QCheckBox::indicator:unchecked {
-    image: url(:assets/pl_on.png);
+    image: url(:assets/pl_off.png);
 }
 
 QCheckBox::indicator:unchecked:hover {
-    image: url(:assets/pl_on.png);
+    image: url(:assets/pl_off.png);
 }
 
 QCheckBox::indicator:unchecked:pressed {
-    image: url(:assets/pl_on_p.png);
+    image: url(:assets/pl_off_p.png);
 }
 
 QCheckBox::indicator:checked {

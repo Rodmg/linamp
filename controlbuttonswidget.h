@@ -15,6 +15,9 @@ public:
     explicit ControlButtonsWidget(QWidget *parent = nullptr);
     ~ControlButtonsWidget();
 
+    void setShuffleEnabled(bool enabled);
+    void setRepeatEnabled(bool enabled);
+
 private:
     Ui::ControlButtonsWidget *ui;
     void scale();

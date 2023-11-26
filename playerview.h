@@ -1,7 +1,7 @@
 #ifndef PLAYERVIEW_H
 #define PLAYERVIEW_H
 
-#include "playlistmodel.h"
+#include "controlbuttonswidget.h"
 #include "mediaplayer.h"
 #include "spectrumwidget.h"
 
@@ -29,7 +29,7 @@ class PlayerView : public QWidget
     Q_OBJECT
 
 public:
-    explicit PlayerView(QWidget *parent = nullptr, PlaylistModel *playlistModel = nullptr);
+    explicit PlayerView(QWidget *parent = nullptr, ControlButtonsWidget *ctlBtns = nullptr);
     ~PlayerView();
 
 public slots:
@@ -63,13 +63,12 @@ signals:
     void repeatClicked();
     void menuClicked();
 
-    void showPlaylistClicked();
-
 private:
     Ui::PlayerView *ui;
     void scale();
     SpectrumWidget *spectrum = nullptr;
     QTimer *messageTimer = nullptr;
+    ControlButtonsWidget *controlButtons = nullptr;
 
     QString m_trackInfo;
     QString m_statusInfo;

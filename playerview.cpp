@@ -1,7 +1,6 @@
 #include "playerview.h"
 #include "ui_playerview.h"
 
-#include "playlistmodel.h"
 #include "scale.h"
 #include "util.h"
 
@@ -17,7 +16,7 @@
 #include <QStandardPaths>
 #include <QFontDatabase>
 
-PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
+PlayerView::PlayerView(QWidget *parent, ControlButtonsWidget *ctlBtns) :
     QWidget(parent),
     ui(new Ui::PlayerView)
 {
@@ -27,6 +26,17 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     // Setup UI
     ui->setupUi(this);
     scale();
+
+    controlButtons = ctlBtns;
+
+    connect(controlButtons, &ControlButtonsWidget::playClicked, this, &PlayerView::playClicked);
+    connect(controlButtons, &ControlButtonsWidget::pauseClicked, this, &PlayerView::pauseClicked);
+    connect(controlButtons, &ControlButtonsWidget::stopClicked, this, &PlayerView::stopClicked);
+    connect(controlButtons, &ControlButtonsWidget::nextClicked, this, &PlayerView::nextClicked);
+    connect(controlButtons, &ControlButtonsWidget::previousClicked, this, &PlayerView::previousClicked);
+    connect(controlButtons, &ControlButtonsWidget::openClicked, this,  &PlayerView::openClicked);
+    connect(controlButtons, &ControlButtonsWidget::repeatClicked, this, &PlayerView::repeatClicked);
+    connect(controlButtons, &ControlButtonsWidget::shuffleClicked, this, &PlayerView::shuffleClicked);
 
     // Setup spectrum analyzer
     spectrum = new SpectrumWidget(this);
@@ -50,7 +60,6 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
     setPlaybackState(MediaPlayer::StoppedState);
 
     connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::plClicked);
-    connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
 
     // Setup spectrum widget
     QVBoxLayout *spectrumLayout = new QVBoxLayout;
@@ -145,7 +154,6 @@ void PlayerView::scale()
 
     ui->progressTimeLabel->setGeometry(39*UI_SCALE, 3*UI_SCALE, 50*UI_SCALE, 20*UI_SCALE);
     QFont ptlFont = ui->progressTimeLabel->font();
-    //ptlFont.setLetterSpacing(ptlFont.PercentageSpacing, 150); // NOT WORKING TODO
     ptlFont.setWordSpacing(-2);
     ui->progressTimeLabel->setFont(ptlFont);
     ui->progressTimeLabel->ensurePolished();
@@ -257,13 +265,13 @@ void PlayerView::setPlEnabled(bool enabled)
 void PlayerView::setShuffleEnabled(bool enabled)
 {
     shuffleEnabled = enabled;
-    // TODO set controlbuttonswidget shuffle button state
+    controlButtons->setShuffleEnabled(shuffleEnabled);
 }
 
 void PlayerView::setRepeatEnabled(bool enabled)
 {
     repeatEnabled = enabled;
-    // TODO set controlbuttonswidget repeat button state
+    controlButtons->setRepeatEnabled(repeatEnabled);
 }
 
 void PlayerView::setMessage(QString message, qint64 timeout)
@@ -278,8 +286,6 @@ void PlayerView::clearMessage()
     ui->songInfoLabel->setText(m_trackInfo);
     messageTimer->stop();
 }
-
-/////////////
 
 void PlayerView::updateDurationInfo(qint64 currentInfo)
 {

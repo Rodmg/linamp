@@ -1,7 +1,11 @@
+#include <QFileDialog>
+
 #include "mainwindow.h"
 #include "desktopplayerwindow.h"
+#include "qstandardpaths.h"
 #include "ui_desktopplayerwindow.h"
 #include "scale.h"
+#include "util.h"
 
 #ifdef IS_EMBEDDED
 #include "embeddedbasewindow.h"
@@ -31,7 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_playlist = m_playlistModel->playlist();
 
     // Setup views
-    player = new PlayerView(this, m_playlistModel);
+    controlButtons = new ControlButtonsWidget(this);
+    player = new PlayerView(this, controlButtons);
     player->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
 
     playlist = new PlaylistView(this, m_playlistModel);
@@ -39,25 +44,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     coordinator = new AudioSourceCoordinator(this, player);
     fileSource = new AudioSourceFile(this, m_playlistModel);
+    btSource = new AudioSourceBluetooth(this);
     coordinator->addSource(fileSource, true);
+    coordinator->addSource(btSource, false);
 
-    controlButtons = new ControlButtonsWidget(this);
 
     // Connect events
-    connect(player, &PlayerView::showPlaylistClicked, this, &MainWindow::showPlaylist);
+    connect(fileSource, &AudioSourceFile::showPlaylistRequested, this, &MainWindow::showPlaylist);
     connect(playlist, &PlaylistView::showPlayerClicked, this, &MainWindow::showPlayer);
     connect(playlist, &PlaylistView::songSelected, fileSource, &AudioSourceFile::jump);
     connect(playlist, &PlaylistView::addSelectedFilesClicked, fileSource, &AudioSourceFile::addToPlaylist);
 
-    connect(controlButtons, &ControlButtonsWidget::playClicked, player, &PlayerView::playClicked);
-    connect(controlButtons, &ControlButtonsWidget::pauseClicked, player, &PlayerView::pauseClicked);
-    connect(controlButtons, &ControlButtonsWidget::stopClicked, player, &PlayerView::stopClicked);
-    connect(controlButtons, &ControlButtonsWidget::nextClicked, player, &PlayerView::nextClicked);
-    connect(controlButtons, &ControlButtonsWidget::previousClicked, player, &PlayerView::previousClicked);
-    connect(controlButtons, &ControlButtonsWidget::openClicked, player,  &PlayerView::showPlaylistClicked);
-    connect(controlButtons, &ControlButtonsWidget::repeatClicked, player, &PlayerView::repeatClicked);
-    connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleClicked);
-    connect(controlButtons, &ControlButtonsWidget::logoClicked, this, &MainWindow::showShutdownModal);
+    connect(controlButtons, &ControlButtonsWidget::logoClicked, this, &MainWindow::showMenu);
 
     // Prepare player main view
     #ifdef IS_EMBEDDED
@@ -96,10 +94,17 @@ MainWindow::MainWindow(QWidget *parent)
     playlistLayout->addWidget(playlist);
     playlistWindow->ui->body->setLayout(playlistLayout);
 
+    // Prepare menu view
+    menu = new MainMenuView(this);
+    menu->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
+    connect(menu, &MainMenuView::backClicked, this, &MainWindow::showPlayer);
+    connect(menu, &MainMenuView::sourceSelected, coordinator, &AudioSourceCoordinator::setSource);
+
     // Prepare navigation stack
     viewStack = new QStackedLayout;
     viewStack->addWidget(playerWindow);
     viewStack->addWidget(playlistWindow);
+    viewStack->addWidget(menu);
 
     // Final UI setup and show
     QVBoxLayout *centralLayout = new QVBoxLayout;
@@ -137,6 +142,11 @@ void MainWindow::showPlaylist()
     viewStack->setCurrentIndex(1);
 }
 
+void MainWindow::showMenu()
+{
+    viewStack->setCurrentIndex(2);
+}
+
 void MainWindow::showShutdownModal()
 {
     QMessageBox msgBox;
@@ -163,4 +173,36 @@ void MainWindow::shutdown()
 
     shutdownProcess = new QProcess(this);
     shutdownProcess->start(cmd);
+}
+
+// Shows a standard file picker for adding items to the playlist
+// Not used currently
+void MainWindow::open()
+{
+    QList<QUrl> urls;
+    urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first())
+         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first())
+         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).first());
+
+
+    QFileDialog fileDialog(this);
+    QString filters = audioFileFilters().join(" ");
+    fileDialog.setNameFilter("Audio (" + filters + ")");
+    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog.setFileMode(QFileDialog::ExistingFiles);
+    fileDialog.setWindowTitle(tr("Open Files"));
+    fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation)
+                                .value(0, QDir::homePath()));
+    fileDialog.setOption(QFileDialog::ReadOnly, true);
+    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog.setViewMode(QFileDialog::Detail);
+    fileDialog.setSidebarUrls(urls);
+
+#ifdef IS_EMBEDDED
+    fileDialog.setWindowState(Qt::WindowFullScreen);
+#endif
+
+    if (fileDialog.exec() == QDialog::Accepted)
+        fileSource->addToPlaylist(fileDialog.selectedUrls());
+
 }

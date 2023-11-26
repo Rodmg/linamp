@@ -10,6 +10,7 @@ LIBS += -ltag -lasound
 
 HEADERS = \
     audiosource.h \
+    audiosourcebluetooth.h \
     audiosourcecoordinator.h \
     audiosourcefile.h \
     controlbuttonswidget.h \
@@ -18,6 +19,7 @@ HEADERS = \
     embeddedbasewindow.h \
     fft.h \
     filebrowsericonprovider.h \
+    mainmenuview.h \
     mainwindow.h \
     mediaplayer.h \
     playerview.h \
@@ -35,6 +37,7 @@ HEADERS = \
 
 SOURCES = main.cpp \
     audiosource.cpp \
+    audiosourcebluetooth.cpp \
     audiosourcecoordinator.cpp \
     audiosourcefile.cpp \
     controlbuttonswidget.cpp \
@@ -43,6 +46,7 @@ SOURCES = main.cpp \
     embeddedbasewindow.cpp \
     fft.cpp \
     filebrowsericonprovider.cpp \
+    mainmenuview.cpp \
     mainwindow.cpp \
     mediaplayer.cpp \
     playerview.cpp \
@@ -66,6 +70,7 @@ FORMS += \
     desktopbasewindow.ui \
     desktopplayerwindow.ui \
     embeddedbasewindow.ui \
+    mainmenuview.ui \
     playerview.ui \
     playlistview.ui \
     titlebar.ui

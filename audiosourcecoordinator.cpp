@@ -1,5 +1,4 @@
 #include "audiosourcecoordinator.h"
-#include "audiosourcefile.h"
 
 AudioSourceCoordinator::AudioSourceCoordinator(QObject *parent, PlayerView *playerView)
     : QObject{parent}
@@ -19,6 +18,11 @@ AudioSourceCoordinator::AudioSourceCoordinator(QObject *parent, PlayerView *play
 
 void AudioSourceCoordinator::setSource(int newSource)
 {
+    if(newSource > sources.length() - 1) {
+        qDebug() << "WARNING: Trying to set source out of range";
+        return;
+    }
+
     if(currentSource >= 0) {
         // deactivate old source
         sources[currentSource]->deactivate();
@@ -32,6 +36,7 @@ void AudioSourceCoordinator::setSource(int newSource)
         disconnect(view, &PlayerView::openClicked, sources[currentSource], &AudioSource::handleOpen);
         disconnect(view, &PlayerView::shuffleClicked, sources[currentSource], &AudioSource::handleShuffle);
         disconnect(view, &PlayerView::repeatClicked, sources[currentSource], &AudioSource::handleRepeat);
+        disconnect(view, &PlayerView::plClicked, sources[currentSource], &AudioSource::handlePl);
 
         disconnect(sources[currentSource], &AudioSource::playbackStateChanged, view, &PlayerView::setPlaybackState);
         disconnect(sources[currentSource], &AudioSource::positionChanged, view, &PlayerView::setPosition);
@@ -57,6 +62,7 @@ void AudioSourceCoordinator::setSource(int newSource)
     connect(view, &PlayerView::openClicked, sources[currentSource], &AudioSource::handleOpen);
     connect(view, &PlayerView::shuffleClicked, sources[currentSource], &AudioSource::handleShuffle);
     connect(view, &PlayerView::repeatClicked, sources[currentSource], &AudioSource::handleRepeat);
+    connect(view, &PlayerView::plClicked, sources[currentSource], &AudioSource::handlePl);
 
     connect(sources[currentSource], &AudioSource::playbackStateChanged, view, &PlayerView::setPlaybackState);
     connect(sources[currentSource], &AudioSource::positionChanged, view, &PlayerView::setPosition);

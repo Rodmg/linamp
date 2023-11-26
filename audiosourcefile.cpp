@@ -56,7 +56,8 @@ void AudioSourceFile::deactivate()
 
 void AudioSourceFile::handlePl()
 {
-
+    emit showPlaylistRequested();
+    emit plEnabledChanged(true);
 }
 
 void AudioSourceFile::handlePrevious()
@@ -101,7 +102,7 @@ void AudioSourceFile::handleNext()
 
 void AudioSourceFile::handleOpen()
 {
-
+    emit showPlaylistRequested();
 }
 
 void AudioSourceFile::handleShuffle()
@@ -219,38 +220,6 @@ void AudioSourceFile::jump(const QModelIndex &index)
         shouldBePlaying = true;
         m_player->play();
     }
-}
-
-void AudioSourceFile::open()
-{
-
-    /*
-    QList<QUrl> urls;
-    urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first())
-         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first())
-         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).first());
-
-
-    QFileDialog fileDialog(this);
-    QString filters = audioFileFilters().join(" ");
-    fileDialog.setNameFilter("Audio (" + filters + ")");
-    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-    fileDialog.setFileMode(QFileDialog::ExistingFiles);
-    fileDialog.setWindowTitle(tr("Open Files"));
-    fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation)
-                                .value(0, QDir::homePath()));
-    fileDialog.setOption(QFileDialog::ReadOnly, true);
-    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-    fileDialog.setViewMode(QFileDialog::Detail);
-    fileDialog.setSidebarUrls(urls);
-
-#ifdef IS_EMBEDDED
-    fileDialog.setWindowState(Qt::WindowFullScreen);
-#endif
-
-    if (fileDialog.exec() == QDialog::Accepted)
-        addToPlaylist(fileDialog.selectedUrls());
-*/
 }
 
 void AudioSourceFile::addToPlaylist(const QList<QUrl> &urls)
