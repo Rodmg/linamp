@@ -2,6 +2,7 @@
 #define AUDIOSOURCEBLUETOOTH_H
 
 #include <QObject>
+#include <QTimer>
 
 #include "audiosource.h"
 
@@ -10,6 +11,7 @@ class AudioSourceBluetooth : public AudioSource
     Q_OBJECT
 public:
     explicit AudioSourceBluetooth(QObject *parent = nullptr);
+    ~AudioSourceBluetooth();
 
 public slots:
     void activate();
@@ -24,6 +26,10 @@ public slots:
     void handleShuffle();
     void handleRepeat();
     void handleSeek(int mseconds);
+
+private:
+    QTimer *dataEmitTimer = nullptr;
+    void emitData();
 };
 
 #endif // AUDIOSOURCEBLUETOOTH_H

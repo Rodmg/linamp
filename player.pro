@@ -4,9 +4,10 @@ TARGET = player
 QT += network \
       multimedia \
       multimediawidgets \
-      widgets
+      widgets \
+      concurrent
 
-LIBS += -ltag -lasound
+LIBS += -ltag -lasound -lpulse -lpulse-simple
 
 HEADERS = \
     audiosource.h \

@@ -22,16 +22,19 @@ MainMenuView::~MainMenuView()
 void MainMenuView::fileSourceClicked()
 {
     emit sourceSelected(0);
+    emit backClicked();
 }
 
 void MainMenuView::btSourceClicked()
 {
     emit sourceSelected(1);
+    emit backClicked();
 }
 
 void MainMenuView::spotifySourceClicked()
 {
     emit sourceSelected(2);
+    emit backClicked();
 }
 
 void MainMenuView::shutdown()

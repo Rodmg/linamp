@@ -8,7 +8,7 @@ Music player for embedded project.
 - libasound2-dev
 
 ```
-sudo apt install libtag1-dev libasound2-dev
+sudo apt install libtag1-dev libasound2-dev libpulse-dev
 ```
 
 ## Development
