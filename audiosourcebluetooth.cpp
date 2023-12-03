@@ -118,6 +118,17 @@ static void pa_context_notify_cb(pa_context *ctx, void* /*userdata*/)
     }
 }
 
+static bool isValidSample(QByteArray *sample)
+{
+    // Greedy: suposing that 100 is enough
+    for(int i = 0; i < 100; i++) {
+        if(sample->at(i) != 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 int startPACapture()
 {
     captureRunning = true;
@@ -256,6 +267,19 @@ void AudioSourceBluetooth::emitData()
     if(sample->length() < DFT_SIZE * 4) {
         return;
     }
+
+    if(!isValidSample(sample)) {
+        return;
+    }
+
+    //dbg
+    /*QString dbgsample = "";
+    for(int i = 0; i < 100; i++) {
+        dbgsample += QString(sample->at(i)) + ",";
+    }
+    qDebug() << ">>>>>" << dbgsample;
+    */
+    // end dbg
 
     QAudioFormat format;
     format.setSampleFormat(QAudioFormat::Int16);
