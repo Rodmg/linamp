@@ -82,7 +82,10 @@ static void pa_server_info_cb(pa_context *ctx, const pa_server_info *info, void*
 
     std::string monitor_name(info->default_sink_name);
     monitor_name += ".monitor";
-    if (pa_stream_connect_record(stream, monitor_name.c_str(), nullptr, PA_STREAM_NOFLAGS) != 0) {
+    pa_buffer_attr bufferAttr;
+    bufferAttr.maxlength = 4096;
+    bufferAttr.fragsize = 4096;
+    if (pa_stream_connect_record(stream, monitor_name.c_str(), &bufferAttr, PA_STREAM_NOFLAGS) != 0) {
         qDebug() << "connection fail";
         return;
     }
