@@ -58,7 +58,7 @@ static void pa_stream_read_cb(pa_stream *stream, const size_t /*nbytes*/, void* 
     }
 
     // process data
-    //qDebug() << ">> " << actualbytes << " bytes";
+    qDebug() << ">> " << actualbytes << " bytes";
     sampleStream->writeRawData((const char *)data, actualbytes);
 
     if (pa_stream_drop(stream) != 0) {
@@ -83,9 +83,10 @@ static void pa_server_info_cb(pa_context *ctx, const pa_server_info *info, void*
     std::string monitor_name(info->default_sink_name);
     monitor_name += ".monitor";
     pa_buffer_attr bufferAttr;
+    // Limit max data so spectrumwidget paints frequently
     bufferAttr.maxlength = 4096;
     bufferAttr.fragsize = 4096;
-    if (pa_stream_connect_record(stream, monitor_name.c_str(), &bufferAttr, PA_STREAM_NOFLAGS) != 0) {
+    if (pa_stream_connect_record(stream, monitor_name.c_str(), &bufferAttr, PA_STREAM_ADJUST_LATENCY) != 0) {
         qDebug() << "connection fail";
         return;
     }

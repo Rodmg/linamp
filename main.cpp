@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     }
 
     #ifdef IS_EMBEDDED
-    //window.setWindowState(Qt::WindowFullScreen);
+    window.setWindowState(Qt::WindowFullScreen);
     #endif
     window.show();
 
