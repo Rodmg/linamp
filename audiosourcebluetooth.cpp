@@ -1,12 +1,13 @@
 #include "audiosourcebluetooth.h"
 #include "spectrumwidget.h"
+#include "util.h"
 
 #include <pulse/error.h>
 #include <pulse/pulseaudio.h>
 #include <pulse/simple.h>
 #include <QtConcurrent>
 
-#define PA_SAMPLE_RATE 44100
+#define PA_SAMPLE_RATE DEFAULT_SAMPLE_RATE
 #define PA_CHANNELS 2
 
 static QMutex *sampleMutex;
@@ -59,6 +60,13 @@ static void pa_stream_read_cb(pa_stream *stream, const size_t /*nbytes*/, void* 
 
     // process data
     qDebug() << ">> " << actualbytes << " bytes";
+    if(actualbytes >= DFT_SIZE * 4) {
+        // If the sample is equal or bigger than the target
+        // Replace the current buffer
+        sample->clear();
+        delete sampleStream;
+        sampleStream = new QDataStream(sample, QIODevice::WriteOnly);
+    }
     sampleStream->writeRawData((const char *)data, actualbytes);
 
     if (pa_stream_drop(stream) != 0) {
@@ -84,8 +92,8 @@ static void pa_server_info_cb(pa_context *ctx, const pa_server_info *info, void*
     monitor_name += ".monitor";
     pa_buffer_attr bufferAttr;
     // Limit max data so spectrumwidget paints frequently
-    bufferAttr.maxlength = 4096;
-    bufferAttr.fragsize = 4096;
+    bufferAttr.maxlength = MAX_AUDIO_STREAM_SAMPLE_SIZE;
+    bufferAttr.fragsize = MAX_AUDIO_STREAM_SAMPLE_SIZE;
     if (pa_stream_connect_record(stream, monitor_name.c_str(), &bufferAttr, PA_STREAM_ADJUST_LATENCY) != 0) {
         qDebug() << "connection fail";
         return;

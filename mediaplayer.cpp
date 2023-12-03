@@ -87,7 +87,7 @@ qint64 MediaPlayer::readData(char* data, qint64 maxlen)
     QMutexLocker l(&readMutex);
 
     // Limit max len
-    if(maxlen > 4096) maxlen = 4096;
+    if(maxlen > MAX_AUDIO_STREAM_SAMPLE_SIZE) maxlen = MAX_AUDIO_STREAM_SAMPLE_SIZE;
 
     memset(data, 0, maxlen);
     qint64 bytesRead = 0;
@@ -386,7 +386,7 @@ void MediaPlayer::setSource(const QUrl &source)
     if(!format.isValid()) {
         qDebug() << "WARNING: Audio format in default audio output is not defined, using defaults";
         format.setSampleFormat(QAudioFormat::Int16);
-        format.setSampleRate(48000);
+        format.setSampleRate(DEFAULT_SAMPLE_RATE);
         format.setChannelConfig(QAudioFormat::ChannelConfigStereo);
         format.setChannelCount(2);
     }
