@@ -87,7 +87,7 @@ static void pa_server_info_cb(pa_context *ctx, const pa_server_info *info, void*
         return;
     }
 
-    qDebug() << "Connected to " << monitor_name;
+    qDebug() << "Connected to " << monitor_name.c_str();
 }
 
 static void pa_context_notify_cb(pa_context *ctx, void* /*userdata*/)
