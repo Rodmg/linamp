@@ -191,7 +191,7 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
         return;
     }
 
-    bool success = dbusConn.connect(SERVICE_NAME, OBJ_PATH, "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(btStatusChanged(QString, QVariantMap, QStringList)));
+    bool success = dbusConn.connect(SERVICE_NAME, OBJ_PATH, "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(handleBtPropertyChange(QString, QVariantMap, QStringList)));
 
     if(success) {
         qDebug() << "SUCCESS!";
@@ -205,7 +205,84 @@ AudioSourceBluetooth::~AudioSourceBluetooth()
     stopPACapture();
 }
 
-void AudioSourceBluetooth::btStatusChanged(QString name, QVariantMap map, QStringList list)
+void AudioSourceBluetooth::handleBtStatusChange(QString status)
+{
+    if(status == "playing") {
+        startSpectrum();
+        emit this->playbackStateChanged(MediaPlayer::PlayingState);
+    }
+    if(status == "stopped") {
+        stopSpectrum();
+        emit this->playbackStateChanged(MediaPlayer::StoppedState);
+    }
+    if(status == "paused") {
+        stopSpectrum();
+        emit this->playbackStateChanged(MediaPlayer::PausedState);
+    }
+    if(status == "error") {
+        stopSpectrum();
+        emit this->playbackStateChanged(MediaPlayer::StoppedState);
+        emit this->messageSet("Bluetooth Error", 5000);
+    }
+}
+
+void AudioSourceBluetooth::handleBtTrackChange(QVariantMap trackData)
+{
+    QMediaMetaData metadata;
+    for( QString trackKey : trackData.keys()){
+        qDebug() << "    " << trackKey << ":" << trackData.value(trackKey);
+        if(trackKey == "Title") {
+            metadata.insert(QMediaMetaData::Title, trackData.value(trackKey));
+        }
+        if(trackKey == "Artist") {
+            metadata.insert(QMediaMetaData::AlbumArtist, trackData.value(trackKey));
+        }
+        if(trackKey == "Album") {
+            metadata.insert(QMediaMetaData::AlbumTitle, trackData.value(trackKey));
+        }
+        if(trackKey == "Genre") {
+            metadata.insert(QMediaMetaData::Genre, trackData.value(trackKey));
+        }
+        if(trackKey == "TrackNumber") {
+            metadata.insert(QMediaMetaData::TrackNumber, trackData.value(trackKey));
+        }
+        if(trackKey == "Duration") {
+            quint32 duration = trackData.value(trackKey).toUInt();
+            metadata.insert(QMediaMetaData::Duration, duration);
+            emit this->durationChanged(duration);
+        }
+    }
+    emit this->metadataChanged(metadata);
+}
+
+void AudioSourceBluetooth::handleBtShuffleChange(QString shuffleSetting)
+{
+    if(shuffleSetting == "off") {
+        emit this->shuffleEnabledChanged(false);
+        this->isShuffleEnabled = false;
+    } else {
+        emit this->shuffleEnabledChanged(true);
+        this->isShuffleEnabled = true;
+    }
+}
+
+void AudioSourceBluetooth::handleBtRepeatChange(QString repeatSetting)
+{
+    if(repeatSetting == "off") {
+        emit this->repeatEnabledChanged(false);
+        this->isRepeatEnabled = false;
+    } else {
+        emit this->repeatEnabledChanged(true);
+        this->isRepeatEnabled = true;
+    }
+}
+
+void AudioSourceBluetooth::handleBtPositionChange(quint32 position)
+{
+    emit this->positionChanged(position);
+}
+
+void AudioSourceBluetooth::handleBtPropertyChange(QString name, QVariantMap map, QStringList list)
 {
     qDebug() << QString("properties of interface %1 changed").arg(name);
     for (QVariantMap::const_iterator it = map.cbegin(), end = map.cend(); it != end; ++it) {
@@ -215,75 +292,84 @@ void AudioSourceBluetooth::btStatusChanged(QString name, QVariantMap map, QStrin
 
         if(prop == "Status") {
             QString status = it.value().toString();
-            if(status == "playing") {
-                emit this->playbackStateChanged(MediaPlayer::PlaybackState::PlayingState);
-            }
-            if(status == "stopped") {
-                emit this->playbackStateChanged(MediaPlayer::PlaybackState::StoppedState);
-            }
-            if(status == "paused") {
-                emit this->playbackStateChanged(MediaPlayer::PlaybackState::PausedState);
-            }
-            if(status == "error") {
-                emit this->messageSet("Bluetooth Error", 5000);
-            }
+            this->handleBtStatusChange(status);
         }
 
         if(prop == "Track") {
-            QMediaMetaData metadata;
-            QVariantMap trackMap = qdbus_cast<QVariantMap>(it.value());
-            for( QString trackKey : trackMap.keys()){
-                qDebug() << "    " << trackKey << ":" << trackMap.value(trackKey);
-                if(trackKey == "Title") {
-                    metadata.insert(QMediaMetaData::Title, trackMap.value(trackKey));
-                }
-                if(trackKey == "Artist") {
-                    metadata.insert(QMediaMetaData::AlbumArtist, trackMap.value(trackKey));
-                }
-                if(trackKey == "Album") {
-                    metadata.insert(QMediaMetaData::AlbumTitle, trackMap.value(trackKey));
-                }
-                if(trackKey == "Genre") {
-                    metadata.insert(QMediaMetaData::Genre, trackMap.value(trackKey));
-                }
-                if(trackKey == "TrackNumber") {
-                    metadata.insert(QMediaMetaData::TrackNumber, trackMap.value(trackKey));
-                }
-                if(trackKey == "Duration") {
-                    quint32 duration = trackMap.value(trackKey).toUInt();
-                    metadata.insert(QMediaMetaData::Duration, duration);
-                    emit this->durationChanged(duration);
-                }
-            }
-            emit this->metadataChanged(metadata);
+            QVariantMap trackData = qdbus_cast<QVariantMap>(it.value());
+            this->handleBtTrackChange(trackData);
         }
 
         if(prop == "Repeat") {
             QString repeatSetting = it.value().toString();
-            if(repeatSetting == "off") {
-                emit this->repeatEnabledChanged(false);
-                this->isRepeatEnabled = false;
-            } else {
-                emit this->repeatEnabledChanged(true);
-                this->isRepeatEnabled = true;
-            }
+            this->handleBtRepeatChange(repeatSetting);
         }
 
         if(prop == "Shuffle") {
             QString shuffleSetting = it.value().toString();
-            if(shuffleSetting == "off") {
-                emit this->shuffleEnabledChanged(false);
-                this->isShuffleEnabled = false;
-            } else {
-                emit this->shuffleEnabledChanged(true);
-                this->isShuffleEnabled = true;
-            }
+            this->handleBtShuffleChange(shuffleSetting);
+        }
+
+        if(prop == "Position") {
+            quint32 pos = it.value().toUInt();
+            this->handleBtPositionChange(pos);
         }
 
     }
     for (const auto& element : list) {
         qDebug() << "list element: " << element;
     }
+}
+
+void AudioSourceBluetooth::fetchBtMetadata()
+{
+    if(!this->dbusIface->isValid()) {
+        return;
+    }
+
+    QVariant status = this->dbusIface->property("Status");
+    if(!status.isNull()) {
+        qDebug() << "<<<<Status:" << status.toString();
+        this->handleBtStatusChange(status.toString());
+    }
+
+    QVariant repeat = this->dbusIface->property("Repeat");
+    if(!repeat.isNull()) {
+        qDebug() << "<<<<Repeat:" << repeat.toString();
+        this->handleBtRepeatChange(repeat.toString());
+    }
+
+    QVariant shuffle = this->dbusIface->property("Shuffle");
+    if(!shuffle.isNull()) {
+        qDebug() << "<<<<Shuffle:" << shuffle.toString();
+        this->handleBtShuffleChange(shuffle.toString());
+    }
+
+    QVariant position = this->dbusIface->property("Position");
+    if(!position.isNull()) {
+        qDebug() << "<<<<Position:" << position.toString();
+        this->handleBtPositionChange(position.toUInt());
+    }
+
+    QVariant track = this->dbusIface->property("Track");
+    if(!track.isNull()) {
+        qDebug() << "<<<<Track:";
+        QVariantMap trackData = qdbus_cast<QVariantMap>(track);
+        this->handleBtTrackChange(trackData);
+    }
+}
+
+
+void AudioSourceBluetooth::startSpectrum()
+{
+    QtConcurrent::run(startPACapture);
+    dataEmitTimer->start();
+}
+
+void AudioSourceBluetooth::stopSpectrum()
+{
+    stopPACapture();
+    dataEmitTimer->stop();
 }
 
 
@@ -303,12 +389,13 @@ void AudioSourceBluetooth::activate()
 
     this->isShuffleEnabled = false;
     this->isRepeatEnabled = false;
+
+    fetchBtMetadata();
 }
 
 void AudioSourceBluetooth::deactivate()
 {
-    stopPACapture();
-    dataEmitTimer->stop();
+    stopSpectrum();
     emit playbackStateChanged(MediaPlayer::StoppedState);
 }
 
@@ -326,18 +413,17 @@ void AudioSourceBluetooth::handlePrevious()
 
 void AudioSourceBluetooth::handlePlay()
 {
-    QtConcurrent::run(startPACapture);
-    dataEmitTimer->start();
+    startSpectrum();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Play");
     }
     emit playbackStateChanged(MediaPlayer::PlayingState);
+    fetchBtMetadata();
 }
 
 void AudioSourceBluetooth::handlePause()
 {
-    stopPACapture();
-    dataEmitTimer->stop();
+    stopSpectrum();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Pause");
     }
@@ -346,8 +432,7 @@ void AudioSourceBluetooth::handlePause()
 
 void AudioSourceBluetooth::handleStop()
 {
-    stopPACapture();
-    dataEmitTimer->stop();
+    stopSpectrum();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Stop");
     }

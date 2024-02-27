@@ -43,8 +43,18 @@ private:
     bool isShuffleEnabled = false;
     bool isRepeatEnabled = false;
 
+    void startSpectrum();
+    void stopSpectrum();
+
+    void fetchBtMetadata();
+
 private slots:
-    void btStatusChanged(QString name, QVariantMap map, QStringList list);
+    void handleBtPropertyChange(QString name, QVariantMap map, QStringList list);
+    void handleBtStatusChange(QString status);
+    void handleBtTrackChange(QVariantMap trackData);
+    void handleBtShuffleChange(QString shuffleSetting);
+    void handleBtRepeatChange(QString repeatSetting);
+    void handleBtPositionChange(quint32 position);
 };
 
 #endif // AUDIOSOURCEBLUETOOTH_H
