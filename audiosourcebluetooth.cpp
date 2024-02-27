@@ -6,6 +6,7 @@
 #include <pulse/pulseaudio.h>
 #include <pulse/simple.h>
 #include <QtConcurrent>
+#include <QDBusMetaType>
 
 #define PA_SAMPLE_RATE DEFAULT_SAMPLE_RATE
 #define PA_CHANNELS 2
@@ -177,6 +178,7 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
     connect(dataEmitTimer, &QTimer::timeout, this, &AudioSourceBluetooth::emitData);
 
     // Init dbus
+    qDBusRegisterMetaType<QVariantMap>();
     auto dbusConn = QDBusConnection::systemBus();
     if(!dbusConn.isConnected()) {
         qDebug() << "Cannot connect to DBuss";
@@ -198,6 +200,11 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
     } else {
         qDebug() << "MEH";
     }
+
+    // Track progress with timer
+    progressTimer = new QTimer(this);
+    progressTimer->setInterval(1000);
+    connect(progressTimer, &QTimer::timeout, this, &AudioSourceBluetooth::refreshProgress);
 }
 
 AudioSourceBluetooth::~AudioSourceBluetooth()
@@ -209,18 +216,22 @@ void AudioSourceBluetooth::handleBtStatusChange(QString status)
 {
     if(status == "playing") {
         startSpectrum();
+        progressTimer->start();
         emit this->playbackStateChanged(MediaPlayer::PlayingState);
     }
     if(status == "stopped") {
         stopSpectrum();
+        progressTimer->stop();
         emit this->playbackStateChanged(MediaPlayer::StoppedState);
     }
     if(status == "paused") {
         stopSpectrum();
+        progressTimer->stop();
         emit this->playbackStateChanged(MediaPlayer::PausedState);
     }
     if(status == "error") {
         stopSpectrum();
+        progressTimer->stop();
         emit this->playbackStateChanged(MediaPlayer::StoppedState);
         emit this->messageSet("Bluetooth Error", 5000);
     }
@@ -345,11 +356,7 @@ void AudioSourceBluetooth::fetchBtMetadata()
         this->handleBtShuffleChange(shuffle.toString());
     }
 
-    QVariant position = this->dbusIface->property("Position");
-    if(!position.isNull()) {
-        qDebug() << "<<<<Position:" << position.toString();
-        this->handleBtPositionChange(position.toUInt());
-    }
+    this->refreshProgress();
 
     QVariant track = this->dbusIface->property("Track");
     if(!track.isNull()) {
@@ -414,6 +421,7 @@ void AudioSourceBluetooth::handlePrevious()
 void AudioSourceBluetooth::handlePlay()
 {
     startSpectrum();
+    progressTimer->start();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Play");
     }
@@ -424,6 +432,7 @@ void AudioSourceBluetooth::handlePlay()
 void AudioSourceBluetooth::handlePause()
 {
     stopSpectrum();
+    progressTimer->stop();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Pause");
     }
@@ -433,6 +442,7 @@ void AudioSourceBluetooth::handlePause()
 void AudioSourceBluetooth::handleStop()
 {
     stopSpectrum();
+    progressTimer->stop();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Stop");
     }
@@ -473,6 +483,15 @@ void AudioSourceBluetooth::handleSeek(int mseconds)
 {
 
 }
+
+void AudioSourceBluetooth::refreshProgress()
+{
+    QVariant position = this->dbusIface->property("Position");
+    if(!position.isNull()) {
+        this->handleBtPositionChange(position.toUInt());
+    }
+}
+
 
 void AudioSourceBluetooth::emitData()
 {

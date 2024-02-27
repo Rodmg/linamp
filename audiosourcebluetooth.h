@@ -40,6 +40,9 @@ private:
 
     QDBusInterface *dbusIface = nullptr;
 
+    QTimer *progressTimer = nullptr;
+    void refreshProgress();
+
     bool isShuffleEnabled = false;
     bool isRepeatEnabled = false;
 
@@ -47,6 +50,7 @@ private:
     void stopSpectrum();
 
     void fetchBtMetadata();
+
 
 private slots:
     void handleBtPropertyChange(QString name, QVariantMap map, QStringList list);
