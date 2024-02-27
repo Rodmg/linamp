@@ -59,7 +59,7 @@ static void pa_stream_read_cb(pa_stream *stream, const size_t /*nbytes*/, void* 
     }
 
     // process data
-    qDebug() << ">> " << actualbytes << " bytes";
+    //qDebug() << ">> " << actualbytes << " bytes";
     if(actualbytes >= DFT_SIZE * 4) {
         // If the sample is equal or bigger than the target
         // Replace the current buffer
@@ -175,12 +175,117 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
     dataEmitTimer = new QTimer(this);
     dataEmitTimer->setInterval(33); // around 30 fps
     connect(dataEmitTimer, &QTimer::timeout, this, &AudioSourceBluetooth::emitData);
+
+    // Init dbus
+    auto dbusConn = QDBusConnection::systemBus();
+    if(!dbusConn.isConnected()) {
+        qDebug() << "Cannot connect to DBuss";
+        return;
+    } else {
+        qDebug() << "CONNECTED!";
+    }
+
+    this->dbusIface = new QDBusInterface(SERVICE_NAME, OBJ_PATH, OBJ_INTERFACE, dbusConn, this);
+    if(!this->dbusIface->isValid()) {
+        qDebug() << "DBus interface is invalid";
+        return;
+    }
+
+    bool success = dbusConn.connect(SERVICE_NAME, OBJ_PATH, "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(btStatusChanged(QString, QVariantMap, QStringList)));
+
+    if(success) {
+        qDebug() << "SUCCESS!";
+    } else {
+        qDebug() << "MEH";
+    }
 }
 
 AudioSourceBluetooth::~AudioSourceBluetooth()
 {
     stopPACapture();
 }
+
+void AudioSourceBluetooth::btStatusChanged(QString name, QVariantMap map, QStringList list)
+{
+    qDebug() << QString("properties of interface %1 changed").arg(name);
+    for (QVariantMap::const_iterator it = map.cbegin(), end = map.cend(); it != end; ++it) {
+        qDebug() << "property: " << it.key() << " value: " << it.value();
+
+        QString prop = it.key();
+
+        if(prop == "Status") {
+            QString status = it.value().toString();
+            if(status == "playing") {
+                emit this->playbackStateChanged(MediaPlayer::PlaybackState::PlayingState);
+            }
+            if(status == "stopped") {
+                emit this->playbackStateChanged(MediaPlayer::PlaybackState::StoppedState);
+            }
+            if(status == "paused") {
+                emit this->playbackStateChanged(MediaPlayer::PlaybackState::PausedState);
+            }
+            if(status == "error") {
+                emit this->messageSet("Bluetooth Error", 5000);
+            }
+        }
+
+        if(prop == "Track") {
+            QMediaMetaData metadata;
+            QVariantMap trackMap = qdbus_cast<QVariantMap>(it.value());
+            for( QString trackKey : trackMap.keys()){
+                qDebug() << "    " << trackKey << ":" << trackMap.value(trackKey);
+                if(trackKey == "Title") {
+                    metadata.insert(QMediaMetaData::Title, trackMap.value(trackKey));
+                }
+                if(trackKey == "Artist") {
+                    metadata.insert(QMediaMetaData::AlbumArtist, trackMap.value(trackKey));
+                }
+                if(trackKey == "Album") {
+                    metadata.insert(QMediaMetaData::AlbumTitle, trackMap.value(trackKey));
+                }
+                if(trackKey == "Genre") {
+                    metadata.insert(QMediaMetaData::Genre, trackMap.value(trackKey));
+                }
+                if(trackKey == "TrackNumber") {
+                    metadata.insert(QMediaMetaData::TrackNumber, trackMap.value(trackKey));
+                }
+                if(trackKey == "Duration") {
+                    quint32 duration = trackMap.value(trackKey).toUInt();
+                    metadata.insert(QMediaMetaData::Duration, duration);
+                    emit this->durationChanged(duration);
+                }
+            }
+            emit this->metadataChanged(metadata);
+        }
+
+        if(prop == "Repeat") {
+            QString repeatSetting = it.value().toString();
+            if(repeatSetting == "off") {
+                emit this->repeatEnabledChanged(false);
+                this->isRepeatEnabled = false;
+            } else {
+                emit this->repeatEnabledChanged(true);
+                this->isRepeatEnabled = true;
+            }
+        }
+
+        if(prop == "Shuffle") {
+            QString shuffleSetting = it.value().toString();
+            if(shuffleSetting == "off") {
+                emit this->shuffleEnabledChanged(false);
+                this->isShuffleEnabled = false;
+            } else {
+                emit this->shuffleEnabledChanged(true);
+                this->isShuffleEnabled = true;
+            }
+        }
+
+    }
+    for (const auto& element : list) {
+        qDebug() << "list element: " << element;
+    }
+}
+
 
 void AudioSourceBluetooth::activate()
 {
@@ -195,6 +300,9 @@ void AudioSourceBluetooth::activate()
     emit plEnabledChanged(false);
     emit shuffleEnabledChanged(false);
     emit repeatEnabledChanged(false);
+
+    this->isShuffleEnabled = false;
+    this->isRepeatEnabled = false;
 }
 
 void AudioSourceBluetooth::deactivate()
@@ -211,13 +319,18 @@ void AudioSourceBluetooth::handlePl()
 
 void AudioSourceBluetooth::handlePrevious()
 {
-
+    if(this->dbusIface->isValid()) {
+        this->dbusIface->call("Previous");
+    }
 }
 
 void AudioSourceBluetooth::handlePlay()
 {
     QtConcurrent::run(startPACapture);
     dataEmitTimer->start();
+    if(this->dbusIface->isValid()) {
+        this->dbusIface->call("Play");
+    }
     emit playbackStateChanged(MediaPlayer::PlayingState);
 }
 
@@ -225,6 +338,9 @@ void AudioSourceBluetooth::handlePause()
 {
     stopPACapture();
     dataEmitTimer->stop();
+    if(this->dbusIface->isValid()) {
+        this->dbusIface->call("Pause");
+    }
     emit playbackStateChanged(MediaPlayer::PausedState);
 }
 
@@ -232,12 +348,17 @@ void AudioSourceBluetooth::handleStop()
 {
     stopPACapture();
     dataEmitTimer->stop();
+    if(this->dbusIface->isValid()) {
+        this->dbusIface->call("Stop");
+    }
     emit playbackStateChanged(MediaPlayer::StoppedState);
 }
 
 void AudioSourceBluetooth::handleNext()
 {
-
+    if(this->dbusIface->isValid()) {
+        this->dbusIface->call("Next");
+    }
 }
 
 void AudioSourceBluetooth::handleOpen()
@@ -247,12 +368,20 @@ void AudioSourceBluetooth::handleOpen()
 
 void AudioSourceBluetooth::handleShuffle()
 {
-    emit shuffleEnabledChanged(false);
+    this->isShuffleEnabled = !this->isShuffleEnabled;
+    emit shuffleEnabledChanged(this->isShuffleEnabled);
+    if(this->dbusIface->isValid()) {
+        this->dbusIface->setProperty("Shuffle", this->isShuffleEnabled ? "alltracks" : "off");
+    }
 }
 
 void AudioSourceBluetooth::handleRepeat()
 {
-    emit repeatEnabledChanged(false);
+    this->isRepeatEnabled = !this->isRepeatEnabled;
+    emit repeatEnabledChanged(this->isRepeatEnabled);
+    if(this->dbusIface->isValid()) {
+        this->dbusIface->setProperty("Repeat", this->isRepeatEnabled ? "alltracks" : "off");
+    }
 }
 
 void AudioSourceBluetooth::handleSeek(int mseconds)

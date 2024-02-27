@@ -5,7 +5,8 @@ QT += network \
       multimedia \
       multimediawidgets \
       widgets \
-      concurrent
+      concurrent \
+      dbus
 
 LIBS += -ltag -lasound -lpulse -lpulse-simple
 
