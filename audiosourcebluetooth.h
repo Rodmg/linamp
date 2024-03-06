@@ -14,9 +14,6 @@
 #define OBJ_PATH "/org/bluez/hci0/dev_5C_70_17_02_D7_6E/player2"
 #define OBJ_INTERFACE "org.bluez.MediaPlayer1"
 
-//typedef QVariantMap Track;
-//Q_DECLARE_METATYPE(Track)
-
 class BluezMediaInterface : public QDBusAbstractInterface
 {
     Q_OBJECT
@@ -104,8 +101,11 @@ private:
 
     BluezMediaInterface *dbusIface = nullptr;
 
-    QTimer *progressTimer = nullptr;
+    QTimer *progressRefreshTimer = nullptr;
+    QTimer *progressInterpolateTimer = nullptr;
+    quint32 currentProgress = 0;
     void refreshProgress();
+    void interpolateProgress();
 
     bool isShuffleEnabled = false;
     bool isRepeatEnabled = false;

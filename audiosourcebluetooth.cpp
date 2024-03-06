@@ -44,9 +44,12 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
     }
 
     // Track progress with timer
-    progressTimer = new QTimer(this);
-    progressTimer->setInterval(1000);
-    connect(progressTimer, &QTimer::timeout, this, &AudioSourceBluetooth::refreshProgress);
+    progressRefreshTimer = new QTimer(this);
+    progressRefreshTimer->setInterval(1000);
+    connect(progressRefreshTimer, &QTimer::timeout, this, &AudioSourceBluetooth::refreshProgress);
+    progressInterpolateTimer = new QTimer(this);
+    progressInterpolateTimer->setInterval(33);
+    connect(progressInterpolateTimer, &QTimer::timeout, this, &AudioSourceBluetooth::interpolateProgress);
 }
 
 AudioSourceBluetooth::~AudioSourceBluetooth()
@@ -58,22 +61,26 @@ void AudioSourceBluetooth::handleBtStatusChange(QString status)
 {
     if(status == "playing") {
         startSpectrum();
-        progressTimer->start();
+        progressRefreshTimer->start();
+        progressInterpolateTimer->start();
         emit this->playbackStateChanged(MediaPlayer::PlayingState);
     }
     if(status == "stopped") {
         stopSpectrum();
-        progressTimer->stop();
+        progressRefreshTimer->stop();
+        progressInterpolateTimer->stop();
         emit this->playbackStateChanged(MediaPlayer::StoppedState);
     }
     if(status == "paused") {
         stopSpectrum();
-        progressTimer->stop();
+        progressRefreshTimer->stop();
+        progressInterpolateTimer->stop();
         emit this->playbackStateChanged(MediaPlayer::PausedState);
     }
     if(status == "error") {
         stopSpectrum();
-        progressTimer->stop();
+        progressRefreshTimer->stop();
+        progressInterpolateTimer->stop();
         emit this->playbackStateChanged(MediaPlayer::StoppedState);
         emit this->messageSet("Bluetooth Error", 5000);
     }
@@ -132,6 +139,7 @@ void AudioSourceBluetooth::handleBtRepeatChange(QString repeatSetting)
 
 void AudioSourceBluetooth::handleBtPositionChange(quint32 position)
 {
+    this->currentProgress = position;
     emit this->positionChanged(position);
 }
 
@@ -263,7 +271,8 @@ void AudioSourceBluetooth::handlePrevious()
 void AudioSourceBluetooth::handlePlay()
 {
     startSpectrum();
-    progressTimer->start();
+    progressRefreshTimer->start();
+    progressInterpolateTimer->start();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Play");
     }
@@ -274,7 +283,8 @@ void AudioSourceBluetooth::handlePlay()
 void AudioSourceBluetooth::handlePause()
 {
     stopSpectrum();
-    progressTimer->stop();
+    progressRefreshTimer->stop();
+    progressInterpolateTimer->stop();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Pause");
     }
@@ -284,7 +294,8 @@ void AudioSourceBluetooth::handlePause()
 void AudioSourceBluetooth::handleStop()
 {
     stopSpectrum();
-    progressTimer->stop();
+    progressRefreshTimer->stop();
+    progressInterpolateTimer->stop();
     if(this->dbusIface->isValid()) {
         this->dbusIface->call("Stop");
     }
@@ -334,6 +345,11 @@ void AudioSourceBluetooth::refreshProgress()
     }
 }
 
+void AudioSourceBluetooth::interpolateProgress()
+{
+    this->currentProgress += 33;
+    emit this->positionChanged(this->currentProgress);
+}
 
 void AudioSourceBluetooth::emitData()
 {
