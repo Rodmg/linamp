@@ -33,6 +33,7 @@ HEADERS = \
     qmediaplaylist_p.h \
     qplaylistfileparser.h \
     spectrumwidget.h \
+    systemaudiocapture_pulseaudio.h \
     systemaudiocontrol.h \
     titlebar.h \
     util.h
@@ -60,6 +61,7 @@ SOURCES = main.cpp \
     qmediaplaylist_p.cpp \
     qplaylistfileparser.cpp \
     spectrumwidget.cpp \
+    systemaudiocapture_pulseaudio.cpp \
     systemaudiocontrol.cpp \
     titlebar.cpp \
     util.cpp
