@@ -30,7 +30,7 @@
   <widget class="QPushButton" name="fileSourceButton">
    <property name="geometry">
     <rect>
-     <x>1070</x>
+     <x>830</x>
      <y>20</y>
      <width>191</width>
      <height>71</height>
@@ -56,8 +56,8 @@
   <widget class="QPushButton" name="spotifySourceButton">
    <property name="geometry">
     <rect>
-     <x>1070</x>
-     <y>220</y>
+     <x>830</x>
+     <y>120</y>
      <width>191</width>
      <height>71</height>
     </rect>
@@ -103,6 +103,19 @@
    </property>
    <property name="text">
     <string>Restart</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cdSourceButton">
+   <property name="geometry">
+    <rect>
+     <x>1070</x>
+     <y>20</y>
+     <width>191</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CD</string>
    </property>
   </widget>
  </widget>

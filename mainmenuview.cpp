@@ -11,6 +11,7 @@ MainMenuView::MainMenuView(QWidget *parent) :
     connect(ui->fileSourceButton, &QPushButton::clicked, this, &MainMenuView::fileSourceClicked);
     connect(ui->btSourceButton, &QPushButton::clicked, this, &MainMenuView::btSourceClicked);
     connect(ui->spotifySourceButton, &QPushButton::clicked, this, &MainMenuView::spotifySourceClicked);
+    connect(ui->cdSourceButton, &QPushButton::clicked, this, &MainMenuView::cdSourceClicked);
     connect(ui->shutdownButton, &QPushButton::clicked, this, &MainMenuView::shutdown);
 }
 
@@ -32,6 +33,12 @@ void MainMenuView::btSourceClicked()
 }
 
 void MainMenuView::spotifySourceClicked()
+{
+    emit sourceSelected(3);
+    emit backClicked();
+}
+
+void MainMenuView::cdSourceClicked()
 {
     emit sourceSelected(2);
     emit backClicked();

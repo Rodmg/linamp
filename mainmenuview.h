@@ -26,6 +26,7 @@ private:
     void fileSourceClicked();
     void btSourceClicked();
     void spotifySourceClicked();
+    void cdSourceClicked();
 
     QProcess *shutdownProcess = nullptr;
     void shutdown();

@@ -5,6 +5,7 @@
 #include <QStackedLayout>
 #include <QProcess>
 #include "audiosourcebluetooth.h"
+#include "audiosourcecd.h"
 #include "audiosourcecoordinator.h"
 #include "audiosourcefile.h"
 #include "controlbuttonswidget.h"
@@ -30,6 +31,7 @@ public:
     AudioSourceCoordinator *coordinator;
     AudioSourceFile *fileSource;
     AudioSourceBluetooth *btSource;
+    AudioSourceCD *cdSource;
 
 public slots:
     void showPlayer();

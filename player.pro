@@ -8,11 +8,13 @@ QT += network \
       concurrent \
       dbus
 
-LIBS += -ltag -lasound -lpulse -lpulse-simple
+LIBS += -ltag -lasound -lpulse -lpulse-simple -L/usr/lib/python3.11/config-3.11-x86_64-linux-gnu/ -lpython3.11
+INCLUDEPATH += /usr/include/python3.11
 
 HEADERS = \
     audiosource.h \
     audiosourcebluetooth.h \
+    audiosourcecd.h \
     audiosourcecoordinator.h \
     audiosourcefile.h \
     controlbuttonswidget.h \
@@ -41,6 +43,7 @@ HEADERS = \
 SOURCES = main.cpp \
     audiosource.cpp \
     audiosourcebluetooth.cpp \
+    audiosourcecd.cpp \
     audiosourcecoordinator.cpp \
     audiosourcefile.cpp \
     controlbuttonswidget.cpp \
@@ -84,6 +87,12 @@ RESOURCES += \
 
 DISTFILES += \
     README.md \
+    install.sh \
+    python/__init__.py \
+    python/cdplayer.py \
+    python/requirements.txt \
     scale-skin.sh \
+    setup.sh \
     shutdown.sh \
+    start.sh \
     styles/controlbuttonswidget.shuffleButton.4x.qss
