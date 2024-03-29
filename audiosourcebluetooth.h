@@ -25,12 +25,9 @@ public:
 public:
     BluezMediaInterface(const QString &service, const QString &path, const QDBusConnection &connection,
                     QObject *parent = nullptr):
-        QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
-    {
-        //qDBusRegisterMetaType<Track>();
-    }
+        QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent) {}
 
-    virtual ~BluezMediaInterface() { }
+    virtual ~BluezMediaInterface() {}
 
     Q_PROPERTY(QVariantMap Track READ track)
     QVariantMap track() const
@@ -114,6 +111,12 @@ private:
     void stopSpectrum();
 
     void fetchBtMetadata();
+
+    // DBus connection utils
+    QString findDbusMediaObjPath(); // returns empty string if not found
+    bool setupDbusIface();
+    bool isDbusReady();
+    void dbusCall(QString method);
 
 
 private slots:

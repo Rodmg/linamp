@@ -19,29 +19,7 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
     dataEmitTimer->setInterval(33); // around 30 fps
     connect(dataEmitTimer, &QTimer::timeout, this, &AudioSourceBluetooth::emitData);
 
-    // Init dbus
-    qDBusRegisterMetaType<QVariantMap>();
-    auto dbusConn = QDBusConnection::systemBus();
-    if(!dbusConn.isConnected()) {
-        qDebug() << "Cannot connect to DBuss";
-        return;
-    } else {
-        qDebug() << "CONNECTED!";
-    }
-
-    this->dbusIface = new BluezMediaInterface(SERVICE_NAME, OBJ_PATH, dbusConn, this);
-    if(!this->dbusIface->isValid()) {
-        qDebug() << "DBus interface is invalid";
-        return;
-    }
-
-    bool success = dbusConn.connect(SERVICE_NAME, OBJ_PATH, "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(handleBtPropertyChange(QString, QVariantMap, QStringList)));
-
-    if(success) {
-        qDebug() << "SUCCESS!";
-    } else {
-        qDebug() << "MEH";
-    }
+    setupDbusIface();
 
     // Track progress with timer
     progressRefreshTimer = new QTimer(this);
@@ -184,7 +162,7 @@ void AudioSourceBluetooth::handleBtPropertyChange(QString name, QVariantMap map,
 
 void AudioSourceBluetooth::fetchBtMetadata()
 {
-    if(!this->dbusIface->isValid()) {
+    if(!isDbusReady()) {
         return;
     }
 
@@ -263,9 +241,7 @@ void AudioSourceBluetooth::handlePl()
 
 void AudioSourceBluetooth::handlePrevious()
 {
-    if(this->dbusIface->isValid()) {
-        this->dbusIface->call("Previous");
-    }
+    dbusCall("Previous");
 }
 
 void AudioSourceBluetooth::handlePlay()
@@ -273,9 +249,7 @@ void AudioSourceBluetooth::handlePlay()
     startSpectrum();
     progressRefreshTimer->start();
     progressInterpolateTimer->start();
-    if(this->dbusIface->isValid()) {
-        this->dbusIface->call("Play");
-    }
+    dbusCall("Play");
     emit playbackStateChanged(MediaPlayer::PlayingState);
     fetchBtMetadata();
 }
@@ -285,9 +259,7 @@ void AudioSourceBluetooth::handlePause()
     stopSpectrum();
     progressRefreshTimer->stop();
     progressInterpolateTimer->stop();
-    if(this->dbusIface->isValid()) {
-        this->dbusIface->call("Pause");
-    }
+    dbusCall("Pause");
     emit playbackStateChanged(MediaPlayer::PausedState);
 }
 
@@ -296,17 +268,13 @@ void AudioSourceBluetooth::handleStop()
     stopSpectrum();
     progressRefreshTimer->stop();
     progressInterpolateTimer->stop();
-    if(this->dbusIface->isValid()) {
-        this->dbusIface->call("Stop");
-    }
+    dbusCall("Stop");
     emit playbackStateChanged(MediaPlayer::StoppedState);
 }
 
 void AudioSourceBluetooth::handleNext()
 {
-    if(this->dbusIface->isValid()) {
-        this->dbusIface->call("Next");
-    }
+    dbusCall("Next");
 }
 
 void AudioSourceBluetooth::handleOpen()
@@ -318,7 +286,7 @@ void AudioSourceBluetooth::handleShuffle()
 {
     this->isShuffleEnabled = !this->isShuffleEnabled;
     emit shuffleEnabledChanged(this->isShuffleEnabled);
-    if(this->dbusIface->isValid()) {
+    if(isDbusReady()) {
         this->dbusIface->setShuffle(this->isShuffleEnabled ? "alltracks" : "off");
     }
 }
@@ -327,7 +295,7 @@ void AudioSourceBluetooth::handleRepeat()
 {
     this->isRepeatEnabled = !this->isRepeatEnabled;
     emit repeatEnabledChanged(this->isRepeatEnabled);
-    if(this->dbusIface->isValid()) {
+    if(isDbusReady()) {
         this->dbusIface->setRepeat(this->isRepeatEnabled ? "alltracks" : "off");
     }
 }
@@ -381,4 +349,51 @@ void AudioSourceBluetooth::emitData()
     sample->clear();
     delete sampleStream;
     sampleStream = new QDataStream(sample, QIODevice::WriteOnly);
+}
+
+QString AudioSourceBluetooth::findDbusMediaObjPath()
+{
+
+}
+
+bool AudioSourceBluetooth::setupDbusIface()
+{
+    // Init dbus
+    auto dbusConn = QDBusConnection::systemBus();
+    if(!dbusConn.isConnected()) {
+        qDebug() << "Cannot connect to DBuss";
+        return false;
+    } else {
+        qDebug() << "CONNECTED!";
+    }
+
+    this->dbusIface = new BluezMediaInterface(SERVICE_NAME, OBJ_PATH, dbusConn, this);
+    if(!this->dbusIface->isValid()) {
+        qDebug() << "DBus interface is invalid";
+        return false;
+    }
+
+    bool success = dbusConn.connect(SERVICE_NAME, OBJ_PATH, "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(handleBtPropertyChange(QString, QVariantMap, QStringList)));
+
+    if(success) {
+        qDebug() << "SUCCESS!";
+    } else {
+        qDebug() << "MEH";
+    }
+    return success;
+}
+
+bool AudioSourceBluetooth::isDbusReady()
+{
+    if(this->dbusIface == nullptr) {
+        return false;
+    }
+    return this->dbusIface->isValid();
+}
+
+void AudioSourceBluetooth::dbusCall(QString method)
+{
+    if(isDbusReady()) {
+        this->dbusIface->call(method);
+    }
 }
