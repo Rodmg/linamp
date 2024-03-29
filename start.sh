@@ -2,5 +2,5 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-source venv/bin/activate
-DISPLAY=:0 PYTHONPATH=python $SCRIPT_DIR/player
+source $SCRIPT_DIR/venv/bin/activate
+DISPLAY=:0 PYTHONPATH=$SCRIPT_DIR/python $SCRIPT_DIR/player
