@@ -36,6 +36,10 @@ private:
 
     PyObject *cdplayerModule;
     PyObject *cdplayer;
+
+    QTimer *detectDiscInsertionTimer = nullptr;
+    void pollDetectDiscInsertion();
+
 };
 
 #endif // AUDIOSOURCECD_H

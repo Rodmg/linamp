@@ -23,7 +23,13 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     cdplayer = PyObject_CallNoArgs(CDPlayerClass);
 
     PyObject_CallMethod(cdplayer, "load", NULL);
-    PyObject_CallMethod(cdplayer, "play", NULL);
+
+
+    // Timer to detect disc insertion and load
+    detectDiscInsertionTimer = new QTimer(this);
+    detectDiscInsertionTimer->setInterval(5000);
+    connect(detectDiscInsertionTimer, &QTimer::timeout, this, &AudioSourceCD::pollDetectDiscInsertion);
+    detectDiscInsertionTimer->start();
 }
 
 AudioSourceCD::~AudioSourceCD()
@@ -31,6 +37,13 @@ AudioSourceCD::~AudioSourceCD()
     //stopPACapture();
     Py_FinalizeEx();
 }
+
+void AudioSourceCD::pollDetectDiscInsertion()
+{
+    if(cdplayer == nullptr) return;
+    PyObject_CallMethod(cdplayer, "detect_disc_insertion", NULL);
+}
+
 
 void AudioSourceCD::activate()
 {
@@ -63,32 +76,38 @@ void AudioSourceCD::handlePl()
 
 void AudioSourceCD::handlePrevious()
 {
-
+    if(cdplayer == nullptr) return;
+    PyObject_CallMethod(cdplayer, "prev", NULL);
 }
 
 void AudioSourceCD::handlePlay()
 {
-
+    if(cdplayer == nullptr) return;
+    PyObject_CallMethod(cdplayer, "play", NULL);
 }
 
 void AudioSourceCD::handlePause()
 {
-
+    if(cdplayer == nullptr) return;
+    PyObject_CallMethod(cdplayer, "pause", NULL);
 }
 
 void AudioSourceCD::handleStop()
 {
-
+    if(cdplayer == nullptr) return;
+    PyObject_CallMethod(cdplayer, "stop", NULL);
 }
 
 void AudioSourceCD::handleNext()
 {
-
+    if(cdplayer == nullptr) return;
+    PyObject_CallMethod(cdplayer, "next", NULL);
 }
 
 void AudioSourceCD::handleOpen()
 {
-
+    if(cdplayer == nullptr) return;
+    PyObject_CallMethod(cdplayer, "eject", NULL);
 }
 
 void AudioSourceCD::handleShuffle()

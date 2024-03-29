@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 source venv/bin/activate
-./player
+PYTHONPATH=python ./player
