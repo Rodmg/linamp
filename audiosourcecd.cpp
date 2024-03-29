@@ -4,7 +4,7 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     : AudioSource{parent}
 {
     Py_Initialize();
-    PyObject *pModuleName = PyUnicode_DecodeFSDefault("python/cdplayer");
+    PyObject *pModuleName = PyUnicode_DecodeFSDefault("cdplayer");
     cdplayerModule = PyImport_Import(pModuleName);
     Py_DECREF(pModuleName);
 
