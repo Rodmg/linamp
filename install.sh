@@ -12,5 +12,6 @@ cp player ~/linamp/
 cp shutdown.sh ~/linamp/
 cp start.sh ~/linamp/
 cp -r venv ~/linamp/
+cp -r python ~/linamp/
 
 echo "Done!"
