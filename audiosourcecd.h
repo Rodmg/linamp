@@ -38,7 +38,11 @@ private:
     PyObject *cdplayer;
 
     QTimer *detectDiscInsertionTimer = nullptr;
+    bool pollInProgress = false;
     void pollDetectDiscInsertion();
+
+    void refreshStatus();
+    void refreshTrackInfo();
 
 };
 

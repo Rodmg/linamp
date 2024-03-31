@@ -90,6 +90,7 @@ DISTFILES += \
     install.sh \
     python/__init__.py \
     python/cdplayer.py \
+    python/mock_cdplayer.py \
     python/requirements.txt \
     scale-skin.sh \
     setup.sh \
