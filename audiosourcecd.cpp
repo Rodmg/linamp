@@ -27,7 +27,7 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     detectDiscInsertionTimer = new QTimer(this);
     detectDiscInsertionTimer->setInterval(5000);
     connect(detectDiscInsertionTimer, &QTimer::timeout, this, &AudioSourceCD::pollDetectDiscInsertion);
-    //detectDiscInsertionTimer->start();
+    detectDiscInsertionTimer->start();
 }
 
 AudioSourceCD::~AudioSourceCD()
@@ -51,7 +51,7 @@ void AudioSourceCD::pollDetectDiscInsertion()
     } else {
         qDebug() << ">>>>pollDetectDiscInsertion: Not a bool";
     }
-
+    Py_DECREF(pyDiscDetected);
     pollInProgress = false;
 }
 
@@ -212,16 +212,20 @@ void AudioSourceCD::refreshTrackInfo()
     metadata.insert(QMediaMetaData::AlbumTitle, album);
     metadata.insert(QMediaMetaData::TrackNumber, trackNumber);
     metadata.insert(QMediaMetaData::Duration, duration);
+    metadata.insert(QMediaMetaData::AudioBitRate, 1411 * 1000);
+    metadata.insert(QMediaMetaData::AudioCodec, 44100); // Using AudioCodec as sample rate for now
 
     emit this->durationChanged(duration);
     emit this->metadataChanged(metadata);
 
+    /*
     Py_DECREF(pyTrackNumber);
     Py_DECREF(pyArtist);
     Py_DECREF(pyAlbum);
     Py_DECREF(pyTitle);
     Py_DECREF(pyDuration);
     Py_DECREF(pyTrackInfo);
+    */
 
 }
 
