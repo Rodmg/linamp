@@ -1,5 +1,16 @@
 #include "audiosourcecd.h"
 
+// Includes for spectrum
+#include "spectrumwidget.h"
+#include "util.h"
+#include "systemaudiocapture_pulseaudio.h"
+extern QMutex *sampleMutex;
+extern QByteArray *sample;
+extern QDataStream *sampleStream;
+// END Includes for spectrum
+
+#define ASCD_PROGRESS_INTERPOLATION_TIME 100
+
 AudioSourceCD::AudioSourceCD(QObject *parent)
     : AudioSource{parent}
 {
@@ -44,8 +55,16 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     progressRefreshTimer->setInterval(1000);
     connect(progressRefreshTimer, &QTimer::timeout, this, &AudioSourceCD::refreshProgress);
     progressInterpolateTimer = new QTimer(this);
-    progressInterpolateTimer->setInterval(33);
+    progressInterpolateTimer->setInterval(ASCD_PROGRESS_INTERPOLATION_TIME);
     connect(progressInterpolateTimer, &QTimer::timeout, this, &AudioSourceCD::interpolateProgress);
+
+    // Spectrum Analyzer start
+    sampleMutex = new QMutex();
+    sample = new QByteArray();
+    sampleStream = new QDataStream(sample, QIODevice::WriteOnly);
+    dataEmitTimer = new QTimer(this);
+    dataEmitTimer->setInterval(33); // around 30 fps
+    connect(dataEmitTimer, &QTimer::timeout, this, &AudioSourceCD::emitData);
 
     PyGILState_Release(state);
 }
@@ -124,7 +143,7 @@ void AudioSourceCD::activate()
 
 void AudioSourceCD::deactivate()
 {
-    //stopSpectrum();
+    stopSpectrum();
     emit playbackStateChanged(MediaPlayer::StoppedState);
     if(cdplayer == nullptr) return;
     auto state = PyGILState_Ensure();
@@ -232,13 +251,6 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 {
     if(cdplayer == nullptr) return;
     auto state = PyGILState_Ensure();
-    PyObject *pyStatus = PyObject_CallMethod(cdplayer, "get_status", NULL);
-    if(pyStatus == nullptr) {
-        PyGILState_Release(state);
-        return;
-    }
-    QString status(PyUnicode_AsUTF8(pyStatus));
-    Py_DECREF(pyStatus);
 
     // Get shuffle status
     PyObject *pyShuffleEnabled = PyObject_CallMethod(cdplayer, "get_shuffle", NULL);
@@ -256,6 +268,14 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
     }
     Py_DECREF(pyRepeatEnabled);
 
+    PyObject *pyStatus = PyObject_CallMethod(cdplayer, "get_status", NULL);
+    if(pyStatus == nullptr) {
+        PyGILState_Release(state);
+        return;
+    }
+    QString status(PyUnicode_AsUTF8(pyStatus));
+    Py_DECREF(pyStatus);
+
     PyGILState_Release(state);
 
     qDebug() << ">>>Status" << status;
@@ -270,6 +290,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 
         progressRefreshTimer->stop();
         progressInterpolateTimer->stop();
+        stopSpectrum();
     }
 
     if(status == "stopped" /*&& this->currentStatus != "stopped"*/) {
@@ -278,6 +299,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 
         progressRefreshTimer->stop();
         progressInterpolateTimer->stop();
+        stopSpectrum();
     }
 
     if(status == "playing" /*&& this->currentStatus != "playing"*/) {
@@ -285,6 +307,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 
         progressRefreshTimer->start();
         progressInterpolateTimer->start();
+        startSpectrum();
     }
 
     if(status == "paused" /*&& this->currentStatus != "paused"*/) {
@@ -292,6 +315,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 
         progressRefreshTimer->stop();
         progressInterpolateTimer->stop();
+        stopSpectrum();
     }
 
     this->currentStatus = status;
@@ -380,7 +404,53 @@ void AudioSourceCD::refreshProgress()
 
 void AudioSourceCD::interpolateProgress()
 {
-    this->currentProgress += 33;
+    this->currentProgress += ASCD_PROGRESS_INTERPOLATION_TIME;
     emit this->positionChanged(this->currentProgress);
 }
 
+
+// Spectrum analyzer functions
+
+void AudioSourceCD::emitData()
+{
+    QMutexLocker l(sampleMutex);
+
+    if(sample->length() < DFT_SIZE * 4) {
+        return;
+    }
+
+    if(!isValidSample(sample)) {
+        return;
+    }
+
+    //dbg
+    /*QString dbgsample = "";
+    for(int i = 0; i < 100; i++) {
+        dbgsample += QString(sample->at(i)) + ",";
+    }
+    qDebug() << ">>>>>" << dbgsample;
+    */
+    // end dbg
+
+    QAudioFormat format;
+    format.setSampleFormat(QAudioFormat::Int16);
+    format.setSampleRate(PA_SAMPLE_RATE);
+    format.setChannelConfig(QAudioFormat::ChannelConfigStereo);
+    format.setChannelCount(PA_CHANNELS);
+    emit dataEmitted(*sample, format);
+    sample->clear();
+    delete sampleStream;
+    sampleStream = new QDataStream(sample, QIODevice::WriteOnly);
+}
+
+void AudioSourceCD::startSpectrum()
+{
+    QtConcurrent::run(startPACapture);
+    dataEmitTimer->start();
+}
+
+void AudioSourceCD::stopSpectrum()
+{
+    stopPACapture();
+    dataEmitTimer->stop();
+}

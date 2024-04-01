@@ -58,7 +58,14 @@ private:
     void refreshStatus(bool shouldRefreshTrackInfo = true);
     void refreshTrackInfo();
 
-    int currentTrackNumber = -1;
+    quint32 currentTrackNumber = std::numeric_limits<quint32>::max();
+
+    // Spectrum analizer functions
+    QTimer *dataEmitTimer = nullptr;
+    void emitData();
+    void startSpectrum();
+    void stopSpectrum();
+
 
 };
 

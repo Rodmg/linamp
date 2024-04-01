@@ -127,6 +127,7 @@ class CDPlayer:
 
     def __init__(self, device="/dev/cdrom") -> None:
         self._device = device
+        self._detect_disc_insertion_is_first_call = True
         self.vlc_instance = vlc.Instance()
         self.player = None
         self.media_list = None
@@ -316,7 +317,9 @@ class CDPlayer:
     def detect_disc_insertion(self):
         d = cdio.Device(driver_id=pycdio.DRIVER_UNKNOWN)
         # This is True every time media changed between the last time you called it and now
-        if d.get_media_changed():
+        # If this is the first tiem we call this, force check
+        if d.get_media_changed() or self._detect_disc_insertion_is_first_call:
+            self._detect_disc_insertion_is_first_call = False
             # This raises an exception "++ WARN: error in ioctl CDROMREADTOCHDR: No medium found" if no disc is inserted
             try:
                 num_tracks = d.get_num_tracks()
