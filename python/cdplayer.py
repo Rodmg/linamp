@@ -280,7 +280,11 @@ class CDPlayer:
             return "stopped"
         state = self.player.get_state()
 
-        if state == vlc.State.Playing:
+        if (
+            state == vlc.State.Playing
+            or state == vlc.State.Buffering
+            or state == vlc.State.Opening
+        ):
             return "playing"
         if state == vlc.State.Stopped:
             return "stopped"
