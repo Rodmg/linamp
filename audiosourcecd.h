@@ -58,6 +58,8 @@ private:
     void refreshStatus(bool shouldRefreshTrackInfo = true);
     void refreshTrackInfo();
 
+    int currentTrackNumber = -1;
+
 };
 
 #endif // AUDIOSOURCECD_H

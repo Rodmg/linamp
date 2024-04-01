@@ -161,7 +161,7 @@ void AudioSourceCD::handlePause()
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "pause", NULL);
     PyGILState_Release(state);
-    refreshStatus(false);
+    refreshStatus();
 }
 
 void AudioSourceCD::handleStop()
@@ -170,7 +170,7 @@ void AudioSourceCD::handleStop()
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "stop", NULL);
     PyGILState_Release(state);
-    refreshStatus(false);
+    refreshStatus();
 }
 
 void AudioSourceCD::handleNext()
@@ -260,7 +260,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 
     qDebug() << ">>>Status" << status;
 
-    if(status == "no-disc" && this->currentStatus != "no-disc") {
+    if(status == "no-disc" /*&& this->currentStatus != "no-disc"*/) {
         QMediaMetaData metadata = QMediaMetaData{};
         metadata.insert(QMediaMetaData::Title, "NO DISC");
         emit metadataChanged(metadata);
@@ -272,7 +272,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         progressInterpolateTimer->stop();
     }
 
-    if(status == "stopped" && this->currentStatus != "stopped") {
+    if(status == "stopped" /*&& this->currentStatus != "stopped"*/) {
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
 
@@ -280,14 +280,14 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         progressInterpolateTimer->stop();
     }
 
-    if(status == "playing" && this->currentStatus != "playing") {
+    if(status == "playing" /*&& this->currentStatus != "playing"*/) {
         emit playbackStateChanged(MediaPlayer::PlayingState);
 
         progressRefreshTimer->start();
         progressInterpolateTimer->start();
     }
 
-    if(status == "paused" && this->currentStatus != "paused") {
+    if(status == "paused" /*&& this->currentStatus != "paused"*/) {
         emit playbackStateChanged(MediaPlayer::PausedState);
 
         progressRefreshTimer->stop();
@@ -321,6 +321,14 @@ void AudioSourceCD::refreshTrackInfo()
     PyObject *pyDuration = PyTuple_GetItem(pyTrackInfo, 4);
 
     quint32 trackNumber = PyLong_AsLong(pyTrackNumber);
+
+    if(trackNumber == this->currentTrackNumber) {
+        // No need to refresh
+        Py_DECREF(pyTrackInfo);
+        PyGILState_Release(state);
+        return;
+    }
+
     QString artist(PyUnicode_AsUTF8(pyArtist));
     QString album(PyUnicode_AsUTF8(pyAlbum));
     QString title(PyUnicode_AsUTF8(pyTitle));
@@ -335,6 +343,7 @@ void AudioSourceCD::refreshTrackInfo()
     metadata.insert(QMediaMetaData::AudioBitRate, 1411 * 1000);
     metadata.insert(QMediaMetaData::AudioCodec, 44100); // Using AudioCodec as sample rate for now
 
+    this->currentTrackNumber = trackNumber;
     emit this->durationChanged(duration);
     emit this->metadataChanged(metadata);
 
@@ -347,6 +356,8 @@ void AudioSourceCD::refreshTrackInfo()
 void AudioSourceCD::refreshProgress()
 {
     if(cdplayer == nullptr) return;
+
+    refreshTrackInfo();
 
     auto state = PyGILState_Ensure();
 
