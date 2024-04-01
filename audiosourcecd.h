@@ -38,6 +38,12 @@ private:
     PyObject *cdplayerModule;
     PyObject *cdplayer;
 
+    QTimer *progressRefreshTimer = nullptr;
+    QTimer *progressInterpolateTimer = nullptr;
+    quint32 currentProgress = 0;
+    void refreshProgress();
+    void interpolateProgress();
+
     QTimer *detectDiscInsertionTimer = nullptr;
     bool pollInProgress = false;
     void pollDetectDiscInsertion();
@@ -45,8 +51,11 @@ private:
     void handlePollResult();
     QFutureWatcher<bool> pollResultWatcher;
 
+    QString currentStatus; // Status as it comes from python
+    bool isShuffleEnabled = false;
+    bool isRepeatEnabled = false;
 
-    void refreshStatus();
+    void refreshStatus(bool shouldRefreshTrackInfo = true);
     void refreshTrackInfo();
 
 };

@@ -39,6 +39,14 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     // Watch for async disc detection results
     connect(&pollResultWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceCD::handlePollResult);
 
+    // Track progress with timer
+    progressRefreshTimer = new QTimer(this);
+    progressRefreshTimer->setInterval(1000);
+    connect(progressRefreshTimer, &QTimer::timeout, this, &AudioSourceCD::refreshProgress);
+    progressInterpolateTimer = new QTimer(this);
+    progressInterpolateTimer->setInterval(33);
+    connect(progressInterpolateTimer, &QTimer::timeout, this, &AudioSourceCD::interpolateProgress);
+
     PyGILState_Release(state);
 }
 
@@ -126,7 +134,7 @@ void AudioSourceCD::deactivate()
 
 void AudioSourceCD::handlePl()
 {
-
+    emit plEnabledChanged(false);
 }
 
 void AudioSourceCD::handlePrevious()
@@ -153,7 +161,7 @@ void AudioSourceCD::handlePause()
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "pause", NULL);
     PyGILState_Release(state);
-    refreshStatus();
+    refreshStatus(false);
 }
 
 void AudioSourceCD::handleStop()
@@ -162,7 +170,7 @@ void AudioSourceCD::handleStop()
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "stop", NULL);
     PyGILState_Release(state);
-    refreshStatus();
+    refreshStatus(false);
 }
 
 void AudioSourceCD::handleNext()
@@ -185,20 +193,42 @@ void AudioSourceCD::handleOpen()
 
 void AudioSourceCD::handleShuffle()
 {
+    if(cdplayer == nullptr) return;
 
+    this->isShuffleEnabled = !this->isShuffleEnabled;
+
+    auto state = PyGILState_Ensure();
+    PyObject_CallMethod(cdplayer, "set_shuffle", "p", this->isShuffleEnabled);
+    PyGILState_Release(state);
+
+    refreshStatus(false);
 }
 
 void AudioSourceCD::handleRepeat()
 {
+    if(cdplayer == nullptr) return;
 
+    this->isRepeatEnabled = !this->isRepeatEnabled;
+
+    auto state = PyGILState_Ensure();
+    PyObject_CallMethod(cdplayer, "set_repeat", "p", this->isRepeatEnabled);
+    PyGILState_Release(state);
+
+    refreshStatus(false);
 }
 
 void AudioSourceCD::handleSeek(int mseconds)
 {
+    if(cdplayer == nullptr) return;
 
+    auto state = PyGILState_Ensure();
+    PyObject_CallMethod(cdplayer, "seek", "l", mseconds);
+    PyGILState_Release(state);
+
+    refreshStatus(false);
 }
 
-void AudioSourceCD::refreshStatus()
+void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 {
     if(cdplayer == nullptr) return;
     auto state = PyGILState_Ensure();
@@ -209,33 +239,64 @@ void AudioSourceCD::refreshStatus()
     }
     QString status(PyUnicode_AsUTF8(pyStatus));
     Py_DECREF(pyStatus);
+
+    // Get shuffle status
+    PyObject *pyShuffleEnabled = PyObject_CallMethod(cdplayer, "get_shuffle", NULL);
+    if(PyBool_Check(pyShuffleEnabled)) {
+        this->isShuffleEnabled = PyObject_IsTrue(pyShuffleEnabled);
+        emit shuffleEnabledChanged(this->isShuffleEnabled);
+    }
+    Py_DECREF(pyShuffleEnabled);
+
+    // Get repeat status
+    PyObject *pyRepeatEnabled = PyObject_CallMethod(cdplayer, "get_repeat", NULL);
+    if(PyBool_Check(pyRepeatEnabled)) {
+        this->isRepeatEnabled = PyObject_IsTrue(pyRepeatEnabled);
+        emit repeatEnabledChanged(this->isRepeatEnabled);
+    }
+    Py_DECREF(pyRepeatEnabled);
+
     PyGILState_Release(state);
 
     qDebug() << ">>>Status" << status;
 
-    if(status == "no-disc") {
+    if(status == "no-disc" && this->currentStatus != "no-disc") {
         QMediaMetaData metadata = QMediaMetaData{};
         metadata.insert(QMediaMetaData::Title, "NO DISC");
         emit metadataChanged(metadata);
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
         emit durationChanged(0);
+
+        progressRefreshTimer->stop();
+        progressInterpolateTimer->stop();
     }
 
-    if(status == "stopped") {
+    if(status == "stopped" && this->currentStatus != "stopped") {
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
+
+        progressRefreshTimer->stop();
+        progressInterpolateTimer->stop();
     }
 
-    if(status == "playing") {
+    if(status == "playing" && this->currentStatus != "playing") {
         emit playbackStateChanged(MediaPlayer::PlayingState);
+
+        progressRefreshTimer->start();
+        progressInterpolateTimer->start();
     }
 
-    if(status == "paused") {
+    if(status == "paused" && this->currentStatus != "paused") {
         emit playbackStateChanged(MediaPlayer::PausedState);
+
+        progressRefreshTimer->stop();
+        progressInterpolateTimer->stop();
     }
 
-    if(status != "no-disc") {
+    this->currentStatus = status;
+
+    if(status != "no-disc" && shouldRefreshTrackInfo) {
         refreshTrackInfo();
     }
 }
@@ -281,5 +342,34 @@ void AudioSourceCD::refreshTrackInfo()
 
     PyGILState_Release(state);
 
+}
+
+void AudioSourceCD::refreshProgress()
+{
+    if(cdplayer == nullptr) return;
+
+    auto state = PyGILState_Ensure();
+
+    PyObject *pyPosition = PyObject_CallMethod(cdplayer, "get_postition", NULL);
+    if(pyPosition == nullptr) {
+        qDebug() << ">>> Couldn't get track position";
+        PyErr_Print();
+        PyGILState_Release(state);
+        return;
+    }
+    if(PyLong_Check(pyPosition)) {
+        quint32 position = PyLong_AsLong(pyPosition);
+        this->currentProgress = position;
+        emit this->positionChanged(this->currentProgress);
+    }
+    Py_DECREF(pyPosition);
+
+    PyGILState_Release(state);
+}
+
+void AudioSourceCD::interpolateProgress()
+{
+    this->currentProgress += 33;
+    emit this->positionChanged(this->currentProgress);
 }
 
