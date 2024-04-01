@@ -4,6 +4,11 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     : AudioSource{parent}
 {
     Py_Initialize();
+    PyEval_InitThreads();
+    PyEval_SaveThread();
+
+    auto state = PyGILState_Ensure();
+
     //PyObject *pModuleName = PyUnicode_DecodeFSDefault("cdplayer"); TODO
     PyObject *pModuleName = PyUnicode_DecodeFSDefault("mock_cdplayer");
     cdplayerModule = PyImport_Import(pModuleName);
@@ -11,6 +16,7 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
 
     if(cdplayerModule == nullptr) {
         qDebug() << "Couldn't load python module";
+        PyGILState_Release(state);
         return;
     }
 
@@ -18,6 +24,7 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
 
     if(!CDPlayerClass || !PyCallable_Check(CDPlayerClass)) {
         qDebug() << "Error getting CDPlayer Class";
+        PyGILState_Release(state);
         return;
     }
 
@@ -28,32 +35,62 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     detectDiscInsertionTimer->setInterval(5000);
     connect(detectDiscInsertionTimer, &QTimer::timeout, this, &AudioSourceCD::pollDetectDiscInsertion);
     detectDiscInsertionTimer->start();
+
+    // Watch for async disc detection results
+    connect(&pollResultWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceCD::handlePollResult);
+
+    PyGILState_Release(state);
 }
 
 AudioSourceCD::~AudioSourceCD()
 {
     //stopPACapture();
+    PyGILState_Ensure();
     Py_Finalize();
 }
 
 void AudioSourceCD::pollDetectDiscInsertion()
 {
     if(pollInProgress) return;
-    if(cdplayer == nullptr) return;
     pollInProgress = true;
+    qDebug() << "pollDetectDiscInsertion: polling";
+    QFuture<bool> status = QtConcurrent::run(&AudioSourceCD::doPollDetectDiscInsertion, this);
+    //pollStatus = &status;
+    pollResultWatcher.setFuture(status);
+}
+
+void AudioSourceCD::handlePollResult()
+{
+    qDebug() << ">>>>POLL RESULT";
+    bool discDetected = pollResultWatcher.result();
+    if(discDetected) {
+        refreshStatus();
+    }
+    pollInProgress = false;
+}
+
+
+bool AudioSourceCD::doPollDetectDiscInsertion()
+{
+    bool discDetected = false;
+    if(cdplayer == nullptr) return discDetected;
+
+    auto state = PyGILState_Ensure();
     PyObject* pyDiscDetected = PyObject_CallMethod(cdplayer, "detect_disc_insertion", NULL);
+
     if(PyBool_Check(pyDiscDetected)) {
-        bool discDetected = PyObject_IsTrue(pyDiscDetected);
+        discDetected = PyObject_IsTrue(pyDiscDetected);
+
         qDebug() << ">>>Disct detected?:" << discDetected;
-        if(discDetected) {
-            refreshStatus();
-        }
     } else {
         qDebug() << ">>>>pollDetectDiscInsertion: Not a bool";
     }
-    Py_DECREF(pyDiscDetected);
-    pollInProgress = false;
+    if(pyDiscDetected) Py_DECREF(pyDiscDetected);
+    PyGILState_Release(state);
+    return discDetected;
 }
+
+
 
 
 void AudioSourceCD::activate()
@@ -82,7 +119,9 @@ void AudioSourceCD::deactivate()
     //stopSpectrum();
     emit playbackStateChanged(MediaPlayer::StoppedState);
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "stop", NULL);
+    PyGILState_Release(state);
 }
 
 void AudioSourceCD::handlePl()
@@ -93,42 +132,54 @@ void AudioSourceCD::handlePl()
 void AudioSourceCD::handlePrevious()
 {
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "prev", NULL);
+    PyGILState_Release(state);
     refreshStatus();
 }
 
 void AudioSourceCD::handlePlay()
 {
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "play", NULL);
+    PyGILState_Release(state);
     refreshStatus();
 }
 
 void AudioSourceCD::handlePause()
 {
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "pause", NULL);
+    PyGILState_Release(state);
     refreshStatus();
 }
 
 void AudioSourceCD::handleStop()
 {
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "stop", NULL);
+    PyGILState_Release(state);
     refreshStatus();
 }
 
 void AudioSourceCD::handleNext()
 {
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "next", NULL);
+    PyGILState_Release(state);
     refreshStatus();
 }
 
 void AudioSourceCD::handleOpen()
 {
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "eject", NULL);
+    PyGILState_Release(state);
     refreshStatus();
 }
 
@@ -150,10 +201,15 @@ void AudioSourceCD::handleSeek(int mseconds)
 void AudioSourceCD::refreshStatus()
 {
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject *pyStatus = PyObject_CallMethod(cdplayer, "get_status", NULL);
-    if(pyStatus == nullptr) return;
+    if(pyStatus == nullptr) {
+        PyGILState_Release(state);
+        return;
+    }
     QString status(PyUnicode_AsUTF8(pyStatus));
     Py_DECREF(pyStatus);
+    PyGILState_Release(state);
 
     qDebug() << ">>>Status" << status;
 
@@ -186,11 +242,14 @@ void AudioSourceCD::refreshStatus()
 
 void AudioSourceCD::refreshTrackInfo()
 {
+    qDebug() << ">>>>>>>>>Refresh track info";
     if(cdplayer == nullptr) return;
+    auto state = PyGILState_Ensure();
     PyObject *pyTrackInfo = PyObject_CallMethod(cdplayer, "get_current_track_info", NULL);
     if(pyTrackInfo == nullptr) {
         qDebug() << ">>> Couldn't get track info";
         PyErr_Print();
+        PyGILState_Release(state);
         return;
     }
     // format (tracknumber: int, artist, album, title, duration: int, is_data_track: bool)
@@ -218,14 +277,9 @@ void AudioSourceCD::refreshTrackInfo()
     emit this->durationChanged(duration);
     emit this->metadataChanged(metadata);
 
-    /*
-    Py_DECREF(pyTrackNumber);
-    Py_DECREF(pyArtist);
-    Py_DECREF(pyAlbum);
-    Py_DECREF(pyTitle);
-    Py_DECREF(pyDuration);
     Py_DECREF(pyTrackInfo);
-    */
+
+    PyGILState_Release(state);
 
 }
 

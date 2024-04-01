@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QtConcurrent>
 
 #include "audiosource.h"
 
@@ -40,6 +41,10 @@ private:
     QTimer *detectDiscInsertionTimer = nullptr;
     bool pollInProgress = false;
     void pollDetectDiscInsertion();
+    bool doPollDetectDiscInsertion();
+    void handlePollResult();
+    QFutureWatcher<bool> pollResultWatcher;
+
 
     void refreshStatus();
     void refreshTrackInfo();
