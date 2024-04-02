@@ -135,6 +135,8 @@ void AudioSourceCD::activate()
     emit repeatEnabledChanged(false);
 
     refreshStatus();
+    // Poll status
+    progressRefreshTimer->start();
 
     qDebug() << ">>>>CD Activated";
     // TODO
@@ -143,6 +145,7 @@ void AudioSourceCD::activate()
 
 void AudioSourceCD::deactivate()
 {
+    progressRefreshTimer->stop();
     stopSpectrum();
     emit playbackStateChanged(MediaPlayer::StoppedState);
     if(cdplayer == nullptr) return;
@@ -288,7 +291,6 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit positionChanged(0);
         emit durationChanged(0);
 
-        progressRefreshTimer->stop();
         progressInterpolateTimer->stop();
         stopSpectrum();
     }
@@ -297,7 +299,6 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
 
-        progressRefreshTimer->stop();
         progressInterpolateTimer->stop();
         stopSpectrum();
     }
@@ -305,7 +306,6 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
     if(status == "playing" /*&& this->currentStatus != "playing"*/) {
         emit playbackStateChanged(MediaPlayer::PlayingState);
 
-        progressRefreshTimer->start();
         progressInterpolateTimer->start();
         startSpectrum();
     }
@@ -313,7 +313,6 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
     if(status == "paused" /*&& this->currentStatus != "paused"*/) {
         emit playbackStateChanged(MediaPlayer::PausedState);
 
-        progressRefreshTimer->stop();
         progressInterpolateTimer->stop();
         stopSpectrum();
     }
@@ -381,7 +380,7 @@ void AudioSourceCD::refreshProgress()
 {
     if(cdplayer == nullptr) return;
 
-    refreshTrackInfo();
+    refreshStatus();
 
     auto state = PyGILState_Ensure();
 
@@ -445,12 +444,12 @@ void AudioSourceCD::emitData()
 
 void AudioSourceCD::startSpectrum()
 {
-    QtConcurrent::run(startPACapture);
-    dataEmitTimer->start();
+    //QtConcurrent::run(startPACapture);
+    //dataEmitTimer->start();
 }
 
 void AudioSourceCD::stopSpectrum()
 {
-    stopPACapture();
-    dataEmitTimer->stop();
+    //stopPACapture();
+    //dataEmitTimer->stop();
 }
