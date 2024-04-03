@@ -252,8 +252,11 @@ class CDPlayer:
 
     def eject(self):
         self.stop()
-        drive = cdio.Device(driver_id=pycdio.DRIVER_UNKNOWN)
-        drive.eject_media()
+        try:
+            drive = cdio.Device(driver_id=pycdio.DRIVER_UNKNOWN)
+            drive.eject_media()
+        except Exception as e:
+            print(f"Problem finding a CD-ROM. {e}")
         self.unload()
 
     # -------- Status Functions --------
@@ -324,18 +327,21 @@ class CDPlayer:
     # -------- Events to be called by a timer --------
 
     def detect_disc_insertion(self):
-        d = cdio.Device(driver_id=pycdio.DRIVER_UNKNOWN)
-        # This is True every time media changed between the last time you called it and now
-        # If this is the first tiem we call this, force check
-        if d.get_media_changed() or self._detect_disc_insertion_is_first_call:
-            self._detect_disc_insertion_is_first_call = False
-            # This raises an exception "++ WARN: error in ioctl CDROMREADTOCHDR: No medium found" if no disc is inserted
-            try:
-                num_tracks = d.get_num_tracks()
-                if num_tracks > 0:
-                    self.load()
-                    return True
-            except Exception:
-                return False
+        try:
+            d = cdio.Device(driver_id=pycdio.DRIVER_UNKNOWN)
+            # This is True every time media changed between the last time you called it and now
+            # If this is the first tiem we call this, force check
+            if d.get_media_changed() or self._detect_disc_insertion_is_first_call:
+                self._detect_disc_insertion_is_first_call = False
+                # This raises an exception "++ WARN: error in ioctl CDROMREADTOCHDR: No medium found" if no disc is inserted
+                try:
+                    num_tracks = d.get_num_tracks()
+                    if num_tracks > 0:
+                        self.load()
+                        return True
+                except Exception:
+                    return False
+        except Exception as e:
+            print(f"Problem finding a CD-ROM. {e}")
 
         return False
