@@ -299,7 +299,6 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
     }
 
     if(status == "stopped") {
-        messageClear();
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
 
