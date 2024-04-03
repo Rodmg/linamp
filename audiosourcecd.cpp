@@ -210,6 +210,8 @@ void AudioSourceCD::handleOpen()
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "eject", NULL);
     PyGILState_Release(state);
+    currentTrackNumber = std::numeric_limits<quint32>::max();
+    messageSet("Ejecting...", 4000);
     refreshStatus();
 }
 
@@ -220,7 +222,7 @@ void AudioSourceCD::handleShuffle()
     this->isShuffleEnabled = !this->isShuffleEnabled;
 
     auto state = PyGILState_Ensure();
-    PyObject_CallMethod(cdplayer, "set_shuffle", "p", this->isShuffleEnabled);
+    PyObject_CallMethod(cdplayer, "set_shuffle", "i", this->isShuffleEnabled);
     PyGILState_Release(state);
 
     refreshStatus(false);
@@ -233,7 +235,7 @@ void AudioSourceCD::handleRepeat()
     this->isRepeatEnabled = !this->isRepeatEnabled;
 
     auto state = PyGILState_Ensure();
-    PyObject_CallMethod(cdplayer, "set_repeat", "p", this->isRepeatEnabled);
+    PyObject_CallMethod(cdplayer, "set_repeat", "i", this->isRepeatEnabled);
     PyGILState_Release(state);
 
     refreshStatus(false);
@@ -284,6 +286,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
     qDebug() << ">>>Status" << status;
 
     if(status == "no-disc" /*&& this->currentStatus != "no-disc"*/) {
+        messageClear();
         QMediaMetaData metadata = QMediaMetaData{};
         metadata.insert(QMediaMetaData::Title, "NO DISC");
         emit metadataChanged(metadata);
@@ -295,7 +298,8 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         stopSpectrum();
     }
 
-    if(status == "stopped" /*&& this->currentStatus != "stopped"*/) {
+    if(status == "stopped") {
+        messageClear();
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
 
@@ -303,18 +307,40 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         stopSpectrum();
     }
 
-    if(status == "playing" /*&& this->currentStatus != "playing"*/) {
+    if(status == "playing") {
+        messageClear();
         emit playbackStateChanged(MediaPlayer::PlayingState);
 
         progressInterpolateTimer->start();
         startSpectrum();
     }
 
-    if(status == "paused" /*&& this->currentStatus != "paused"*/) {
+    if(status == "paused") {
+        messageClear();
         emit playbackStateChanged(MediaPlayer::PausedState);
 
         progressInterpolateTimer->stop();
         stopSpectrum();
+    }
+
+    if(status == "loading") {
+        emit playbackStateChanged(MediaPlayer::StoppedState);
+        emit positionChanged(0);
+
+        progressInterpolateTimer->stop();
+        stopSpectrum();
+
+        messageSet("Loading...", 3000);
+    }
+
+    if(status == "error") {
+        emit playbackStateChanged(MediaPlayer::StoppedState);
+        emit positionChanged(0);
+
+        progressInterpolateTimer->stop();
+        stopSpectrum();
+
+        messageSet("VLC Error", 5000);
     }
 
     this->currentStatus = status;

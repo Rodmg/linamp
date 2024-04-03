@@ -291,6 +291,11 @@ class CDPlayer:
         if state == vlc.State.Paused:
             return "paused"
 
+        if state == vlc.State.Buffering or state == vlc.State.Opening:
+            return "loading"
+        if state == vlc.State.Error:
+            return "error"
+
         return "stopped"
 
     def get_all_tracks_info(self):
