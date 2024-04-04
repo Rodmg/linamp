@@ -85,6 +85,10 @@ AudioSourceCD::~AudioSourceCD()
 
 void AudioSourceCD::pollDetectDiscInsertion()
 {
+    if(pollResultWatcher.isRunning() || loadWatcher.isRunning()) {
+        qDebug() << ">>>>>>>>>>>>>>>POLL Avoided";
+        return;
+    }
     if(pollInProgress) return;
     pollInProgress = true;
     qDebug() << "pollDetectDiscInsertion: polling";
@@ -98,6 +102,10 @@ void AudioSourceCD::handlePollResult()
     qDebug() << ">>>>POLL RESULT";
     bool discDetected = pollResultWatcher.result();
     if(discDetected) {
+        if(loadWatcher.isRunning()) {
+            qDebug() << ">>>>>>>>>>>>>>>LOAD Avoided";
+            return;
+        }
         emit this->messageSet("LOADING...", 5000);
         QFuture<void> status = QtConcurrent::run(&AudioSourceCD::doLoad, this);
         loadWatcher.setFuture(status);
@@ -243,6 +251,10 @@ void AudioSourceCD::handleOpen()
 {
     if(cdplayer == nullptr) return;
     qDebug() << "<<<<<EJECTING";
+    if(ejectWatcher.isRunning()) {
+        qDebug() << ">>>>>>>>>>>>>>>EJECT Avoided";
+        return;
+    }
     emit this->messageSet("EJECTING...", 4000);
     QFuture<void> status = QtConcurrent::run(&AudioSourceCD::doEject, this);
     ejectWatcher.setFuture(status);
