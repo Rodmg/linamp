@@ -50,6 +50,10 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     // Watch for async disc detection results
     connect(&pollResultWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceCD::handlePollResult);
 
+    // Handle finish ejecting
+    connect(&ejectWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceCD::handleEjectEnd);
+
+
     // Track progress with timer
     progressRefreshTimer = new QTimer(this);
     progressRefreshTimer->setInterval(1000);
@@ -96,7 +100,6 @@ void AudioSourceCD::handlePollResult()
     pollInProgress = false;
 }
 
-
 bool AudioSourceCD::doPollDetectDiscInsertion()
 {
     bool discDetected = false;
@@ -117,7 +120,20 @@ bool AudioSourceCD::doPollDetectDiscInsertion()
     return discDetected;
 }
 
+void AudioSourceCD::doEject()
+{
+    auto state = PyGILState_Ensure();
+    PyObject_CallMethod(cdplayer, "eject", NULL);
+    PyGILState_Release(state);
 
+}
+
+void AudioSourceCD::handleEjectEnd()
+{
+    emit this->messageClear();
+    currentTrackNumber = std::numeric_limits<quint32>::max();
+    refreshStatus();
+}
 
 
 void AudioSourceCD::activate()
@@ -209,11 +225,9 @@ void AudioSourceCD::handleOpen()
     if(cdplayer == nullptr) return;
     qDebug() << "<<<<<EJECTING";
     emit this->messageSet("EJECTING...", 4000);
-    auto state = PyGILState_Ensure();
-    PyObject_CallMethod(cdplayer, "eject", NULL);
-    PyGILState_Release(state);
-    currentTrackNumber = std::numeric_limits<quint32>::max();
-    refreshStatus();
+    QFuture<void> status = QtConcurrent::run(&AudioSourceCD::doEject, this);
+    ejectWatcher.setFuture(status);
+
 }
 
 void AudioSourceCD::handleShuffle()

@@ -44,12 +44,18 @@ private:
     void refreshProgress();
     void interpolateProgress();
 
+    // Detect disc insertion thread
     QTimer *detectDiscInsertionTimer = nullptr;
     bool pollInProgress = false;
     void pollDetectDiscInsertion();
     bool doPollDetectDiscInsertion();
     void handlePollResult();
     QFutureWatcher<bool> pollResultWatcher;
+
+    // Eject thread
+    void doEject();
+    void handleEjectEnd();
+    QFutureWatcher<void> ejectWatcher;
 
     QString currentStatus; // Status as it comes from python
     bool isShuffleEnabled = false;
