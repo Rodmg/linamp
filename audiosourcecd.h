@@ -52,6 +52,11 @@ private:
     void handlePollResult();
     QFutureWatcher<bool> pollResultWatcher;
 
+    // Load disc thread
+    void doLoad();
+    void handleLoadEnd();
+    QFutureWatcher<void> loadWatcher;
+
     // Eject thread
     void doEject();
     void handleEjectEnd();

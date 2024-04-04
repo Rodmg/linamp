@@ -50,6 +50,9 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     // Watch for async disc detection results
     connect(&pollResultWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceCD::handlePollResult);
 
+    // Handle load end
+    connect(&loadWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceCD::handleLoadEnd);
+
     // Handle finish ejecting
     connect(&ejectWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceCD::handleEjectEnd);
 
@@ -95,9 +98,12 @@ void AudioSourceCD::handlePollResult()
     qDebug() << ">>>>POLL RESULT";
     bool discDetected = pollResultWatcher.result();
     if(discDetected) {
-        refreshStatus();
+        emit this->messageSet("LOADING...", 5000);
+        QFuture<void> status = QtConcurrent::run(&AudioSourceCD::doLoad, this);
+        loadWatcher.setFuture(status);
+    } else {
+        pollInProgress = false;
     }
-    pollInProgress = false;
 }
 
 bool AudioSourceCD::doPollDetectDiscInsertion()
@@ -120,12 +126,25 @@ bool AudioSourceCD::doPollDetectDiscInsertion()
     return discDetected;
 }
 
+void AudioSourceCD::doLoad()
+{
+    auto state = PyGILState_Ensure();
+    PyObject_CallMethod(cdplayer, "load", NULL);
+    PyGILState_Release(state);
+}
+
+void AudioSourceCD::handleLoadEnd()
+{
+    emit this->messageClear();
+    refreshStatus();
+    pollInProgress = false;
+}
+
 void AudioSourceCD::doEject()
 {
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "eject", NULL);
     PyGILState_Release(state);
-
 }
 
 void AudioSourceCD::handleEjectEnd()

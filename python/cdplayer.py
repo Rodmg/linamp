@@ -201,6 +201,10 @@ class CDPlayer:
         self.disc_loaded = True
 
     def unload(self):
+        self.player.release()
+        self.media_list.release()
+        self.list_player.release()
+
         self.player = None
         self.media_list = None
         self.list_player = None
@@ -337,7 +341,6 @@ class CDPlayer:
                 try:
                     num_tracks = d.get_num_tracks()
                     if num_tracks > 0:
-                        self.load()
                         return True
                 except Exception:
                     return False
@@ -345,3 +348,7 @@ class CDPlayer:
             print(f"Problem finding a CD-ROM. {e}")
 
         return False
+
+    def detect_disc_insertion_and_load(self):
+        if self.detect_disc_insertion():
+            self.load()
