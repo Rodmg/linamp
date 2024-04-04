@@ -304,7 +304,10 @@ void PlayerView::setTrackInfo(const QString &info)
 {
     m_trackInfo = info;
 
-    ui->songInfoLabel->setText(info);
+    // Don't override info label if message is in flight
+    if(!messageTimer->isActive()) {
+        ui->songInfoLabel->setText(info);
+    }
 
     if (!m_statusInfo.isEmpty())
         setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));

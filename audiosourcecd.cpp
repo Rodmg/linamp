@@ -207,11 +207,12 @@ void AudioSourceCD::handleNext()
 void AudioSourceCD::handleOpen()
 {
     if(cdplayer == nullptr) return;
+    qDebug() << "<<<<<EJECTING";
+    emit this->messageSet("EJECTING...", 4000);
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "eject", NULL);
     PyGILState_Release(state);
     currentTrackNumber = std::numeric_limits<quint32>::max();
-    messageSet("Ejecting...", 4000);
     refreshStatus();
 }
 
@@ -285,8 +286,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 
     qDebug() << ">>>Status" << status;
 
-    if(status == "no-disc" /*&& this->currentStatus != "no-disc"*/) {
-        messageClear();
+    if(status == "no-disc") {
         QMediaMetaData metadata = QMediaMetaData{};
         metadata.insert(QMediaMetaData::Title, "NO DISC");
         emit metadataChanged(metadata);
@@ -307,7 +307,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
     }
 
     if(status == "playing") {
-        messageClear();
+        emit this->messageClear();
         emit playbackStateChanged(MediaPlayer::PlayingState);
 
         progressInterpolateTimer->start();
@@ -315,7 +315,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
     }
 
     if(status == "paused") {
-        messageClear();
+        emit this->messageClear();
         emit playbackStateChanged(MediaPlayer::PausedState);
 
         progressInterpolateTimer->stop();
@@ -329,7 +329,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         progressInterpolateTimer->stop();
         stopSpectrum();
 
-        messageSet("Loading...", 3000);
+        emit this->messageSet("LOADING...", 3000);
     }
 
     if(status == "error") {
@@ -339,7 +339,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         progressInterpolateTimer->stop();
         stopSpectrum();
 
-        messageSet("VLC Error", 5000);
+        emit this->messageSet("VLC ERROR", 5000);
     }
 
     this->currentStatus = status;
@@ -394,6 +394,8 @@ void AudioSourceCD::refreshTrackInfo()
     this->currentTrackNumber = trackNumber;
     emit this->durationChanged(duration);
     emit this->metadataChanged(metadata);
+
+    qDebug() << ">>>>>>>>METADATA changed";
 
     Py_DECREF(pyTrackInfo);
 
