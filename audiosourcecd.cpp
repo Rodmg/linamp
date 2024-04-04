@@ -15,7 +15,7 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
     : AudioSource{parent}
 {
     Py_Initialize();
-    PyEval_InitThreads();
+    // PyEval_InitThreads();
     PyEval_SaveThread();
 
     auto state = PyGILState_Ensure();
