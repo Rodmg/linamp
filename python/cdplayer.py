@@ -165,6 +165,9 @@ class CDPlayer:
     # -------- Control Functions --------
 
     def load(self):
+        # Make sure to start fresh
+        self.unload()
+
         try:
             artists, track_titles, album, n_tracks, durations, is_data_tracks = (
                 fetchdata()
@@ -201,9 +204,12 @@ class CDPlayer:
         self.disc_loaded = True
 
     def unload(self):
-        self.player.release()
-        self.media_list.release()
-        self.list_player.release()
+        if self.player is not None:
+            self.player.release()
+        if self.media_list is not None:
+            self.media_list.release()
+        if self.list_player is not None:
+            self.list_player.release()
 
         self.player = None
         self.media_list = None
@@ -331,6 +337,10 @@ class CDPlayer:
     # -------- Events to be called by a timer --------
 
     def detect_disc_insertion(self):
+        if self.disc_loaded:
+            # Don't try to detect if disc is already loaded
+            return False
+
         try:
             d = cdio.Device(driver_id=pycdio.DRIVER_UNKNOWN)
             # This is True every time media changed between the last time you called it and now
