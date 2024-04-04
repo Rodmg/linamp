@@ -67,7 +67,7 @@ private:
     bool isRepeatEnabled = false;
 
     void refreshStatus(bool shouldRefreshTrackInfo = true);
-    void refreshTrackInfo();
+    void refreshTrackInfo(bool force = false);
 
     quint32 currentTrackNumber = std::numeric_limits<quint32>::max();
 

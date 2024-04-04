@@ -167,12 +167,8 @@ void AudioSourceCD::handleEjectEnd()
 
 void AudioSourceCD::activate()
 {
-    QMediaMetaData metadata = QMediaMetaData{};
-    metadata.insert(QMediaMetaData::Title, "CD");
-
     emit playbackStateChanged(MediaPlayer::StoppedState);
     emit positionChanged(0);
-    emit metadataChanged(metadata);
     emit durationChanged(0);
     emit eqEnabledChanged(false);
     emit plEnabledChanged(false);
@@ -180,12 +176,9 @@ void AudioSourceCD::activate()
     emit repeatEnabledChanged(false);
 
     refreshStatus();
+    refreshTrackInfo(true);
     // Poll status
     progressRefreshTimer->start();
-
-    qDebug() << ">>>>CD Activated";
-    // TODO
-
 }
 
 void AudioSourceCD::deactivate()
@@ -396,7 +389,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
     }
 }
 
-void AudioSourceCD::refreshTrackInfo()
+void AudioSourceCD::refreshTrackInfo(bool force)
 {
     qDebug() << ">>>>>>>>>Refresh track info";
     if(cdplayer == nullptr) return;
@@ -417,7 +410,7 @@ void AudioSourceCD::refreshTrackInfo()
 
     quint32 trackNumber = PyLong_AsLong(pyTrackNumber);
 
-    if(trackNumber == this->currentTrackNumber) {
+    if(trackNumber == this->currentTrackNumber && !force) {
         // No need to refresh
         Py_DECREF(pyTrackInfo);
         PyGILState_Release(state);
