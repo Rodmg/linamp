@@ -283,7 +283,7 @@ void PlayerView::setMessage(QString message, qint64 timeout)
 
 void PlayerView::clearMessage()
 {
-    if(!messageTimer->isActive()) {
+    if(messageTimer->isActive()) {
         ui->songInfoLabel->setText(m_trackInfo);
         messageTimer->stop();
     }
