@@ -23,6 +23,11 @@ void AudioSourceCoordinator::setSource(int newSource)
         return;
     }
 
+    if (currentSource == newSource) {
+        qDebug() << "INFO: Source already selected";
+        return;
+    }
+
     if(currentSource >= 0) {
         // deactivate old source
         sources[currentSource]->deactivate();
@@ -104,7 +109,12 @@ void AudioSourceCoordinator::addSource(AudioSource *source, bool activate)
 {
     // Instantiate sources
     sources.append(source);
+    quint32 idx = sources.length() - 1;
+    connect(source, &AudioSource::requestActivation, [=]() {
+        qDebug() << ">>>>>>>>>>>>>Activation requested for idx: " << idx;
+        this->setSource(idx);
+    } );
     if(activate) {
-        setSource(sources.length() - 1);
+        setSource(idx);
     }
 }

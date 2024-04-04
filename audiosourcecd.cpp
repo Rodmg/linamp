@@ -100,12 +100,14 @@ void AudioSourceCD::pollDetectDiscInsertion()
 void AudioSourceCD::handlePollResult()
 {
     qDebug() << ">>>>POLL RESULT";
+
     bool discDetected = pollResultWatcher.result();
     if(discDetected) {
         if(loadWatcher.isRunning()) {
             qDebug() << ">>>>>>>>>>>>>>>LOAD Avoided";
             return;
         }
+        emit this->requestActivation(); // Request audiosource coordinator to select us
         emit this->messageSet("LOADING...", 5000);
         QFuture<void> status = QtConcurrent::run(&AudioSourceCD::doLoad, this);
         loadWatcher.setFuture(status);

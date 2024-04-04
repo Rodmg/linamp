@@ -23,6 +23,7 @@ signals:
     void repeatEnabledChanged(bool enabled);
     void messageSet(QString message, qint64 timeout);
     void messageClear();
+    void requestActivation(); // Asks the coordinator to be selected, coordinator can ignore this
 
 public slots:
     virtual void activate() = 0;
