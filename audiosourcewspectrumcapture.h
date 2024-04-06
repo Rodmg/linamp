@@ -39,7 +39,7 @@ private:
 
     QAudioFormat spectrumDataFormat;
 
-    struct PwData pwData = { 0, };
+    struct PwData pwData;
     void pwLoop();
 
     QFuture<void> pwLoopThread;

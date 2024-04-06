@@ -1,24 +1,8 @@
 #include "audiosourcebluetooth.h"
-#include "spectrumwidget.h"
-#include "util.h"
-#include "systemaudiocapture_pulseaudio.h"
-
-#include <QtConcurrent>
-
-extern QMutex *sampleMutex;
-extern QByteArray *sample;
-extern QDataStream *sampleStream;
 
 AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
-    : AudioSource{parent}
+    : AudioSourceWSpectrumCapture{parent}
 {
-    sampleMutex = new QMutex();
-    sample = new QByteArray();
-    sampleStream = new QDataStream(sample, QIODevice::WriteOnly);
-    dataEmitTimer = new QTimer(this);
-    dataEmitTimer->setInterval(33); // around 30 fps
-    connect(dataEmitTimer, &QTimer::timeout, this, &AudioSourceBluetooth::emitData);
-
     setupDbusIface();
 
     // Track progress with timer
@@ -32,7 +16,6 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
 
 AudioSourceBluetooth::~AudioSourceBluetooth()
 {
-    stopPACapture();
 }
 
 void AudioSourceBluetooth::handleBtStatusChange(QString status)
@@ -194,20 +177,6 @@ void AudioSourceBluetooth::fetchBtMetadata()
     this->refreshProgress();
 }
 
-
-void AudioSourceBluetooth::startSpectrum()
-{
-    QtConcurrent::run(startPACapture);
-    dataEmitTimer->start();
-}
-
-void AudioSourceBluetooth::stopSpectrum()
-{
-    stopPACapture();
-    dataEmitTimer->stop();
-}
-
-
 void AudioSourceBluetooth::activate()
 {
     QMediaMetaData metadata = QMediaMetaData{};
@@ -317,38 +286,6 @@ void AudioSourceBluetooth::interpolateProgress()
 {
     this->currentProgress += 33;
     emit this->positionChanged(this->currentProgress);
-}
-
-void AudioSourceBluetooth::emitData()
-{
-    QMutexLocker l(sampleMutex);
-
-    if(sample->length() < DFT_SIZE * 4) {
-        return;
-    }
-
-    if(!isValidSample(sample)) {
-        return;
-    }
-
-    //dbg
-    /*QString dbgsample = "";
-    for(int i = 0; i < 100; i++) {
-        dbgsample += QString(sample->at(i)) + ",";
-    }
-    qDebug() << ">>>>>" << dbgsample;
-    */
-    // end dbg
-
-    QAudioFormat format;
-    format.setSampleFormat(QAudioFormat::Int16);
-    format.setSampleRate(PA_SAMPLE_RATE);
-    format.setChannelConfig(QAudioFormat::ChannelConfigStereo);
-    format.setChannelCount(PA_CHANNELS);
-    emit dataEmitted(*sample, format);
-    sample->clear();
-    delete sampleStream;
-    sampleStream = new QDataStream(sample, QIODevice::WriteOnly);
 }
 
 QString AudioSourceBluetooth::findDbusMediaObjPath()

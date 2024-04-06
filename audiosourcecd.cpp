@@ -11,8 +11,8 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
 
     auto state = PyGILState_Ensure();
 
-    //PyObject *pModuleName = PyUnicode_DecodeFSDefault("cdplayer");
-    PyObject *pModuleName = PyUnicode_DecodeFSDefault("mock_cdplayer");
+    PyObject *pModuleName = PyUnicode_DecodeFSDefault("cdplayer");
+    //PyObject *pModuleName = PyUnicode_DecodeFSDefault("mock_cdplayer");
     cdplayerModule = PyImport_Import(pModuleName);
     Py_DECREF(pModuleName);
 

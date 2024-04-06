@@ -4,6 +4,8 @@
 #define SPECTRUM_DATA_SAMPLE_RATE 44100
 #define SPECTRUM_DATA_CHANNELS 2
 
+bool globalAudioSourceWSpectrumCaptureInstanceIsRunning = false;
+
 bool is_valid_sample(QByteArray *sample)
 {
     // Greedy: suposing that 100 is enough
@@ -29,11 +31,15 @@ static void on_process(void *userdata)
         struct PwData *data = (PwData*)userdata;
         struct pw_buffer *b;
         struct spa_buffer *buf;
-        qint16 *samples, max;
-        uint32_t c, n, n_channels, n_samples, n_bytes, peak;
+        qint16 *samples;
+        uint32_t n_bytes;
 
         QMutexLocker l(data->sampleMutex);
 
+        if(data->stream == nullptr || data->loop == nullptr) {
+            qDebug() << "<<<<<<<<<<<<<<<<<<<<Bad loop";
+            return;
+        }
 
         if ((b = pw_stream_dequeue_buffer(data->stream)) == NULL) {
                 pw_log_warn("out of buffers: %m");
@@ -44,17 +50,27 @@ static void on_process(void *userdata)
         if ((samples = (qint16*)buf->datas[0].data) == NULL)
                 return;
 
-        //n_channels = data->format.info.raw.channels;
-        //n_samples = buf->datas[0].chunk->size / sizeof(qint16);
         n_bytes = buf->datas[0].chunk->size;
 
 
         if(n_bytes >= DFT_SIZE * 4) {
             // If the sample is equal or bigger than the target
             // Replace the current buffer
+            if(data->sample == nullptr) {
+                qDebug() << ">>>>>>SAMPLE IS NULL!!";
+                return;
+            }
+            if(data->sampleStream == nullptr) {
+                qDebug() << ">>>>>>SAMPLEstream IS NULL!!";
+                return;
+            }
             data->sample->clear();
             delete data->sampleStream;
             data->sampleStream = new QDataStream(data->sample, QIODevice::WriteOnly);
+        }
+        if(data->sampleStream == nullptr) {
+            qDebug() << ">>>>>>samplestream IS NULL!!";
+            return;
         }
         data->sampleStream->writeRawData((const char *)samples, n_bytes);
 
@@ -97,7 +113,7 @@ static const struct pw_stream_events stream_events = {
         .process = on_process,
 };
 
-static void do_quit(void *userdata, int signal_number)
+static void do_quit(void *userdata, int)
 {
         struct PwData *data = (PwData*)userdata;
         pw_main_loop_quit(data->loop);
@@ -112,26 +128,26 @@ AudioSourceWSpectrumCapture::AudioSourceWSpectrumCapture(QObject *parent)
     spectrumDataFormat.setChannelCount(SPECTRUM_DATA_CHANNELS);
 
     pwData.sampleMutex = new QMutex();
-    pwData.sample = new QByteArray();
-    pwData.sampleStream = new QDataStream(pwData.sample, QIODevice::WriteOnly);
 
     dataEmitTimer = new QTimer(this);
     dataEmitTimer->setInterval(33); // around 30 fps
     connect(dataEmitTimer, &QTimer::timeout, this, &AudioSourceWSpectrumCapture::emitData);
-
-    pwLoopThread = QtConcurrent::run(&AudioSourceWSpectrumCapture::pwLoop, this);
-
-    qDebug() << "Compiled with libpipewire: " << pw_get_headers_version() << " Linked with libpipewire:" << pw_get_library_version();
 }
 
 AudioSourceWSpectrumCapture::~AudioSourceWSpectrumCapture()
 {
     do_quit(&this->pwData, 1);
-    pw_deinit();
 }
 
 void AudioSourceWSpectrumCapture::pwLoop()
 {
+    if (globalAudioSourceWSpectrumCaptureInstanceIsRunning) {
+        qDebug() << ">>>>>>>>>>>>>>WARNING: Another AudioSourceWSpectrumCapture is running";
+        return;
+    }
+
+    globalAudioSourceWSpectrumCaptureInstanceIsRunning = true;
+
     const struct spa_pod *params[1];
     uint8_t buffer[1024];
     struct pw_properties *props;
@@ -180,6 +196,10 @@ void AudioSourceWSpectrumCapture::pwLoop()
     pw_stream_destroy(pwData.stream);
     pw_main_loop_destroy(pwData.loop);
     pw_deinit();
+    pwData.stream = nullptr;
+    pwData.loop = nullptr;
+
+    globalAudioSourceWSpectrumCaptureInstanceIsRunning = false;
 }
 
 
@@ -204,10 +224,31 @@ void AudioSourceWSpectrumCapture::emitData()
 
 void AudioSourceWSpectrumCapture::startSpectrum()
 {
+    QMutexLocker l(pwData.sampleMutex);
+
+    if(pwLoopThread.isRunning()) {
+        return;
+    }
+
+    if(pwData.sampleStream != nullptr) {
+        delete pwData.sampleStream;
+    }
+    if(pwData.sample != nullptr) {
+        delete pwData.sample;
+    }
+    pwData.sample = new QByteArray();
+    pwData.sampleStream = new QDataStream(pwData.sample, QIODevice::WriteOnly);
+
+    pwLoopThread = QtConcurrent::run(&AudioSourceWSpectrumCapture::pwLoop, this);
+
     dataEmitTimer->start();
 }
 
 void AudioSourceWSpectrumCapture::stopSpectrum()
 {
+    QMutexLocker l(pwData.sampleMutex);
     dataEmitTimer->stop();
+    if(pwLoopThread.isRunning()) {
+        do_quit(&this->pwData, 1);
+    }
 }

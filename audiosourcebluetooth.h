@@ -8,7 +8,7 @@
 #include <QDBusReply>
 #include <QDBusMetaType>
 
-#include "audiosource.h"
+#include "audiosourcewspectrumcapture.h"
 
 #define SERVICE_NAME "org.bluez"
 #define OBJ_PATH "/org/bluez/hci0/dev_5C_70_17_02_D7_6E/player2"
@@ -71,7 +71,7 @@ Q_SIGNALS:
     void PropertiesChanged(const QVariantMap &properties);
 };
 
-class AudioSourceBluetooth : public AudioSource
+class AudioSourceBluetooth : public AudioSourceWSpectrumCapture
 {
     Q_OBJECT
 public:
@@ -93,9 +93,6 @@ public slots:
     void handleSeek(int mseconds);
 
 private:
-    QTimer *dataEmitTimer = nullptr;
-    void emitData();
-
     BluezMediaInterface *dbusIface = nullptr;
 
     QTimer *progressRefreshTimer = nullptr;
@@ -106,9 +103,6 @@ private:
 
     bool isShuffleEnabled = false;
     bool isRepeatEnabled = false;
-
-    void startSpectrum();
-    void stopSpectrum();
 
     void fetchBtMetadata();
 
