@@ -6,9 +6,10 @@ Music player for embedded project.
 
 - taglib 1.11.1 or newer
 - libasound2-dev
+- libpipewire-0.3-dev
 
 ```
-sudo apt install libtag1-dev libasound2-dev libpulse-dev
+sudo apt install libtag1-dev libasound2-dev libpulse-dev libpipewire-0.3-dev
 ```
 
 ## Development

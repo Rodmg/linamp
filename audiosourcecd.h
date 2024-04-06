@@ -10,9 +10,9 @@
 #include <QTimer>
 #include <QtConcurrent>
 
-#include "audiosource.h"
+#include "audiosourcewspectrumcapture.h"
 
-class AudioSourceCD : public AudioSource
+class AudioSourceCD : public AudioSourceWSpectrumCapture
 {
     Q_OBJECT
 public:
@@ -70,14 +70,6 @@ private:
     void refreshTrackInfo(bool force = false);
 
     quint32 currentTrackNumber = std::numeric_limits<quint32>::max();
-
-    // Spectrum analizer functions
-    QTimer *dataEmitTimer = nullptr;
-    void emitData();
-    void startSpectrum();
-    void stopSpectrum();
-
-
 };
 
 #endif // AUDIOSOURCECD_H

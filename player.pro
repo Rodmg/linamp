@@ -8,8 +8,8 @@ QT += network \
       concurrent \
       dbus
 
-LIBS += -ltag -lasound -lpulse -lpulse-simple -L/usr/lib/python3.11/config-3.11-x86_64-linux-gnu/ -lpython3.11
-INCLUDEPATH += /usr/include/python3.11
+LIBS += -ltag -lasound -lpulse -lpulse-simple -lpipewire-0.3 -L/usr/lib/python3.11/config-3.11-x86_64-linux-gnu/ -lpython3.11
+INCLUDEPATH += /usr/include/python3.11 /usr/include/pipewire-0.3 /usr/include/spa-0.2
 
 HEADERS = \
     audiosource.h \
@@ -17,6 +17,7 @@ HEADERS = \
     audiosourcecd.h \
     audiosourcecoordinator.h \
     audiosourcefile.h \
+    audiosourcewspectrumcapture.h \
     controlbuttonswidget.h \
     desktopbasewindow.h \
     desktopplayerwindow.h \
@@ -46,6 +47,7 @@ SOURCES = main.cpp \
     audiosourcecd.cpp \
     audiosourcecoordinator.cpp \
     audiosourcefile.cpp \
+    audiosourcewspectrumcapture.cpp \
     controlbuttonswidget.cpp \
     desktopbasewindow.cpp \
     desktopplayerwindow.cpp \
