@@ -110,12 +110,13 @@ on_stream_param_changed(void *_data, uint32_t id, const struct spa_pod *param)
 static const struct pw_stream_events stream_events = {
         PW_VERSION_STREAM_EVENTS,
         .param_changed = on_stream_param_changed,
-        .process = on_process,
+        .process = on_process
 };
 
 static void do_quit(void *userdata, int)
 {
         struct PwData *data = (PwData*)userdata;
+        if(data == nullptr || data->loop == nullptr) return;
         pw_main_loop_quit(data->loop);
 }
 
@@ -127,7 +128,15 @@ AudioSourceWSpectrumCapture::AudioSourceWSpectrumCapture(QObject *parent)
     spectrumDataFormat.setChannelConfig(QAudioFormat::ChannelConfigStereo);
     spectrumDataFormat.setChannelCount(SPECTRUM_DATA_CHANNELS);
 
+    // Initialize pwData
+    pwData.format.media_type = SPA_MEDIA_TYPE_audio;
+    pwData.format.media_subtype = SPA_MEDIA_SUBTYPE_raw;
+    pwData.loop = nullptr;
+    pwData.move = false;
+    pwData.sample = nullptr;
     pwData.sampleMutex = new QMutex();
+    pwData.sampleStream = nullptr;
+    pwData.stream = nullptr;
 
     dataEmitTimer = new QTimer(this);
     dataEmitTimer->setInterval(33); // around 30 fps
