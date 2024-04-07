@@ -215,7 +215,7 @@ void AudioSourceBluetooth::handlePrevious()
 
 void AudioSourceBluetooth::handlePlay()
 {
-    startSpectrum();
+    //startSpectrum();
     progressRefreshTimer->start();
     progressInterpolateTimer->start();
     dbusCall("Play");
