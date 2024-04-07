@@ -245,7 +245,9 @@ void AudioSourceWSpectrumCapture::startSpectrum()
 
     if(pwLoopThread.isRunning()) {
         qDebug() << "-------------START SPECTRUM: NOT STARTING";
-
+        if(!dataEmitTimer->isActive()) {
+            dataEmitTimer->start();
+        }
         return;
     }
 
