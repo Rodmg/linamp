@@ -160,6 +160,12 @@ void PlayerView::scale()
 
     QRect scGeo = ui->spectrumContainer->geometry();
     ui->spectrumContainer->setGeometry(scGeo.x()*UI_SCALE, scGeo.y()*UI_SCALE, scGeo.width()*UI_SCALE, scGeo.height()*UI_SCALE);
+
+    QRect ilGeo = ui->inputLabel->geometry();
+    ui->inputLabel->setGeometry(6, 3, ilGeo.width()*UI_SCALE, ilGeo.height()*UI_SCALE);
+    QFont ilFont = ui->inputLabel->font();
+    ilFont.setPointSize(23);
+    ui->inputLabel->setFont(ilFont);
 }
 
 void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)

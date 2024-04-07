@@ -425,6 +425,154 @@
                 <enum>QFrame::Plain</enum>
                </property>
               </widget>
+              <widget class="QLabel" name="inputLabel">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>10</width>
+                 <height>71</height>
+                </rect>
+               </property>
+               <property name="palette">
+                <palette>
+                 <active>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="ButtonText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="PlaceholderText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="128">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </active>
+                 <inactive>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="ButtonText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="PlaceholderText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="128">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </inactive>
+                 <disabled>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="ButtonText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="PlaceholderText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="128">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </disabled>
+                </palette>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>5</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">#inputLabel {
+	color: #6f808f;
+}</string>
+               </property>
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;F&lt;br/&gt;I&lt;br/&gt;L&lt;br/&gt;E&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
+              </widget>
              </widget>
             </item>
            </layout>
@@ -524,7 +672,17 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
@@ -636,7 +794,17 @@
                      </brush>
                     </colorrole>
                    </inactive>
-                   <disabled/>
+                   <disabled>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>190</red>
+                       <green>190</green>
+                       <blue>190</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
                   </palette>
                  </property>
                  <property name="font">
@@ -696,7 +864,17 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
@@ -795,7 +973,17 @@
                      </brush>
                     </colorrole>
                    </inactive>
-                   <disabled/>
+                   <disabled>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>190</red>
+                       <green>190</green>
+                       <blue>190</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
                   </palette>
                  </property>
                  <property name="font">
@@ -855,7 +1043,17 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
@@ -918,7 +1116,17 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
@@ -964,7 +1172,17 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
