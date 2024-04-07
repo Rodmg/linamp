@@ -241,7 +241,11 @@ void AudioSourceWSpectrumCapture::startSpectrum()
 {
     QMutexLocker l(pwData.sampleMutex);
 
+    qDebug() << "-------------START SPECTRUM";
+
     if(pwLoopThread.isRunning()) {
+        qDebug() << "-------------START SPECTRUM: NOT STARTING";
+
         return;
     }
 
@@ -262,6 +266,9 @@ void AudioSourceWSpectrumCapture::startSpectrum()
 void AudioSourceWSpectrumCapture::stopSpectrum()
 {
     QMutexLocker l(pwData.sampleMutex);
+
+    qDebug() << "-------------STOP SPECTRUM";
+
     dataEmitTimer->stop();
     if(pwLoopThread.isRunning()) {
         do_quit(&this->pwData, 1);
