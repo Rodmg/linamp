@@ -162,10 +162,13 @@ void AudioSourceCD::activate()
     // Poll status
     progressRefreshTimer->start();
 
+    isActive = true;
 }
 
 void AudioSourceCD::deactivate()
 {
+    isActive = false;
+
     progressRefreshTimer->stop();
     stopSpectrum();
     emit playbackStateChanged(MediaPlayer::StoppedState);
@@ -173,6 +176,7 @@ void AudioSourceCD::deactivate()
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(cdplayer, "stop", NULL);
     PyGILState_Release(state);
+
 }
 
 void AudioSourceCD::handlePl()
@@ -317,40 +321,50 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit positionChanged(0);
         emit durationChanged(0);
 
-        progressInterpolateTimer->stop();
-        stopSpectrum();
+        if(isActive) {
+            progressInterpolateTimer->stop();
+            stopSpectrum();
+        }
     }
 
     if(status == "stopped") {
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
 
-        progressInterpolateTimer->stop();
-        stopSpectrum();
+        if(isActive) {
+            progressInterpolateTimer->stop();
+            stopSpectrum();
+        }
     }
 
     if(status == "playing") {
         emit this->messageClear();
         emit playbackStateChanged(MediaPlayer::PlayingState);
 
-        progressInterpolateTimer->start();
-        startSpectrum();
+        if(isActive) {
+            progressInterpolateTimer->start();
+            startSpectrum();
+        }
     }
 
     if(status == "paused") {
         emit this->messageClear();
         emit playbackStateChanged(MediaPlayer::PausedState);
 
-        progressInterpolateTimer->stop();
-        stopSpectrum();
+        if(isActive) {
+            progressInterpolateTimer->stop();
+            stopSpectrum();
+        }
     }
 
     if(status == "loading") {
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
 
-        progressInterpolateTimer->stop();
-        stopSpectrum();
+        if(isActive) {
+            progressInterpolateTimer->stop();
+            stopSpectrum();
+        }
 
         emit this->messageSet("LOADING...", 3000);
     }
@@ -359,8 +373,10 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
 
-        progressInterpolateTimer->stop();
-        stopSpectrum();
+        if(isActive) {
+            progressInterpolateTimer->stop();
+            stopSpectrum();
+        }
 
         emit this->messageSet("VLC ERROR", 5000);
     }

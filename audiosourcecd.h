@@ -34,6 +34,7 @@ public slots:
     void handleSeek(int mseconds);
 
 private:
+    bool isActive = false;
 
     PyObject *cdplayerModule;
     PyObject *cdplayer;
