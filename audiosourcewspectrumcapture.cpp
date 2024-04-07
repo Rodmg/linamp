@@ -163,6 +163,12 @@ void AudioSourceWSpectrumCapture::pwLoop()
     struct spa_pod_builder b;
     b.data = buffer;
     b.size = sizeof(buffer);
+    b.callbacks.data = nullptr;
+    b.callbacks.funcs = nullptr;
+    b.state.flags = 0;
+    b.state.frame = nullptr;
+    b.state.offset = 0;
+    b._padding = 0;
 
     pw_init(nullptr, nullptr);
 
