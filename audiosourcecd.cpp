@@ -318,7 +318,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit durationChanged(0);
 
         progressInterpolateTimer->stop();
-        //stopSpectrum();
+        stopSpectrum();
     }
 
     if(status == "stopped") {
@@ -326,7 +326,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit positionChanged(0);
 
         progressInterpolateTimer->stop();
-        //stopSpectrum();
+        stopSpectrum();
     }
 
     if(status == "playing") {
@@ -342,7 +342,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit playbackStateChanged(MediaPlayer::PausedState);
 
         progressInterpolateTimer->stop();
-        //stopSpectrum();
+        stopSpectrum();
     }
 
     if(status == "loading") {
@@ -350,7 +350,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit positionChanged(0);
 
         progressInterpolateTimer->stop();
-        //stopSpectrum();
+        stopSpectrum();
 
         emit this->messageSet("LOADING...", 3000);
     }
@@ -360,7 +360,7 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
         emit positionChanged(0);
 
         progressInterpolateTimer->stop();
-        //stopSpectrum();
+        stopSpectrum();
 
         emit this->messageSet("VLC ERROR", 5000);
     }
