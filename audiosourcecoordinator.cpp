@@ -81,6 +81,8 @@ void AudioSourceCoordinator::setSource(int newSource)
     connect(sources[currentSource], &AudioSource::messageSet, view, &PlayerView::setMessage);
     connect(sources[currentSource], &AudioSource::messageClear, view, &PlayerView::clearMessage);
 
+    view->setSourceLabel(sourceLabels[currentSource]);
+
     // activate new source
     sources[currentSource]->activate();
 }
@@ -105,10 +107,11 @@ void AudioSourceCoordinator::setBalance(int balance)
     view->setMessage(message, 500);
 }
 
-void AudioSourceCoordinator::addSource(AudioSource *source, bool activate)
+void AudioSourceCoordinator::addSource(AudioSource *source, QString label, bool activate)
 {
     // Instantiate sources
     sources.append(source);
+    sourceLabels.append(label);
     quint32 idx = sources.length() - 1;
     connect(source, &AudioSource::requestActivation, [=]() {
         qDebug() << ">>>>>>>>>>>>>Activation requested for idx: " << idx;

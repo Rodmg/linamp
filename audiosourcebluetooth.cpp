@@ -25,6 +25,7 @@ void AudioSourceBluetooth::handleBtStatusChange(QString status)
         progressRefreshTimer->start();
         progressInterpolateTimer->start();
         emit this->playbackStateChanged(MediaPlayer::PlayingState);
+        emit this->requestActivation(); // Request audiosource coordinator to select us
     }
     if(status == "stopped") {
         stopSpectrum();

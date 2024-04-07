@@ -46,9 +46,9 @@ MainWindow::MainWindow(QWidget *parent)
     fileSource = new AudioSourceFile(this, m_playlistModel);
     btSource = new AudioSourceBluetooth(this);
     cdSource = new AudioSourceCD(this);
-    coordinator->addSource(fileSource, true);
-    coordinator->addSource(btSource, false);
-    coordinator->addSource(cdSource, false);
+    coordinator->addSource(fileSource, "FILE", true);
+    coordinator->addSource(btSource, "BT", false);
+    coordinator->addSource(cdSource, "CD", false);
 
 
     // Connect events

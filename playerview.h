@@ -32,6 +32,8 @@ public:
     explicit PlayerView(QWidget *parent = nullptr, ControlButtonsWidget *ctlBtns = nullptr);
     ~PlayerView();
 
+    void setSourceLabel(QString label);
+
 public slots:
     void setPlaybackState(MediaPlayer::PlaybackState state);
     void setPosition(qint64 progress);

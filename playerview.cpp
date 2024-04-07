@@ -165,6 +165,7 @@ void PlayerView::scale()
     ui->inputLabel->setGeometry(6, 3, ilGeo.width()*UI_SCALE, ilGeo.height()*UI_SCALE);
     QFont ilFont = ui->inputLabel->font();
     ilFont.setPointSize(23);
+    ilFont.setFamily("DejaVu Sans Mono");
     ui->inputLabel->setFont(ilFont);
 }
 
@@ -332,4 +333,14 @@ void PlayerView::handleBalanceChanged()
         ui->balanceSlider->setValue(val);
     }
     emit balanceChanged(val);
+}
+
+void PlayerView::setSourceLabel(QString label)
+{
+    QString fLabel = "";
+    for(quint8 i = 0; i < label.length(); i++) {
+        fLabel.append(label[i]);
+        fLabel.append("\n");
+    }
+    ui->inputLabel->setText(fLabel);
 }
