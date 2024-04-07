@@ -246,6 +246,7 @@ void AudioSourceWSpectrumCapture::startSpectrum()
     if(pwLoopThread.isRunning()) {
         qDebug() << "-------------START SPECTRUM: NOT STARTING";
         if(!dataEmitTimer->isActive()) {
+            qDebug() << "-------------START SPECTRUM: But starting timer";
             dataEmitTimer->start();
         }
         return;
@@ -273,6 +274,7 @@ void AudioSourceWSpectrumCapture::stopSpectrum()
 
     dataEmitTimer->stop();
     if(pwLoopThread.isRunning()) {
+        qDebug() << "-------------STOP SPECTRUM: was running";
         do_quit(&this->pwData, 1);
     }
 }
