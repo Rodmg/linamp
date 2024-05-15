@@ -179,7 +179,7 @@ class CDPlayer:
             print(f"Unknown exception: {e}")
             return
 
-        print(f">>>> {artists}, {track_titles}, {album}, {n_tracks}")
+        #print(f">>>> {artists}, {track_titles}, {album}, {n_tracks}")
 
         self._set_track_info(artists, track_titles, album, durations, is_data_tracks)
 

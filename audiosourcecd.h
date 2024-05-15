@@ -41,6 +41,7 @@ private:
 
     QTimer *progressRefreshTimer = nullptr;
     QTimer *progressInterpolateTimer = nullptr;
+    QElapsedTimer progressInterpolateElapsedTimer;
     quint32 currentProgress = 0;
     void refreshProgress();
     void interpolateProgress();

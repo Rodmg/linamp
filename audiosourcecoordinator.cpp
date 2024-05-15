@@ -114,7 +114,6 @@ void AudioSourceCoordinator::addSource(AudioSource *source, QString label, bool 
     sourceLabels.append(label);
     quint32 idx = sources.length() - 1;
     connect(source, &AudioSource::requestActivation, [=]() {
-        qDebug() << ">>>>>>>>>>>>>Activation requested for idx: " << idx;
         this->setSource(idx);
     } );
     if(activate) {

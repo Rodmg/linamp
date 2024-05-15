@@ -503,6 +503,18 @@ void AudioSourceCD::refreshProgress()
 
 void AudioSourceCD::interpolateProgress()
 {
-    this->currentProgress += ASCD_PROGRESS_INTERPOLATION_TIME;
+    if(!progressInterpolateElapsedTimer.isValid()) {
+        // Handle first time
+        progressInterpolateElapsedTimer.start();
+        return;
+    }
+    qint64 elapsed = progressInterpolateElapsedTimer.elapsed();
+    if(elapsed > 200) {
+        // Handle invalid interpolations
+        progressInterpolateElapsedTimer.start();
+        return;
+    }
+    this->currentProgress += elapsed;
+    progressInterpolateElapsedTimer.start();
     emit this->positionChanged(this->currentProgress);
 }
