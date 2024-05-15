@@ -491,7 +491,7 @@ void AudioSourceCD::refreshProgress()
         qDebug() << ">>>>Time diff" << diff;
 
         // Avoid small jumps caused by the python method latency
-        if(abs(diff) > 500) {
+        if(abs(diff) > 1000) {
             this->currentProgress = position;
             emit this->positionChanged(this->currentProgress);
         }
