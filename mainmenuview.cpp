@@ -12,7 +12,6 @@ MainMenuView::MainMenuView(QWidget *parent) :
     connect(ui->btSourceButton, &QPushButton::clicked, this, &MainMenuView::btSourceClicked);
     connect(ui->spotifySourceButton, &QPushButton::clicked, this, &MainMenuView::spotifySourceClicked);
     connect(ui->cdSourceButton, &QPushButton::clicked, this, &MainMenuView::cdSourceClicked);
-    connect(ui->shutdownButton, &QPushButton::clicked, this, &MainMenuView::shutdown);
 }
 
 MainMenuView::~MainMenuView()

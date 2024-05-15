@@ -30,40 +30,101 @@
   <widget class="QPushButton" name="fileSourceButton">
    <property name="geometry">
     <rect>
-     <x>830</x>
-     <y>20</y>
-     <width>191</width>
-     <height>71</height>
+     <x>40</x>
+     <y>40</y>
+     <width>240</width>
+     <height>220</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>DejaVu Sans Mono</family>
+     <pointsize>24</pointsize>
+     <bold>false</bold>
+     <kerning>true</kerning>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	background-color: #bdced6;
+	border: 4px solid #4a5a6b;
+	border-radius: 0px;
+}
+
+QPushButton:pressed {
+	color: #080810;
+	background-color: #7b8c9c;
+	border: 4px solid #080810;
+}</string>
+   </property>
    <property name="text">
-    <string>File</string>
+    <string>FILE</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btSourceButton">
    <property name="geometry">
     <rect>
-     <x>1070</x>
-     <y>120</y>
-     <width>191</width>
-     <height>71</height>
+     <x>640</x>
+     <y>40</y>
+     <width>240</width>
+     <height>220</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>DejaVu Sans Mono</family>
+     <pointsize>24</pointsize>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	background-color: #bdced6;
+	border: 4px solid #4a5a6b;
+	border-radius: 0px;
+}
+
+QPushButton:pressed {
+	color: #080810;
+	background-color: #7b8c9c;
+	border: 4px solid #080810;
+}</string>
+   </property>
    <property name="text">
-    <string>Bluetooth</string>
+    <string>BLUETOOTH</string>
    </property>
   </widget>
   <widget class="QPushButton" name="spotifySourceButton">
    <property name="geometry">
     <rect>
-     <x>830</x>
-     <y>120</y>
-     <width>191</width>
-     <height>71</height>
+     <x>940</x>
+     <y>40</y>
+     <width>240</width>
+     <height>220</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>DejaVu Sans Mono</family>
+     <pointsize>24</pointsize>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	background-color: #bdced6;
+	border: 4px solid #4a5a6b;
+	border-radius: 0px;
+}
+
+QPushButton:pressed {
+	color: #080810;
+	background-color: #7b8c9c;
+	border: 4px solid #080810;
+}</string>
+   </property>
    <property name="text">
-    <string>Spotify</string>
+    <string>SPOTIFY</string>
    </property>
   </widget>
   <widget class="QPushButton" name="backButton">
@@ -75,47 +136,87 @@
      <height>71</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Back</string>
+   <property name="font">
+    <font>
+     <family>DejaVu Sans Mono</family>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
    </property>
-  </widget>
-  <widget class="QPushButton" name="shutdownButton">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>60</y>
-     <width>261</width>
-     <height>211</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Shut Down</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="restartButton">
-   <property name="geometry">
-    <rect>
-     <x>470</x>
-     <y>60</y>
-     <width>261</width>
-     <height>211</height>
-    </rect>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	background-color: #bdced6;
+	border: 4px solid #4a5a6b;
+	border-radius: 0px;
+}
+
+QPushButton:pressed {
+	color: #080810;
+	background-color: #7b8c9c;
+	border: 4px solid #080810;
+}</string>
    </property>
    <property name="text">
-    <string>Restart</string>
+    <string>BACK</string>
    </property>
   </widget>
   <widget class="QPushButton" name="cdSourceButton">
    <property name="geometry">
     <rect>
-     <x>1070</x>
-     <y>20</y>
-     <width>191</width>
-     <height>71</height>
+     <x>340</x>
+     <y>40</y>
+     <width>240</width>
+     <height>220</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>DejaVu Sans Mono</family>
+     <pointsize>24</pointsize>
+     <bold>false</bold>
+     <kerning>true</kerning>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	background-color: #bdced6;
+	border: 4px solid #4a5a6b;
+	border-radius: 0px;
+}
+
+QPushButton:pressed {
+	color: #080810;
+	background-color: #7b8c9c;
+	border: 4px solid #080810;
+}</string>
    </property>
    <property name="text">
     <string>CD</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>310</y>
+     <width>361</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>DejaVu Sans Mono</family>
+     <pointsize>48</pointsize>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QLabel {
+	color: rgb(186, 199, 211);
+}</string>
+   </property>
+   <property name="text">
+    <string>SOURCES</string>
    </property>
   </widget>
  </widget>

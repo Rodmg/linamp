@@ -162,7 +162,7 @@ void PlayerView::scale()
     ui->spectrumContainer->setGeometry(scGeo.x()*UI_SCALE, scGeo.y()*UI_SCALE, scGeo.width()*UI_SCALE, scGeo.height()*UI_SCALE);
 
     QRect ilGeo = ui->inputLabel->geometry();
-    ui->inputLabel->setGeometry(6, 3, ilGeo.width()*UI_SCALE, ilGeo.height()*UI_SCALE);
+    ui->inputLabel->setGeometry(10, 6, ilGeo.width()*UI_SCALE, ilGeo.height()*UI_SCALE);
     QFont ilFont = ui->inputLabel->font();
     ilFont.setPointSize(23);
     ilFont.setFamily("DejaVu Sans Mono");
@@ -290,8 +290,12 @@ void PlayerView::setMessage(QString message, qint64 timeout)
 
 void PlayerView::clearMessage()
 {
-    if(messageTimer->isActive()) {
+    // TODO debug
+    qDebug() << ">>>>>IS messagetimer active: " << messageTimer->isActive() << (ui->songInfoLabel->text() == m_trackInfo);
+    if(ui->songInfoLabel->text() != m_trackInfo) {
         ui->songInfoLabel->setText(m_trackInfo);
+    }
+    if(messageTimer->isActive()) {
         messageTimer->stop();
     }
 }
