@@ -488,7 +488,9 @@ void AudioSourceCD::refreshProgress()
         quint32 position = PyLong_AsLong(pyPosition);
 
         int diff = (int)this->currentProgress - (int)position;
+        #ifdef DEBUG_CD
         qDebug() << ">>>>Time diff" << diff;
+        #endif
 
         // Avoid small jumps caused by the python method latency
         if(abs(diff) > 1000) {
