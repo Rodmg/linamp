@@ -469,6 +469,6 @@ void AudioSourceCD::refreshProgress()
 
 void AudioSourceCD::interpolateProgress()
 {
-    this->currentProgress += ASCD_PROGRESS_INTERPOLATION_TIME;
+    this->currentProgress += ASCD_PROGRESS_INTERPOLATION_TIME - 10; // workaround for back jumps
     emit this->positionChanged(this->currentProgress);
 }
