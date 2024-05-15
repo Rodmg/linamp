@@ -1,6 +1,8 @@
 #include "audiosourcewspectrumcapture.h"
 #include "spectrumwidget.h"
 
+//#define DEBUG_SPECTRUM
+
 #define SPECTRUM_DATA_SAMPLE_RATE 44100
 #define SPECTRUM_DATA_CHANNELS 2
 
@@ -37,7 +39,9 @@ static void on_process(void *userdata)
         QMutexLocker l(data->sampleMutex);
 
         if(data->stream == nullptr || data->loop == nullptr) {
+            #ifdef DEBUG_SPECTRUM
             qDebug() << "<<<<<<<<<<<<<<<<<<<<Bad loop";
+            #endif
             return;
         }
 
@@ -57,11 +61,15 @@ static void on_process(void *userdata)
             // If the sample is equal or bigger than the target
             // Replace the current buffer
             if(data->sample == nullptr) {
+                #ifdef DEBUG_SPECTRUM
                 qDebug() << ">>>>>>SAMPLE IS NULL!!";
+                #endif
                 return;
             }
             if(data->sampleStream == nullptr) {
+                #ifdef DEBUG_SPECTRUM
                 qDebug() << ">>>>>>SAMPLEstream IS NULL!!";
+                #endif
                 return;
             }
             data->sample->clear();
@@ -69,7 +77,9 @@ static void on_process(void *userdata)
             data->sampleStream = new QDataStream(data->sample, QIODevice::WriteOnly);
         }
         if(data->sampleStream == nullptr) {
+            #ifdef DEBUG_SPECTRUM
             qDebug() << ">>>>>>samplestream IS NULL!!";
+            #endif
             return;
         }
         data->sampleStream->writeRawData((const char *)samples, n_bytes);
@@ -151,7 +161,9 @@ AudioSourceWSpectrumCapture::~AudioSourceWSpectrumCapture()
 void AudioSourceWSpectrumCapture::pwLoop()
 {
     if (globalAudioSourceWSpectrumCaptureInstanceIsRunning) {
+        #ifdef DEBUG_SPECTRUM
         qDebug() << ">>>>>>>>>>>>>>WARNING: Another AudioSourceWSpectrumCapture is running";
+        #endif
         return;
     }
 
@@ -241,10 +253,14 @@ void AudioSourceWSpectrumCapture::startSpectrum()
 {
     QMutexLocker l(pwData.sampleMutex);
 
+    #ifdef DEBUG_SPECTRUM
     qDebug() << "-------------START SPECTRUM";
+    #endif
 
     if(pwLoopThread.isRunning()) {
+        #ifdef DEBUG_SPECTRUM
         qDebug() << "-------------START SPECTRUM: NOT STARTING";
+        #endif
         return;
     }
 
@@ -266,11 +282,15 @@ void AudioSourceWSpectrumCapture::stopSpectrum()
 {
     QMutexLocker l(pwData.sampleMutex);
 
+    #ifdef DEBUG_SPECTRUM
     qDebug() << "-------------STOP SPECTRUM";
+    #endif
 
     dataEmitTimer->stop();
     if(pwLoopThread.isRunning()) {
+        #ifdef DEBUG_SPECTRUM
         qDebug() << "-------------STOP SPECTRUM: was running";
+        #endif
         do_quit(&this->pwData, 1);
     }
 }

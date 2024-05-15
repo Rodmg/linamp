@@ -290,8 +290,6 @@ void PlayerView::setMessage(QString message, qint64 timeout)
 
 void PlayerView::clearMessage()
 {
-    // TODO debug
-    qDebug() << ">>>>>IS messagetimer active: " << messageTimer->isActive() << (ui->songInfoLabel->text() == m_trackInfo);
     if(ui->songInfoLabel->text() != m_trackInfo) {
         ui->songInfoLabel->setText(m_trackInfo);
     }

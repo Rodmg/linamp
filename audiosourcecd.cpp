@@ -1,5 +1,7 @@
 #include "audiosourcecd.h"
 
+//#define DEBUG_CD
+
 #define ASCD_PROGRESS_INTERPOLATION_TIME 100
 
 AudioSourceCD::AudioSourceCD(QObject *parent)
@@ -68,12 +70,16 @@ AudioSourceCD::~AudioSourceCD()
 void AudioSourceCD::pollDetectDiscInsertion()
 {
     if(pollResultWatcher.isRunning() || loadWatcher.isRunning()) {
+        #ifdef DEBUG_CD
         qDebug() << ">>>>>>>>>>>>>>>POLL Avoided";
+        #endif
         return;
     }
     if(pollInProgress) return;
     pollInProgress = true;
+    #ifdef DEBUG_CD
     qDebug() << "pollDetectDiscInsertion: polling";
+    #endif
     QFuture<bool> status = QtConcurrent::run(&AudioSourceCD::doPollDetectDiscInsertion, this);
     //pollStatus = &status;
     pollResultWatcher.setFuture(status);
@@ -81,12 +87,16 @@ void AudioSourceCD::pollDetectDiscInsertion()
 
 void AudioSourceCD::handlePollResult()
 {
+    #ifdef DEBUG_CD
     qDebug() << ">>>>POLL RESULT";
+    #endif
 
     bool discDetected = pollResultWatcher.result();
     if(discDetected) {
         if(loadWatcher.isRunning()) {
+            #ifdef DEBUG_CD
             qDebug() << ">>>>>>>>>>>>>>>LOAD Avoided";
+            #endif
             return;
         }
         emit this->requestActivation(); // Request audiosource coordinator to select us
@@ -108,10 +118,13 @@ bool AudioSourceCD::doPollDetectDiscInsertion()
 
     if(PyBool_Check(pyDiscDetected)) {
         discDetected = PyObject_IsTrue(pyDiscDetected);
-
+        #ifdef DEBUG_CD
         qDebug() << ">>>Disct detected?:" << discDetected;
+        #endif
     } else {
+        #ifdef DEBUG_CD
         qDebug() << ">>>>pollDetectDiscInsertion: Not a bool";
+        #endif
     }
     if(pyDiscDetected) Py_DECREF(pyDiscDetected);
     PyGILState_Release(state);
@@ -232,9 +245,13 @@ void AudioSourceCD::handleNext()
 void AudioSourceCD::handleOpen()
 {
     if(cdplayer == nullptr) return;
+    #ifdef DEBUG_CD
     qDebug() << "<<<<<EJECTING";
+    #endif
     if(ejectWatcher.isRunning()) {
+        #ifdef DEBUG_CD
         qDebug() << ">>>>>>>>>>>>>>>EJECT Avoided";
+        #endif
         return;
     }
     emit this->messageSet("EJECTING...", 4000);
@@ -311,7 +328,9 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 
     PyGILState_Release(state);
 
+    #ifdef DEBUG_CD
     qDebug() << ">>>Status" << status;
+    #endif
 
     if(status == "no-disc") {
         QMediaMetaData metadata = QMediaMetaData{};
@@ -390,12 +409,16 @@ void AudioSourceCD::refreshStatus(bool shouldRefreshTrackInfo)
 
 void AudioSourceCD::refreshTrackInfo(bool force)
 {
+    #ifdef DEBUG_CD
     qDebug() << ">>>>>>>>>Refresh track info";
+    #endif
     if(cdplayer == nullptr) return;
     auto state = PyGILState_Ensure();
     PyObject *pyTrackInfo = PyObject_CallMethod(cdplayer, "get_current_track_info", NULL);
     if(pyTrackInfo == nullptr) {
+        #ifdef DEBUG_CD
         qDebug() << ">>> Couldn't get track info";
+        #endif
         PyErr_Print();
         PyGILState_Release(state);
         return;
@@ -434,7 +457,9 @@ void AudioSourceCD::refreshTrackInfo(bool force)
     emit this->durationChanged(duration);
     emit this->metadataChanged(metadata);
 
+    #ifdef DEBUG_CD
     qDebug() << ">>>>>>>>METADATA changed";
+    #endif
 
     Py_DECREF(pyTrackInfo);
 
@@ -452,13 +477,19 @@ void AudioSourceCD::refreshProgress()
 
     PyObject *pyPosition = PyObject_CallMethod(cdplayer, "get_postition", NULL);
     if(pyPosition == nullptr) {
+        #ifdef DEBUG_CD
         qDebug() << ">>> Couldn't get track position";
+        #endif
         PyErr_Print();
         PyGILState_Release(state);
         return;
     }
     if(PyLong_Check(pyPosition)) {
         quint32 position = PyLong_AsLong(pyPosition);
+
+        int diff = (int)this->currentProgress - (int)position;
+        qDebug() << ">>>>Time diff" << diff;
+
         this->currentProgress = position;
         emit this->positionChanged(this->currentProgress);
     }
@@ -469,6 +500,6 @@ void AudioSourceCD::refreshProgress()
 
 void AudioSourceCD::interpolateProgress()
 {
-    this->currentProgress += ASCD_PROGRESS_INTERPOLATION_TIME - 10; // workaround for back jumps
+    this->currentProgress += ASCD_PROGRESS_INTERPOLATION_TIME;
     emit this->positionChanged(this->currentProgress);
 }
