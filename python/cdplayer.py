@@ -4,7 +4,32 @@ import vlc
 import cdio, pycdio
 import discid
 import musicbrainzngs
+import threading
 
+# Debounce function from https://github.com/salesforce/decorator-operations/blob/master/decoratorOperations/debounce_functions/debounce.py
+def debounce(wait_time):
+    """
+    Decorator that will debounce a function so that it is called after wait_time seconds
+    If it is called multiple times, will wait for the last call to be debounced and run only this one.
+    See the test_debounce.py file for examples
+    """
+
+    def decorator(function):
+        def debounced(*args, **kwargs):
+            def call_function():
+                debounced._timer = None
+                return function(*args, **kwargs)
+
+            if debounced._timer is not None:
+                debounced._timer.cancel()
+
+            debounced._timer = threading.Timer(wait_time, call_function)
+            debounced._timer.start()
+
+        debounced._timer = None
+        return debounced
+
+    return decorator
 
 def search_exact_tracklist(data):  # function to find exalctly which cd was inserted
     for x in range(0, len(data["disc"]["release-list"])):
@@ -243,8 +268,13 @@ class CDPlayer:
             self.list_player.play_item_at_index(index)
 
     # Go to a specific time in a track while playing
+    @debounce(0.5)
     def seek(self, ms):
         if self.player is None:
+            return
+
+        state = self.player.get_state()
+        if not (state == vlc.State.Playing or state == vlc.State.Buffering):
             return
 
         track_duration = self.player.get_media().get_duration()
