@@ -145,6 +145,7 @@ def fetchdata():
                 if value is not None:
                     artists[t - i_first_track] = value
                 pass
+    d.close()
     return artists, track_list, album, i_tracks, durations, is_data_tracks
 
 
@@ -295,6 +296,7 @@ class CDPlayer:
         try:
             drive = cdio.Device(driver_id=pycdio.DRIVER_UNKNOWN)
             drive.eject_media()
+            drive.close()
         except Exception as e:
             print(f"Problem finding a CD-ROM. {e}")
         self.unload()
@@ -381,9 +383,12 @@ class CDPlayer:
                 try:
                     num_tracks = d.get_num_tracks()
                     if num_tracks > 0:
+                        d.close()
                         return True
                 except Exception:
+                    d.close()
                     return False
+            d.close()
         except Exception as e:
             print(f"Problem finding a CD-ROM. {e}")
 
