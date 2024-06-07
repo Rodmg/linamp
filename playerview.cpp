@@ -1,8 +1,8 @@
 #include "playerview.h"
 #include "ui_playerview.h"
 
-#include "playlistmodel.h"
-#include "qmediaplaylist.h"
+#include "scale.h"
+#include "util.h"
 
 #include <QApplication>
 #include <QAudioDevice>
@@ -16,7 +16,7 @@
 #include <QStandardPaths>
 #include <QFontDatabase>
 
-PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
+PlayerView::PlayerView(QWidget *parent, ControlButtonsWidget *ctlBtns) :
     QWidget(parent),
     ui(new Ui::PlayerView)
 {
@@ -25,66 +25,52 @@ PlayerView::PlayerView(QWidget *parent, PlaylistModel *playlistModel) :
 
     // Setup UI
     ui->setupUi(this);
+    scale();
 
-    //! [create-objs]
-    m_player = new MediaPlayer(this);
+    controlButtons = ctlBtns;
+
+    connect(controlButtons, &ControlButtonsWidget::playClicked, this, &PlayerView::playClicked);
+    connect(controlButtons, &ControlButtonsWidget::pauseClicked, this, &PlayerView::pauseClicked);
+    connect(controlButtons, &ControlButtonsWidget::stopClicked, this, &PlayerView::stopClicked);
+    connect(controlButtons, &ControlButtonsWidget::nextClicked, this, &PlayerView::nextClicked);
+    connect(controlButtons, &ControlButtonsWidget::previousClicked, this, &PlayerView::previousClicked);
+    connect(controlButtons, &ControlButtonsWidget::openClicked, this,  &PlayerView::openClicked);
+    connect(controlButtons, &ControlButtonsWidget::repeatClicked, this, &PlayerView::repeatClicked);
+    connect(controlButtons, &ControlButtonsWidget::shuffleClicked, this, &PlayerView::shuffleClicked);
+
+    // Setup spectrum analyzer
     spectrum = new SpectrumWidget(this);
-    //! [create-objs]
-    connect(m_player, &MediaPlayer::durationChanged, this, &PlayerView::durationChanged);
-    connect(m_player, &MediaPlayer::positionChanged, this, &PlayerView::positionChanged);
-    connect(m_player, QOverload<>::of(&MediaPlayer::metaDataChanged), this,
-            &PlayerView::metaDataChanged);
-    connect(m_player, &MediaPlayer::mediaStatusChanged, this, &PlayerView::statusChanged);
-    connect(m_player, &MediaPlayer::bufferProgressChanged, this, &PlayerView::bufferingProgress);
-    connect(m_player, &MediaPlayer::errorChanged, this, &PlayerView::displayErrorMessage);
-
-    m_playlistModel = playlistModel;
-    m_playlist = m_playlistModel->playlist();
-    //! [2]
-    connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this,
-            &PlayerView::playlistPositionChanged);
 
     // duration slider and label
-    ui->posBar->setRange(0, m_player->duration());
-    connect(ui->posBar, &QSlider::sliderMoved, this, &PlayerView::seek);
+    ui->posBar->setRange(0, 0);
+    connect(ui->posBar, &QSlider::sliderMoved, this, &PlayerView::positionChanged);
 
     // Set volume slider
     ui->volumeSlider->setRange(0, 100);
-    this->setVolumeSlider(m_player->volume());
+    connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
 
     // Set Balance Slider
-    ui->balanceSlider->setRange(0, 100);
-    ui->balanceSlider->setValue(50);
+    ui->balanceSlider->setRange(-100, 100);
+    connect(ui->balanceSlider, &QSlider::valueChanged, this, &PlayerView::handleBalanceChanged);
 
     // Reset time counter
     ui->progressTimeLabel->setText("");
 
     // Set play status icon
-    setPlaybackState(m_player->playbackState());
+    setPlaybackState(MediaPlayer::StoppedState);
 
-    connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
-    connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::showPlaylistClicked);
-
-    connect(m_player, &MediaPlayer::playbackStateChanged, this, &PlayerView::setPlaybackState);
-    connect(m_player, &MediaPlayer::volumeChanged, this, &PlayerView::setVolumeSlider);
+    connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::plClicked);
 
     // Setup spectrum widget
-    connect(m_player, &MediaPlayer::newData, this, &PlayerView::handleSpectrumData);
     QVBoxLayout *spectrumLayout = new QVBoxLayout;
     spectrumLayout->addWidget(spectrum);
     spectrumLayout->setContentsMargins(0, 0, 0, 0);
     spectrumLayout->setSpacing(0);
     ui->spectrumContainer->setLayout(spectrumLayout);
 
-
-    if (!isPlayerAvailable()) {
-        QMessageBox::warning(this, tr("Service not available"),
-                             tr("The QMediaPlayer object does not have a valid service.\n"
-                                "Please check the media service plugins are installed."));
-        // Should disable ui here...
-    }
-
-    metaDataChanged();
+    // Setup message functionality
+    messageTimer = new QTimer(this);
+    connect(messageTimer, &QTimer::timeout, this, &PlayerView::clearMessage);
 }
 
 PlayerView::~PlayerView()
@@ -92,323 +78,95 @@ PlayerView::~PlayerView()
     delete ui;
 }
 
-bool PlayerView::isPlayerAvailable() const
+void PlayerView::scale()
 {
-    return true; //m_player->isAvailable();
-}
+    this->setMaximumSize(this->maximumSize() * UI_SCALE);
+    this->setMinimumSize(this->minimumSize() * UI_SCALE);
 
-void PlayerView::open()
-{
-    QFileDialog fileDialog(this);
-    fileDialog.setNameFilter(tr("Audio (*.mp3 *.flac *.m4a *.ogg *.wma *.wav *.m3u)"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-    fileDialog.setFileMode(QFileDialog::ExistingFiles);
-    fileDialog.setWindowTitle(tr("Open Files"));
-    fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation)
-                                .value(0, QDir::homePath()));
-    if (fileDialog.exec() == QDialog::Accepted)
-        addToPlaylist(fileDialog.selectedUrls());
-}
+    ui->posBarContainer->layout()->setContentsMargins(ui->posBarContainer->layout()->contentsMargins() * UI_SCALE);
 
-static bool isPlaylist(const QUrl &url) // Check for ".m3u" playlists.
-{
-    if (!url.isLocalFile())
-        return false;
-    const QFileInfo fileInfo(url.toLocalFile());
-    return fileInfo.exists()
-           && !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
-}
+    ui->posBar->setMaximumHeight(ui->posBar->maximumHeight() * UI_SCALE);
+    ui->posBar->setMinimumHeight(ui->posBar->minimumHeight() * UI_SCALE);
+    ui->posBar->setStyleSheet(getStylesheet("playerview.posBar"));
 
-void PlayerView::addToPlaylist(const QList<QUrl> &urls)
-{
-    const int previousMediaCount = m_playlist->mediaCount();
-    for (auto &url : urls) {
-        if (isPlaylist(url))
-            m_playlist->load(url);
-        else
-            m_playlist->addMedia(url);
-    }
-    if (m_playlist->mediaCount() > previousMediaCount) {
-        auto index = m_playlistModel->index(previousMediaCount, 0);
-        jump(index);
-    }
-}
+    ui->infoContainer->setContentsMargins(ui->infoContainer->contentsMargins() * UI_SCALE);
+    ui->visualizationContainer->setContentsMargins(ui->visualizationContainer->contentsMargins() * UI_SCALE);
 
-void PlayerView::durationChanged(qint64 duration)
-{
-    m_duration = duration / 1000;
-    ui->posBar->setMaximum(duration);
-}
-
-void PlayerView::positionChanged(qint64 progress)
-{
-    if (!ui->posBar->isSliderDown())
-        ui->posBar->setValue(progress);
-
-    updateDurationInfo(progress / 1000);
-}
-
-void PlayerView::metaDataChanged()
-{
-    auto metaData = m_player->metaData();
-
-    // Generate track info string
-    QString artist = metaData.value(QMediaMetaData::AlbumArtist).toString().toUpper();
-    QString album = metaData.value(QMediaMetaData::AlbumTitle).toString().toUpper();
-    QString title = metaData.value(QMediaMetaData::Title).toString().toUpper();
-
-    //  Calculate duration
-    qint64 duration = metaData.value(QMediaMetaData::Duration).toLongLong()/1000;
-    QTime totalTime((duration / 3600) % 60, (duration / 60) % 60, duration % 60,
-                    (duration * 1000) % 1000);
-    QString format = "mm:ss";
-    if (duration > 3600)
-        format = "hh:mm:ss";
-    QString durationStr = totalTime.toString(format);
-
-    QString trackInfo = "";
-
-    if(artist.length()) trackInfo.append(QString("%1 - ").arg(artist));
-    if(album.length()) trackInfo.append(QString("%1 - ").arg(album));
-    if(title.length()) trackInfo.append(title);
-    if(totalTime > QTime(0, 0, 0)) trackInfo.append(QString(" (%1)").arg(durationStr));
-
-    setTrackInfo(trackInfo);
-
-    // Set kbps
-    int bitrate = metaData.value(QMediaMetaData::AudioBitRate).toInt()/1000;
-    ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
-
-    // Set kHz
-    int khz = metaData.value(QMediaMetaData::AudioCodec).toInt()/1000;
-    ui->khzValueLabel->setText(khz > 0 ? QString::number(khz) : "");
-}
-
-QString PlayerView::trackName(const QMediaMetaData &metaData, int index)
-{
-    QString name;
-    QString title = metaData.stringValue(QMediaMetaData::Title);
-    QLocale::Language lang = metaData.value(QMediaMetaData::Language).value<QLocale::Language>();
-
-    if (title.isEmpty()) {
-        if (lang == QLocale::Language::AnyLanguage)
-            name = tr("Track %1").arg(index + 1);
-        else
-            name = QLocale::languageToString(lang);
-    } else {
-        if (lang == QLocale::Language::AnyLanguage)
-            name = title;
-        else
-            name = QString("%1 - [%2]").arg(title, QLocale::languageToString(lang));
-    }
-    return name;
-}
-
-void PlayerView::previousClicked()
-{
-    // Go to previous track if we are within the first 5 seconds of playback
-    // Otherwise, seek to the beginning.
-    if (m_player->position() <= 5000) {
-        handlePrevious();
-    } else {
-        m_player->setPosition(0);
-    }
-}
-
-void PlayerView::nextClicked()
-{
-    handleNext();
-}
-
-void PlayerView::playClicked()
-{
-    shouldBePlaying = true;
-    m_player->play();
-}
-
-void PlayerView::pauseClicked()
-{
-    shouldBePlaying = false;
-    m_player->pause();
-}
-
-void PlayerView::stopClicked()
-{
-    shouldBePlaying = false;
-    m_player->stop();
-}
-
-void PlayerView::repeatButtonClicked(bool checked)
-{
-    repeatEnabled = checked;
-    QMediaPlaylist::PlaybackMode mode = QMediaPlaylist::PlaybackMode::Sequential;
-    if(repeatEnabled) mode = QMediaPlaylist::PlaybackMode::Loop;
-    m_playlist->setPlaybackMode(mode);
-}
-
-void PlayerView::shuffleButtonClicked(bool checked)
-{
-    shuffleEnabled = checked;
-    m_playlist->setShuffle(shuffleEnabled);
-}
-
-void PlayerView::jump(const QModelIndex &index)
-{
-    if (index.isValid()) {
-        m_playlist->setCurrentIndex(index.row());
-        shouldBePlaying = true;
-        m_player->play();
-    }
-}
-
-void PlayerView::playlistPositionChanged(int)
-{
-    m_player->setSource(m_playlist->currentQueueMedia());
-
-    if (shouldBePlaying) {
-        m_player->play();
-    }
-}
-
-void PlayerView::seek(int mseconds)
-{
-    m_player->setPosition(mseconds);
-}
-
-void PlayerView::statusChanged(MediaPlayer::MediaStatus status)
-{
-    handleCursor(status);
-
-    // handle status message
-    switch (status) {
-    case MediaPlayer::NoMedia:
-    case MediaPlayer::LoadedMedia:
-        setStatusInfo(QString());
-        break;
-    case MediaPlayer::LoadingMedia:
-        setStatusInfo(tr("Loading..."));
-        break;
-    case MediaPlayer::BufferingMedia:
-    case MediaPlayer::BufferedMedia:
-        setStatusInfo(tr("Buffering %1%").arg(qRound(m_player->bufferProgress() * 100.)));
-        break;
-    case MediaPlayer::StalledMedia:
-        setStatusInfo(tr("Stalled %1%").arg(qRound(m_player->bufferProgress() * 100.)));
-        break;
-    case MediaPlayer::EndOfMedia:
-        QApplication::alert(this);
-        handleNext();
-        break;
-    case MediaPlayer::InvalidMedia:
-        displayErrorMessage();
-        break;
-    }
-}
-
-void PlayerView::handleCursor(MediaPlayer::MediaStatus status)
-{
-#ifndef QT_NO_CURSOR
-    if (status == MediaPlayer::LoadingMedia || status == MediaPlayer::BufferingMedia
-        || status == MediaPlayer::StalledMedia)
-        setCursor(QCursor(Qt::BusyCursor));
-    else
-        unsetCursor();
-#endif
-}
-
-void PlayerView::bufferingProgress(float progress)
-{
-    if (m_player->mediaStatus() == MediaPlayer::StalledMedia)
-        setStatusInfo(tr("Stalled %1%").arg(qRound(progress * 100.)));
-    else
-        setStatusInfo(tr("Buffering %1%").arg(qRound(progress * 100.)));
-}
-
-void PlayerView::handleSpectrumData(const QByteArray& data)
-{
-    spectrum->setData(data, m_player->format());
-}
+    ui->codecDetailsContainer->layout()->setContentsMargins(ui->codecDetailsContainer->layout()->contentsMargins() * UI_SCALE);
+    ui->codecDetailsContainer->layout()->setSpacing(ui->codecDetailsContainer->layout()->spacing() * UI_SCALE);
+    ui->codecDetailsContainer->setStyleSheet(getStylesheet("playerview.codecDetailsContainer"));
 
 
-void PlayerView::setTrackInfo(const QString &info)
-{
-    m_trackInfo = info;
+    ui->kHzLabel->setMaximumHeight(ui->kHzLabel->maximumHeight() * UI_SCALE);
+    ui->kHzLabel->setMinimumHeight(ui->kHzLabel->minimumHeight() * UI_SCALE);
 
-    ui->songInfoLabel->setText(info);
+    ui->kbpsLabel->setMaximumHeight(ui->kbpsLabel->maximumHeight() * UI_SCALE);
+    ui->kbpsLabel->setMinimumHeight(ui->kbpsLabel->minimumHeight() * UI_SCALE);
 
-    if (!m_statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));
-    else
-        setWindowTitle(m_trackInfo);
-}
+    ui->kbpsFrame->setMinimumSize(ui->kbpsFrame->minimumSize() * UI_SCALE);
+    ui->kbpsFrame->setMaximumHeight(ui->kbpsFrame->maximumHeight() * UI_SCALE);
+    ui->kbpsFrame->layout()->setContentsMargins(ui->kbpsFrame->layout()->contentsMargins() * UI_SCALE);
+    ui->kbpsFrame->layout()->setSpacing(ui->kbpsFrame->layout()->spacing() * UI_SCALE);
+    ui->kbpsFrame->setStyleSheet(getStylesheet("playerview.kbpsFrame"));
 
-void PlayerView::setStatusInfo(const QString &info)
-{
-    m_statusInfo = info;
+    ui->khzFrame->setMinimumSize(ui->khzFrame->minimumSize() * UI_SCALE);
+    ui->khzFrame->setMaximumHeight(ui->khzFrame->maximumHeight() * UI_SCALE);
+    ui->khzFrame->layout()->setContentsMargins(ui->khzFrame->layout()->contentsMargins() * UI_SCALE);
+    ui->khzFrame->layout()->setSpacing(ui->khzFrame->layout()->spacing() * UI_SCALE);
+    ui->khzFrame->setStyleSheet(getStylesheet("playerview.khzFrame"));
 
-    if (!m_statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));
-    else
-        setWindowTitle(m_trackInfo);
-}
+    ui->monoLabel->setMinimumHeight(ui->monoLabel->minimumHeight() * UI_SCALE);
+    ui->stereoLabel->setMinimumHeight(ui->stereoLabel->minimumHeight() * UI_SCALE);
 
-void PlayerView::displayErrorMessage()
-{
-    if (m_player->error() == MediaPlayer::NoError)
-        return;
-    setStatusInfo(m_player->errorString());
-    qDebug() << m_player->errorString();
-}
+    // Volume and balance sliders and buttons container
+    ui->horizontalWidget_2->setMinimumHeight(ui->horizontalWidget_2->minimumHeight() * UI_SCALE);
+    ui->horizontalWidget_2->setMaximumHeight(ui->horizontalWidget_2->maximumHeight() * UI_SCALE);
+    ui->horizontalWidget_2->layout()->setContentsMargins(ui->horizontalWidget_2->layout()->contentsMargins() * UI_SCALE);
 
-void PlayerView::updateDurationInfo(qint64 currentInfo)
-{
-    QString tStr, tDisplayStr;
-    if (currentInfo || m_duration) {
-        QTime currentTime((currentInfo / 3600) % 60, (currentInfo / 60) % 60, currentInfo % 60,
-                          (currentInfo * 1000) % 1000);
-        QTime totalTime((m_duration / 3600) % 60, (m_duration / 60) % 60, m_duration % 60,
-                        (m_duration * 1000) % 1000);
-        QString format = "mm:ss";
-        if (m_duration > 3600)
-            format = "hh:mm:ss";
-        tStr = currentTime.toString(format) + " / " + totalTime.toString(format);
-        format = "m ss";
-        tDisplayStr = currentTime.toString(format);
-    }
-    ui->progressTimeLabel->setText(tDisplayStr);
-}
+    ui->eqButton->setMinimumSize(ui->eqButton->minimumSize() * UI_SCALE);
+    ui->eqButton->setMaximumSize(ui->eqButton->maximumSize() * UI_SCALE);
+    ui->eqButton->setStyleSheet(getStylesheet("playerview.eqButton"));
 
-void PlayerView::setVolumeSlider(float volume)
-{
-    qreal logarithmicVolume = QAudio::convertVolume(volume, QAudio::LinearVolumeScale,
-                                                    QAudio::LogarithmicVolumeScale);
+    ui->playlistButton->setMinimumSize(ui->playlistButton->minimumSize() * UI_SCALE);
+    ui->playlistButton->setMaximumSize(ui->playlistButton->maximumSize() * UI_SCALE);
+    ui->playlistButton->setStyleSheet(getStylesheet("playerview.playlistButton"));
 
-    ui->volumeSlider->setValue(qRound(logarithmicVolume * 100));
-}
+    ui->balanceSlider->setMinimumSize(ui->balanceSlider->minimumSize() * UI_SCALE);
+    ui->balanceSlider->setStyleSheet(getStylesheet("playerview.balanceSlider"));
 
-void PlayerView::volumeChanged()
-{
-    qreal linearVolume =
-        QAudio::convertVolume(ui->volumeSlider->value() / qreal(100),
-                              QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
+    ui->volumeSlider->setMinimumSize(ui->volumeSlider->minimumSize() * UI_SCALE);
+    ui->volumeSlider->setMaximumSize(ui->volumeSlider->maximumSize() * UI_SCALE);
+    ui->volumeSlider->setStyleSheet(getStylesheet("playerview.volumeSlider"));
 
-    m_player->setVolume(linearVolume);
-}
+    ui->songInfoContainer->setMinimumHeight(ui->songInfoContainer->minimumHeight() * UI_SCALE);
+    ui->songInfoContainer->setMaximumHeight(ui->songInfoContainer->maximumHeight() * UI_SCALE);
+    ui->songInfoContainer->layout()->setContentsMargins(ui->songInfoContainer->layout()->contentsMargins() * UI_SCALE);
+    ui->songInfoContainer->setStyleSheet(getStylesheet("playerview.songInfoContainer"));
 
-void PlayerView::handlePrevious()
-{
-    // If is first item in playlist, do nothing
-    // That's handled by QMediaPlaylist
-    m_playlist->previous();
-}
+    ui->visualizationFrame->setMaximumSize(ui->visualizationFrame->maximumSize() * UI_SCALE);
+    ui->visualizationFrame->setMinimumSize(ui->visualizationFrame->minimumSize() * UI_SCALE);
+    ui->visualizationFrame->setStyleSheet(getStylesheet("playerview.visualizationFrame"));
 
-void PlayerView::handleNext()
-{
-    // If is last item in playlist:
-    // If repeat enabled, go to first
-    // If not, do nothing
-    // That's handled by QMediaPlaylist
-    m_playlist->next();
+    ui->playStatusIcon->setMaximumSize(ui->playStatusIcon->maximumSize() * UI_SCALE);
+    ui->playStatusIcon->setMinimumSize(ui->playStatusIcon->minimumSize() * UI_SCALE);
+    QRect psiGeo = ui->playStatusIcon->geometry();
+    ui->playStatusIcon->setGeometry(psiGeo.x()*UI_SCALE, psiGeo.y()*UI_SCALE, psiGeo.width(), psiGeo.height());
+
+    ui->progressTimeLabel->setGeometry(39*UI_SCALE, 3*UI_SCALE, 50*UI_SCALE, 20*UI_SCALE);
+    QFont ptlFont = ui->progressTimeLabel->font();
+    ptlFont.setWordSpacing(-2);
+    ui->progressTimeLabel->setFont(ptlFont);
+    ui->progressTimeLabel->ensurePolished();
+
+    QRect scGeo = ui->spectrumContainer->geometry();
+    ui->spectrumContainer->setGeometry(scGeo.x()*UI_SCALE, scGeo.y()*UI_SCALE, scGeo.width()*UI_SCALE, scGeo.height()*UI_SCALE);
+
+    QRect ilGeo = ui->inputLabel->geometry();
+    ui->inputLabel->setGeometry(10, 6, ilGeo.width()*UI_SCALE, ilGeo.height()*UI_SCALE);
+    QFont ilFont = ui->inputLabel->font();
+    ilFont.setPointSize(23);
+    ilFont.setFamily("DejaVu Sans Mono");
+    ui->inputLabel->setFont(ilFont);
 }
 
 void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
@@ -436,4 +194,155 @@ void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
     scene->addPixmap(image);
     scene->setSceneRect(image.rect());
     ui->playStatusIcon->setScene(scene);
+}
+
+void PlayerView::setPosition(qint64 progress)
+{
+    if (!ui->posBar->isSliderDown())
+        ui->posBar->setValue(progress);
+
+    updateDurationInfo(progress / 1000);
+}
+
+void PlayerView::setSpectrumData(const QByteArray& data, QAudioFormat format)
+{
+    spectrum->setData(data, format);
+}
+
+void PlayerView::setMetadata(QMediaMetaData metadata)
+{
+    // Generate track info string
+    QString artist = metadata.value(QMediaMetaData::AlbumArtist).toString().toUpper();
+    QString album = metadata.value(QMediaMetaData::AlbumTitle).toString().toUpper();
+    QString title = metadata.value(QMediaMetaData::Title).toString().toUpper();
+
+    //  Calculate duration
+    qint64 ms = metadata.value(QMediaMetaData::Duration).toLongLong();
+    qint64 duration = ms/1000;
+    QTime totalTime((duration / 3600) % 60, (duration / 60) % 60, duration % 60,
+                    (duration * 1000) % 1000);
+    QString durationStr = formatDuration(ms);
+
+    QString trackInfo = "";
+
+    if(artist.length()) trackInfo.append(QString("%1 - ").arg(artist));
+    if(album.length()) trackInfo.append(QString("%1 - ").arg(album));
+    if(title.length()) trackInfo.append(title);
+    if(totalTime > QTime(0, 0, 0)) trackInfo.append(QString(" (%1)").arg(durationStr));
+
+    setTrackInfo(trackInfo);
+
+    // Set kbps
+    int bitrate = metadata.value(QMediaMetaData::AudioBitRate).toInt()/1000;
+    ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
+
+    // Set kHz
+    int khz = metadata.value(QMediaMetaData::AudioCodec).toInt()/1000;
+    ui->khzValueLabel->setText(khz > 0 ? QString::number(khz) : "");
+}
+
+void PlayerView::setDuration(qint64 duration)
+{
+    m_duration = duration / 1000;
+    ui->posBar->setMaximum(duration);
+}
+
+void PlayerView::setVolume(int volume)
+{
+    ui->volumeSlider->setValue(volume);
+}
+
+void PlayerView::setBalance(int balance)
+{
+    ui->balanceSlider->setValue(balance);
+}
+
+void PlayerView::setEqEnabled(bool enabled)
+{
+    eqEnabled = enabled;
+    ui->eqButton->setChecked(eqEnabled);
+}
+
+void PlayerView::setPlEnabled(bool enabled)
+{
+    plEnabled = enabled;
+    ui->playlistButton->setChecked(plEnabled);
+}
+
+void PlayerView::setShuffleEnabled(bool enabled)
+{
+    shuffleEnabled = enabled;
+    controlButtons->setShuffleEnabled(shuffleEnabled);
+}
+
+void PlayerView::setRepeatEnabled(bool enabled)
+{
+    repeatEnabled = enabled;
+    controlButtons->setRepeatEnabled(repeatEnabled);
+}
+
+void PlayerView::setMessage(QString message, qint64 timeout)
+{
+    ui->songInfoLabel->setText(message);
+    messageTimer->setSingleShot(true);
+    messageTimer->start(timeout);
+}
+
+void PlayerView::clearMessage()
+{
+    if(ui->songInfoLabel->text() != m_trackInfo) {
+        ui->songInfoLabel->setText(m_trackInfo);
+    }
+    if(messageTimer->isActive()) {
+        messageTimer->stop();
+    }
+}
+
+void PlayerView::updateDurationInfo(qint64 currentInfo)
+{
+    QString tStr, tDisplayStr;
+    if (currentInfo || m_duration) {
+        tStr = formatDuration(currentInfo) + " / " + formatDuration(m_duration);
+
+        QTime currentTime((currentInfo / 3600) % 60, (currentInfo / 60) % 60, currentInfo % 60,
+                          (currentInfo * 1000) % 1000);
+        tDisplayStr = currentTime.toString("m ss");
+    }
+    ui->progressTimeLabel->setText(tDisplayStr);
+}
+
+void PlayerView::setTrackInfo(const QString &info)
+{
+    m_trackInfo = info;
+
+    // Don't override info label if message is in flight
+    if(!messageTimer->isActive()) {
+        ui->songInfoLabel->setText(info);
+    }
+
+    if (!m_statusInfo.isEmpty())
+        setWindowTitle(QString("%1 | %2").arg(m_trackInfo, m_statusInfo));
+    else
+        setWindowTitle(m_trackInfo);
+}
+
+void PlayerView::handleBalanceChanged()
+{
+    // Snap slider to the center if it falls near to it
+    int val = ui->balanceSlider->value();
+    if(val > -20 && val < 20) {
+        val = 0;
+        ui->balanceSlider->setValue(val);
+    }
+    emit balanceChanged(val);
+}
+
+void PlayerView::setSourceLabel(QString label)
+{
+    QString fLabel = "";
+    for(quint8 i = 0; i < label.length(); i++) {
+        fLabel.append(label[i]);
+        fLabel.append("\n");
+    }
+    ui->inputLabel->setText(fLabel);
 }

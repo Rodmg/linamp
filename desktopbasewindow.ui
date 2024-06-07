@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>831</width>
-    <height>351</height>
+    <width>277</width>
+    <height>117</height>
    </rect>
   </property>
   <property name="palette">
@@ -106,35 +106,54 @@
   </property>
   <property name="styleSheet">
    <string notr="true">#DesktopBaseWindow {
-	border: 3px solid #0d0d14;
-	background-color: #333350;
-}</string>
+    border: 1px solid #0d0d14;
+    background-color: #333350;
+}
+
+#outerFrame {
+    border-top: 1px solid #5c5c63;
+    border-left: 1px solid #5c5c63;
+    border-bottom: 1px solid #25253a;
+    border-right: 1px solid #25253a;
+}
+
+#bodyOuterFrame {
+    border-top: 1px solid #25253a;
+    border-left: 1px solid #25253a;
+    border-bottom: 1px solid #5c5c63;
+    border-right: 1px solid #5c5c63;
+    background-color: #25253a;
+}
+
+#bodyInnerFrame {
+    border-top: 1px solid #5c5c63;
+    border-left: 1px solid #5c5c63;
+    border-bottom: 1px solid #25253a;
+    border-right: 1px solid #25253a;
+    background-color: #333350;
+}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="topMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="rightMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="bottomMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <item>
     <widget class="QFrame" name="outerFrame">
      <property name="styleSheet">
-      <string notr="true">#outerFrame {
-	border-top: 3px solid #5c5c63;
-	border-left: 3px solid #5c5c63;
-	border-bottom: 3px solid #25253a;
-	border-right: 3px solid #25253a;
-}</string>
+      <string notr="true"/>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -163,13 +182,13 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>24</height>
+          <height>8</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>24</height>
+          <height>8</height>
          </size>
         </property>
        </widget>
@@ -187,27 +206,21 @@
           <number>0</number>
          </property>
          <property name="leftMargin">
-          <number>6</number>
+          <number>2</number>
          </property>
          <property name="topMargin">
           <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>6</number>
+          <number>2</number>
          </property>
          <property name="bottomMargin">
-          <number>6</number>
+          <number>2</number>
          </property>
          <item>
           <widget class="QFrame" name="bodyOuterFrame">
            <property name="styleSheet">
-            <string notr="true">#bodyOuterFrame {
-	border-top: 3px solid #25253a;
-	border-left: 3px solid #25253a;
-	border-bottom: 3px solid #5c5c63;
-	border-right: 3px solid #5c5c63;
-	background-color: #25253a;
-}</string>
+            <string notr="true"/>
            </property>
            <property name="frameShape">
             <enum>QFrame::StyledPanel</enum>
@@ -220,27 +233,21 @@
              <number>0</number>
             </property>
             <property name="leftMargin">
-             <number>3</number>
+             <number>1</number>
             </property>
             <property name="topMargin">
-             <number>3</number>
+             <number>1</number>
             </property>
             <property name="rightMargin">
-             <number>3</number>
+             <number>1</number>
             </property>
             <property name="bottomMargin">
-             <number>3</number>
+             <number>1</number>
             </property>
             <item>
              <widget class="QFrame" name="bodyInnerFrame">
               <property name="styleSheet">
-               <string notr="true">#bodyInnerFrame {
-	border-top: 3px solid #5c5c63;
-	border-left: 3px solid #5c5c63;
-	border-bottom: 3px solid #25253a;
-	border-right: 3px solid #25253a;
-	background-color: #333350;
-}</string>
+               <string notr="true"/>
               </property>
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>

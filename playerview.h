@@ -1,14 +1,14 @@
 #ifndef PLAYERVIEW_H
 #define PLAYERVIEW_H
 
-#include "qmediaplaylist.h"
-#include "playlistmodel.h"
+#include "controlbuttonswidget.h"
 #include "mediaplayer.h"
 #include "spectrumwidget.h"
 
 #include <QMediaMetaData>
 #include <QAudioOutput>
 #include <QWidget>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 class QAbstractItemView;
@@ -29,67 +29,64 @@ class PlayerView : public QWidget
     Q_OBJECT
 
 public:
-    explicit PlayerView(QWidget *parent = nullptr, PlaylistModel *playlistModel = nullptr);
+    explicit PlayerView(QWidget *parent = nullptr, ControlButtonsWidget *ctlBtns = nullptr);
     ~PlayerView();
 
-    bool isPlayerAvailable() const;
-
-    void addToPlaylist(const QList<QUrl> &urls);
+    void setSourceLabel(QString label);
 
 public slots:
-    void setVolumeSlider(float volume);
-    void jump(const QModelIndex &index);
-    void open();
+    void setPlaybackState(MediaPlayer::PlaybackState state);
+    void setPosition(qint64 progress);
+    void setSpectrumData(const QByteArray& data, QAudioFormat format);
+    void setMetadata(QMediaMetaData metadata);
+    void setDuration(qint64 duration);
+    void setVolume(int volume);
+    void setBalance(int balance);
+    void setEqEnabled(bool enabled);
+    void setPlEnabled(bool enabled);
+    void setShuffleEnabled(bool enabled);
+    void setRepeatEnabled(bool enabled);
+    void setMessage(QString message, qint64 timeout);
+    void clearMessage();
 
+signals:
+    void volumeChanged(int volume);
+    void balanceChanged(int balance);
+    void positionChanged(qint64 progress);
+    void eqClicked();
+    void plClicked();
     void previousClicked();
-    void nextClicked();
     void playClicked();
     void pauseClicked();
     void stopClicked();
-    void repeatButtonClicked(bool checked);
-    void shuffleButtonClicked(bool checked);
-
-private slots:
-    void durationChanged(qint64 duration);
-    void positionChanged(qint64 progress);
-    void metaDataChanged();
-
-    void seek(int mseconds);
-    void playlistPositionChanged(int);
-
-    void statusChanged(MediaPlayer::MediaStatus status);
-    void bufferingProgress(float progress);
-    void handleSpectrumData(const QByteArray& data);
-
-    void displayErrorMessage();
-
-signals:
-    void showPlaylistClicked();
+    void nextClicked();
+    void openClicked();
+    void shuffleClicked();
+    void repeatClicked();
+    void menuClicked();
 
 private:
     Ui::PlayerView *ui;
+    void scale();
     SpectrumWidget *spectrum = nullptr;
-    void setTrackInfo(const QString &info);
-    void setStatusInfo(const QString &info);
-    void setPlaybackState(MediaPlayer::PlaybackState state);
-    void handleCursor(MediaPlayer::MediaStatus status);
-    void updateDurationInfo(qint64 currentInfo);
-    void volumeChanged();
-    void handlePrevious();
-    void handleNext();
-    QString trackName(const QMediaMetaData &metaData, int index);
+    QTimer *messageTimer = nullptr;
+    ControlButtonsWidget *controlButtons = nullptr;
 
-    MediaPlayer *m_player = nullptr;
-    QMediaPlaylist *m_playlist = nullptr;
-
-    PlaylistModel *m_playlistModel = nullptr;
     QString m_trackInfo;
     QString m_statusInfo;
     qint64 m_duration;
 
+    bool plEnabled = false;
+    bool eqEnabled = false;
     bool shuffleEnabled = false;
     bool repeatEnabled = false;
-    bool shouldBePlaying = false;
+
+    void updateDurationInfo(qint64 currentInfo);
+    void setTrackInfo(const QString &info);
+
+private slots:
+    void handleBalanceChanged();
+
 };
 
 #endif // PLAYERVIEW_H

@@ -21,6 +21,7 @@ protected:
 
 private:
     Ui::TitleBar *ui;
+    void scale();
     QPointF m_pCursor;
 };
 

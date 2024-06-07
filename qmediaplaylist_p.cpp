@@ -75,6 +75,12 @@ int QMediaPlaylistPrivate::currentQueuePos() const
 void QMediaPlaylistPrivate::setCurrentPos(int pos)
 {
     m_currentPos = pos;
+
+    if (pos < 0 || pos >= playlist.size()) {
+        m_currentQueuePos = pos;
+        return;
+    }
+
     // Sync currentPlayPos
     QUrl item = playlist.at(m_currentPos);
     m_currentQueuePos = playqueue.indexOf(item);
@@ -83,6 +89,12 @@ void QMediaPlaylistPrivate::setCurrentPos(int pos)
 void QMediaPlaylistPrivate::setCurrentQueuePos(int pos)
 {
     m_currentQueuePos = pos;
+
+    if (pos < 0 || pos >= playlist.size()) {
+        m_currentPos = pos;
+        return;
+    }
+
     // Sync currentPos
     QUrl item = playqueue.at(m_currentQueuePos);
     m_currentPos = playlist.indexOf(item);

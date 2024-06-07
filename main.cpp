@@ -3,6 +3,7 @@
 // Copyright (C) 2023 Rodrigo Mendez.
 
 #include "mainwindow.h"
+#include "scale.h"
 
 #include <QApplication>
 #include <QCommandLineOption>
@@ -10,7 +11,7 @@
 #include <QDir>
 #include <QUrl>
 
-#define APP_VERSION_STR "0.1.0"
+#define APP_VERSION_STR "1.0.1"
 
 int main(int argc, char *argv[])
 {
@@ -27,12 +28,16 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     MainWindow window;
-    if (!parser.positionalArguments().isEmpty() && window.player->isPlayerAvailable()) {
+    if (!parser.positionalArguments().isEmpty()) {
         QList<QUrl> urls;
         for (auto &a : parser.positionalArguments())
             urls.append(QUrl::fromUserInput(a, QDir::currentPath()));
-        window.player->addToPlaylist(urls);
+        //window.player->addToPlaylist(urls);
     }
+
+    #ifdef IS_EMBEDDED
+    window.setWindowState(Qt::WindowFullScreen);
+    #endif
     window.show();
 
     return app.exec();

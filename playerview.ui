@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>768</width>
-    <height>180</height>
+    <width>279</width>
+    <height>61</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>768</width>
-    <height>180</height>
+    <width>256</width>
+    <height>60</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>768</width>
-    <height>180</height>
+    <width>320</width>
+    <height>61</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -77,7 +77,7 @@
           <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>8</number>
+          <number>2</number>
          </property>
          <property name="bottomMargin">
           <number>0</number>
@@ -86,23 +86,23 @@
           <widget class="QFrame" name="visualizationFrame">
            <property name="minimumSize">
             <size>
-             <width>279</width>
-             <height>129</height>
+             <width>93</width>
+             <height>43</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>279</width>
-             <height>129</height>
+             <width>93</width>
+             <height>43</height>
             </size>
            </property>
            <property name="styleSheet">
             <string notr="true">#visualizationFrame {
 	background-color: #000;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
 }</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -134,10 +134,10 @@
               <widget class="QLabel" name="progressTimeLabel">
                <property name="geometry">
                 <rect>
-                 <x>118</x>
-                 <y>9</y>
-                 <width>150</width>
-                 <height>61</height>
+                 <x>39</x>
+                 <y>3</y>
+                 <width>50</width>
+                 <height>20</height>
                 </rect>
                </property>
                <property name="palette">
@@ -261,7 +261,7 @@
                <property name="font">
                 <font>
                  <family>bignumbers</family>
-                 <pointsize>29</pointsize>
+                 <pointsize>10</pointsize>
                  <stylestrategy>NoAntialias</stylestrategy>
                 </font>
                </property>
@@ -288,22 +288,22 @@
               <widget class="QGraphicsView" name="playStatusIcon">
                <property name="geometry">
                 <rect>
-                 <x>36</x>
-                 <y>15</y>
-                 <width>33</width>
-                 <height>27</height>
+                 <x>12</x>
+                 <y>5</y>
+                 <width>11</width>
+                 <height>9</height>
                 </rect>
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>33</width>
-                 <height>27</height>
+                 <width>11</width>
+                 <height>9</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>33</width>
-                 <height>27</height>
+                 <width>11</width>
+                 <height>9</height>
                 </size>
                </property>
                <property name="palette">
@@ -412,10 +412,10 @@
               <widget class="QFrame" name="spectrumContainer">
                <property name="geometry">
                 <rect>
-                 <x>33</x>
-                 <y>57</y>
-                 <width>231</width>
-                 <height>51</height>
+                 <x>11</x>
+                 <y>19</y>
+                 <width>77</width>
+                 <height>17</height>
                 </rect>
                </property>
                <property name="frameShape">
@@ -423,6 +423,154 @@
                </property>
                <property name="frameShadow">
                 <enum>QFrame::Plain</enum>
+               </property>
+              </widget>
+              <widget class="QLabel" name="inputLabel">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>10</width>
+                 <height>71</height>
+                </rect>
+               </property>
+               <property name="palette">
+                <palette>
+                 <active>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="ButtonText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="PlaceholderText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="128">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </active>
+                 <inactive>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="ButtonText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="PlaceholderText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="128">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </inactive>
+                 <disabled>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="ButtonText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="PlaceholderText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="128">
+                     <red>111</red>
+                     <green>128</green>
+                     <blue>143</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </disabled>
+                </palette>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>5</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">#inputLabel {
+	color: #6f808f;
+}</string>
+               </property>
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;F&lt;br/&gt;I&lt;br/&gt;L&lt;br/&gt;E&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
                </property>
               </widget>
              </widget>
@@ -438,7 +586,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>7</height>
             </size>
            </property>
           </spacer>
@@ -451,10 +599,10 @@
           <number>0</number>
          </property>
          <property name="leftMargin">
-          <number>5</number>
+          <number>2</number>
          </property>
          <property name="topMargin">
-          <number>0</number>
+          <number>1</number>
          </property>
          <property name="rightMargin">
           <number>0</number>
@@ -464,33 +612,36 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>41</height>
+             <height>14</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>22</height>
+             <height>14</height>
             </size>
            </property>
            <property name="styleSheet">
             <string notr="true">#songInfoContainer {
 	background-color: #000000;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
 }</string>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <property name="leftMargin">
-             <number>8</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
              <number>0</number>
             </property>
             <property name="rightMargin">
-             <number>8</number>
+             <number>3</number>
             </property>
             <property name="bottomMargin">
              <number>0</number>
@@ -521,22 +672,30 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
                <font>
                 <family>Bitstream Vera Sans Mono</family>
-                <pointsize>18</pointsize>
+                <pointsize>6</pointsize>
                 <bold>true</bold>
                 <stylestrategy>NoAntialias</stylestrategy>
                 <kerning>true</kerning>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">#songInfoLabel {
-
-}</string>
+               <string notr="true"/>
               </property>
               <property name="text">
                <string>ARTIST - ALBUM - SONG (0:00) ---</string>
@@ -555,50 +714,56 @@
             </size>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <property name="leftMargin">
              <number>0</number>
             </property>
             <property name="topMargin">
-             <number>18</number>
+             <number>3</number>
             </property>
             <property name="rightMargin">
-             <number>15</number>
+             <number>5</number>
             </property>
             <property name="bottomMargin">
-             <number>8</number>
+             <number>2</number>
             </property>
             <item>
              <widget class="QFrame" name="kbpsFrame">
               <property name="minimumSize">
                <size>
-                <width>58</width>
-                <height>34</height>
+                <width>19</width>
+                <height>12</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>34</height>
+                <height>12</height>
                </size>
               </property>
               <property name="styleSheet">
                <string notr="true">#kbpsFrame {
 	background-color: #000000;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
 }</string>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <property name="spacing">
+                <number>2</number>
+               </property>
                <property name="leftMargin">
-                <number>4</number>
+                <number>1</number>
                </property>
                <property name="topMargin">
                 <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>1</number>
                </property>
                <property name="bottomMargin">
                 <number>0</number>
@@ -629,13 +794,23 @@
                      </brush>
                     </colorrole>
                    </inactive>
-                   <disabled/>
+                   <disabled>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>190</red>
+                       <green>190</green>
+                       <blue>190</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
                   </palette>
                  </property>
                  <property name="font">
                   <font>
                    <family>Bitstream Vera Sans Mono</family>
-                   <pointsize>18</pointsize>
+                   <pointsize>6</pointsize>
                    <bold>true</bold>
                    <stylestrategy>NoAntialias</stylestrategy>
                   </font>
@@ -656,13 +831,13 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>34</height>
+                <height>12</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>34</height>
+                <height>12</height>
                </size>
               </property>
               <property name="palette">
@@ -689,13 +864,23 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
                <font>
                 <family>Bitstream Vera Sans Mono</family>
-                <pointsize>16</pointsize>
+                <pointsize>5</pointsize>
                 <bold>true</bold>
                </font>
               </property>
@@ -727,34 +912,37 @@
              <widget class="QFrame" name="khzFrame">
               <property name="minimumSize">
                <size>
-                <width>45</width>
-                <height>34</height>
+                <width>15</width>
+                <height>12</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>34</height>
+                <height>12</height>
                </size>
               </property>
               <property name="styleSheet">
                <string notr="true">#khzFrame {
 	background-color: #000000;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
+	border-top: 1px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 1px solid #26253c;
 }</string>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <property name="spacing">
+                <number>2</number>
+               </property>
                <property name="leftMargin">
-                <number>4</number>
+                <number>1</number>
                </property>
                <property name="topMargin">
                 <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>1</number>
                </property>
                <property name="bottomMargin">
                 <number>0</number>
@@ -785,13 +973,23 @@
                      </brush>
                     </colorrole>
                    </inactive>
-                   <disabled/>
+                   <disabled>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>190</red>
+                       <green>190</green>
+                       <blue>190</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
                   </palette>
                  </property>
                  <property name="font">
                   <font>
                    <family>Bitstream Vera Sans Mono</family>
-                   <pointsize>18</pointsize>
+                   <pointsize>6</pointsize>
                    <bold>true</bold>
                    <stylestrategy>NoAntialias</stylestrategy>
                   </font>
@@ -812,13 +1010,13 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>34</height>
+                <height>12</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>34</height>
+                <height>12</height>
                </size>
               </property>
               <property name="palette">
@@ -845,13 +1043,23 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
                <font>
                 <family>Bitstream Vera Sans Mono</family>
-                <pointsize>16</pointsize>
+                <pointsize>5</pointsize>
                 <bold>true</bold>
                </font>
               </property>
@@ -870,7 +1078,7 @@
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>40</width>
+                <width>1</width>
                 <height>1</height>
                </size>
               </property>
@@ -881,7 +1089,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>34</height>
+                <height>12</height>
                </size>
               </property>
               <property name="palette">
@@ -908,13 +1116,23 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
                <font>
                 <family>Noto Sans</family>
-                <pointsize>11</pointsize>
+                <pointsize>4</pointsize>
                </font>
               </property>
               <property name="text">
@@ -927,7 +1145,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>34</height>
+                <height>12</height>
                </size>
               </property>
               <property name="palette">
@@ -954,13 +1172,23 @@
                   </brush>
                  </colorrole>
                 </inactive>
-                <disabled/>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>190</red>
+                    <green>190</green>
+                    <blue>190</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
                </palette>
               </property>
               <property name="font">
                <font>
                 <family>Noto Sans</family>
-                <pointsize>11</pointsize>
+                <pointsize>4</pointsize>
                </font>
               </property>
               <property name="text">
@@ -970,19 +1198,6 @@
             </item>
            </layout>
           </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
          </item>
          <item>
           <widget class="QWidget" name="horizontalWidget_2" native="true">
@@ -1002,6 +1217,9 @@
             <property name="topMargin">
              <number>0</number>
             </property>
+            <property name="rightMargin">
+             <number>3</number>
+            </property>
             <property name="bottomMargin">
              <number>0</number>
             </property>
@@ -1009,26 +1227,26 @@
              <widget class="QSlider" name="volumeSlider">
               <property name="minimumSize">
                <size>
-                <width>180</width>
-                <height>33</height>
+                <width>65</width>
+                <height>11</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>180</width>
-                <height>33</height>
+                <width>65</width>
+                <height>11</height>
                </size>
               </property>
               <property name="styleSheet">
                <string notr="true">QSlider::handle:horizontal {
-	width: 42px;
-	height: 33px;
+	width: 14px;
+	height: 11px;
 	background-color: transparent;
 	border-image: url(:assets/volumeHandle.png);
 	background: none;
 	background-repeat: none;
-	margin-top: -7.5px;
-	margin-bottom: -7.5px;
+	margin-top: -2.5px;
+	margin-bottom: -2.5px;
 }
 
 QSlider::handle:horizontal:pressed {
@@ -1037,26 +1255,26 @@ QSlider::handle:horizontal:pressed {
 
 QSlider::groove:horizontal {
 	background: transparent;
-	height: 18px;
+	height: 6px;
 }
 
 QSlider::sub-page:horizontal {
 	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #9f161b, stop: 1 #e11f26);
-	border-top: 3px solid #161623;
-	border-left: 3px solid #161623;
-	border-bottom: 3px solid #7d7d92;
-	border-right: 3px solid #7d7d92;
-	border-radius: 8px;
+	border-top: 1px solid #161623;
+	border-left: 1px solid #161623;
+	border-bottom: 1px solid #7d7d92;
+	border-right: 1px solid #7d7d92;
+	border-radius: 2.66px;
 }
 
 QSlider::add-page:horizontal {
-	height: 18px;
+	height: 6px;
 	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
-	border-top: 3px solid #161623;
-	border-left: 3px solid #161623;
-	border-bottom: 3px solid #7d7d92;
-	border-right: 3px solid #7d7d92;
-	border-radius: 8px;
+	border-top: 1px solid #161623;
+	border-left: 1px solid #161623;
+	border-bottom: 1px solid #7d7d92;
+	border-right: 1px solid #7d7d92;
+	border-radius: 2.66px;
 }</string>
               </property>
               <property name="orientation">
@@ -1070,12 +1288,12 @@ QSlider::add-page:horizontal {
                <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
+               <enum>QSizePolicy::MinimumExpanding</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>16</width>
-                <height>20</height>
+                <height>1</height>
                </size>
               </property>
              </spacer>
@@ -1084,20 +1302,26 @@ QSlider::add-page:horizontal {
              <widget class="QSlider" name="balanceSlider">
               <property name="minimumSize">
                <size>
-                <width>110</width>
-                <height>33</height>
+                <width>38</width>
+                <height>11</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>38</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="styleSheet">
                <string notr="true">QSlider::handle:horizontal {
-	width: 42px;
-	height: 33px;
+	width: 14px;
+	height: 11px;
 	background-color: transparent;
 	border-image: url(:assets/balanceHandle.png);
 	background: none;
 	background-repeat: none;
-	margin-top: -7.5px;
-	margin-bottom: -7.5px;
+	margin-top: -2.5px;
+	margin-bottom: -2.5px;
 }
 
 QSlider::handle:horizontal:pressed {
@@ -1106,26 +1330,26 @@ QSlider::handle:horizontal:pressed {
 
 QSlider::groove:horizontal {
 	background: transparent;
-	height: 15px;
+	height: 5px;
 }
 
 QSlider::sub-page:horizontal {
 	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
-	border-top: 2px solid #161623;
-	border-left: 2px solid #161623;
-	border-bottom: 2px solid #7d7d92;
-	border-right: 2px solid #7d7d92;
-	border-radius: 2px;
+	border-top: 0.66px solid #161623;
+	border-left: 0.66px solid #161623;
+	border-bottom: 0.66px solid #7d7d92;
+	border-right: 0.66px solid #7d7d92;
+	border-radius: 0.66px;
 }
 
 QSlider::add-page:horizontal {
-	height: 15px;
+	height: 5px;
 	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #1c6c14, stop: 1 #28991c);
-	border-top: 2px solid #161623;
-	border-left: 2px solid #161623;
-	border-bottom: 2px solid #7d7d92;
-	border-right: 2px solid #7d7d92;
-	border-radius: 2px;
+	border-top: 0.66px solid #161623;
+	border-left: 0.66px solid #161623;
+	border-bottom: 0.66px solid #7d7d92;
+	border-right: 0.66px solid #7d7d92;
+	border-radius: 0.66px;
 }</string>
               </property>
               <property name="orientation">
@@ -1139,12 +1363,12 @@ QSlider::add-page:horizontal {
                <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
+               <enum>QSizePolicy::MinimumExpanding</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>14</width>
-                <height>20</height>
+                <height>1</height>
                </size>
               </property>
              </spacer>
@@ -1153,14 +1377,14 @@ QSlider::add-page:horizontal {
              <widget class="QCheckBox" name="eqButton">
               <property name="minimumSize">
                <size>
-                <width>69</width>
-                <height>36</height>
+                <width>23</width>
+                <height>12</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>69</width>
-                <height>36</height>
+                <width>23</width>
+                <height>12</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -1169,8 +1393,8 @@ QSlider::add-page:horizontal {
 }
 
 QCheckBox::indicator {
-    width: 69px;
-    height: 36px;
+    width: 23px;
+    height: 12px;
 }
 
 QCheckBox::indicator:unchecked {
@@ -1214,14 +1438,14 @@ QCheckBox::indicator:indeterminate:pressed {
              <widget class="QCheckBox" name="playlistButton">
               <property name="minimumSize">
                <size>
-                <width>69</width>
-                <height>36</height>
+                <width>23</width>
+                <height>12</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>69</width>
-                <height>36</height>
+                <width>23</width>
+                <height>12</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -1230,20 +1454,20 @@ QCheckBox::indicator:indeterminate:pressed {
 }
 
 QCheckBox::indicator {
-    width: 69px;
-    height: 36px;
+    width: 23px;
+    height: 12px;
 }
 
 QCheckBox::indicator:unchecked {
-    image: url(:assets/pl_on.png);
+    image: url(:assets/pl_off.png);
 }
 
 QCheckBox::indicator:unchecked:hover {
-    image: url(:assets/pl_on.png);
+    image: url(:assets/pl_off.png);
 }
 
 QCheckBox::indicator:unchecked:pressed {
-    image: url(:assets/pl_on_p.png);
+    image: url(:assets/pl_off_p.png);
 }
 
 QCheckBox::indicator:checked {
@@ -1279,10 +1503,13 @@ QCheckBox::indicator:indeterminate:pressed {
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Maximum</enum>
+           </property>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>7</height>
             </size>
            </property>
           </spacer>
@@ -1297,10 +1524,10 @@ QCheckBox::indicator:indeterminate:pressed {
         <number>0</number>
        </property>
        <property name="leftMargin">
-        <number>15</number>
+        <number>5</number>
        </property>
        <property name="rightMargin">
-        <number>6</number>
+        <number>2</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -1310,19 +1537,19 @@ QCheckBox::indicator:indeterminate:pressed {
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>27</height>
+           <height>10</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>27</height>
+           <height>10</height>
           </size>
          </property>
          <property name="styleSheet">
           <string notr="true">QSlider::handle:horizontal {
-	width: 84px;
-	height: 27px;
+	width: 28px;
+	height: 10px;
 	background-color: transparent;
 	border-image: url(:assets/posHandle.png);
 	background: none;
@@ -1339,11 +1566,14 @@ QSlider::groove:horizontal {
 
 #posBar {
 	background-color: #2c2b43;
-	border-top: 3px solid #26253c;
-	border-right: 3px solid #6d6d7f;
-	border-bottom: 3px solid #6d6d7f;
-	border-left: 3px solid #26253c;
-	padding: -3px;
+	border-top: 2px solid #26253c;
+	border-right: 1px solid #6d6d7f;
+	border-bottom: 1px solid #6d6d7f;
+	border-left: 2px solid #26253c;
+	padding-top: -2px;
+	padding-right: -1px;
+	padding-bottom: -1px;
+	padding-left: -2px;
 }</string>
          </property>
          <property name="orientation">

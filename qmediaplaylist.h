@@ -5,6 +5,7 @@
 #define QMEDIAPLAYLIST_H
 
 #include <QObject>
+#include <QMediaMetaData>
 
 #include <qmediaenumdebug.h>
 
@@ -49,8 +50,13 @@ public:
     QUrl media(int index) const;
     QUrl queueMedia(int index) const;
 
+    QMediaMetaData mediaMetadata(int index) const;
+    QMediaMetaData queueMediaMetadata(int index) const;
+
+
     int mediaCount() const;
     bool isEmpty() const;
+    qint64 totalDuration() const;
 
     void addMedia(const QUrl &content);
     void addMedia(const QList<QUrl> &items);
@@ -85,6 +91,9 @@ signals:
     void playbackModeChanged(QMediaPlaylist::PlaybackMode mode);
     void currentMediaChanged(const QUrl &);
 
+    // Emited when we want to inform the view to select a different index without playinf
+    void currentSelectionChanged(int index);
+
     void mediaAboutToBeInserted(int start, int end);
     void mediaInserted(int start, int end);
     void mediaAboutToBeRemoved(int start, int end);
@@ -98,6 +107,11 @@ private:
     bool shuffleEnabled = false;
     QMediaPlaylistPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QMediaPlaylist)
+
+    // Metadata for files in the playlist
+    QMap<QUrl, QMediaMetaData> m_mediaMetadata;
+    void loadMetadata(const QUrl &url);
+    void vacuumMetadata();
 };
 
 QT_END_NAMESPACE

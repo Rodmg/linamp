@@ -2,6 +2,7 @@
 #include "fft.h"
 #include <QPainter>
 #include <QColor>
+#include "scale.h"
 
 #define VIS_DELAY 1 /* delay before falloff in frames */
 #define VIS_FALLOFF 4 /* falloff in pixels per frame */
@@ -123,6 +124,9 @@ void SpectrumWidget::stop()
     this->update();
 }
 
+const unsigned int BG_DOT_SIZE = 1 * UI_SCALE;
+const unsigned int BG_DOT_SPACING = 1 * UI_SCALE;
+
 void SpectrumWidget::paintBackground(QPainter & p)
 {
     // Paint the gray pixels behind the spectrum
@@ -132,29 +136,31 @@ void SpectrumWidget::paintBackground(QPainter & p)
     const unsigned int cols = 38;
 
     // Starting points
-    unsigned int x = 3;
-    unsigned int y = 6;
+    unsigned int x = BG_DOT_SIZE;
+    unsigned int y = BG_DOT_SIZE + BG_DOT_SPACING;
 
     const QColor color = QColor::fromRgb(64, 64, 64);
 
     for(unsigned int row = 0; row < rows; row++) {
         for(unsigned int col = 0; col < cols; col++) {
-            p.fillRect(x, y, 3, 3, color);
-            x += 6; // Add pixel width + spacing
+            p.fillRect(x, y, BG_DOT_SIZE, BG_DOT_SIZE, color);
+            x += BG_DOT_SIZE + BG_DOT_SPACING; // Add pixel width + spacing
         }
-        x = 3;  // Go back to the start of the row
-        y += 6; // Add pixel height + spacing
+        x = BG_DOT_SIZE;  // Go back to the start of the row
+        y += BG_DOT_SIZE + BG_DOT_SPACING; // Add pixel height + spacing
     }
 }
 
+const unsigned int BAR_W = 3 * UI_SCALE;
+const unsigned int BAR_SPACING = 1 * UI_SCALE;
 
 void SpectrumWidget::paintSpectrum (QPainter & p)
 {
     for (int i = 0; i < N_BANDS; i++) {
         // Bar measures 3px*3 wide, 1px*3 spacing
-        int x = (9 * i) + 3*i;
-        p.fillRect(x + 3, height() - (m_bandValues[i] * height() / 40),
-                   9, (m_bandValues[i] * height() / 40), *getSpecBarGradient());
+        int x = (BAR_W * i) + BAR_SPACING*i;
+        p.fillRect(x + BAR_SPACING, height() - (m_bandValues[i] * height() / 40),
+                   BAR_W, (m_bandValues[i] * height() / 40), *getSpecBarGradient());
     }
 }
 
@@ -163,9 +169,9 @@ void SpectrumWidget::paintPeaks (QPainter & p)
     const QColor color = QColor::fromRgb(191, 191, 191);
     for (int i = 0; i < N_BANDS; i++) {
         // Peak rectangle measures 3px*3 wide, 1px*3 high, 1px*3 spacing
-        int x = (9 * i) + 3*i;
-        p.fillRect(x + 3, height() - (m_peakValues[i] * height() / 40),
-                   9, 3, color);
+        int x = (BAR_W * i) + BAR_SPACING*i;
+        p.fillRect(x + BAR_SPACING, height() - (m_peakValues[i] * height() / 40),
+                   BAR_W, BAR_SPACING, color);
     }
 }
 

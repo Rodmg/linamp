@@ -1,0 +1,15 @@
+#kHzLabel {
+    font-size: 5pt;
+}
+
+#kbpsLabel {
+    font-size: 5pt;
+}
+
+#monoLabel {
+        font-size: 4pt;
+}
+
+#stereoLabel {
+        font-size: 4pt;
+}

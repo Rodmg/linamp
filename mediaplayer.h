@@ -95,12 +95,13 @@ private:
     void clearAudioOutput();
     void clear();
     bool atEnd() const override;
-    void parseMetaData();
+    void loadMetaData();
     void setError(Error error);
     void setMediaStatus(MediaStatus status);
 
 public slots:
     void setSource(const QUrl &source);
+    void clearSource();
     void setPosition(qint64 position);
     void setVolume(float volume);
 

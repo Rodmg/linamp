@@ -1,10 +1,31 @@
+#include <QFileDialog>
+
 #include "mainwindow.h"
-#include "desktopbasewindow.h"
 #include "desktopplayerwindow.h"
-#include "ui_desktopbasewindow.h"
+#include "qstandardpaths.h"
 #include "ui_desktopplayerwindow.h"
+#include "scale.h"
+#include "util.h"
+
+#ifdef IS_EMBEDDED
+#include "embeddedbasewindow.h"
+#include "ui_embeddedbasewindow.h"
+#else
+#include "desktopbasewindow.h"
+#include "ui_desktopbasewindow.h"
+#endif
+
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QMessageBox>
+
+#ifdef IS_EMBEDDED
+const unsigned int WINDOW_W = 320 * UI_SCALE;
+const unsigned int WINDOW_H = 100 * UI_SCALE;
+#else
+const unsigned int WINDOW_W = 277 * UI_SCALE;
+const unsigned int WINDOW_H = 117 * UI_SCALE;
+#endif
 
 MainWindow::MainWindow(QWidget *parent)
      : QMainWindow{parent}
@@ -14,53 +35,78 @@ MainWindow::MainWindow(QWidget *parent)
     m_playlist = m_playlistModel->playlist();
 
     // Setup views
-    player = new PlayerView(this, m_playlistModel);
+    controlButtons = new ControlButtonsWidget(this);
+    player = new PlayerView(this, controlButtons);
     player->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
 
     playlist = new PlaylistView(this, m_playlistModel);
     playlist->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
 
-    controlButtons = new ControlButtonsWidget(this);
+    coordinator = new AudioSourceCoordinator(this, player);
+    fileSource = new AudioSourceFile(this, m_playlistModel);
+    btSource = new AudioSourceBluetooth(this);
+    cdSource = new AudioSourceCD(this);
+    coordinator->addSource(fileSource, "FILE", true);
+    coordinator->addSource(btSource, "BT", false);
+    coordinator->addSource(cdSource, "CD", false);
+
 
     // Connect events
-    connect(player, &PlayerView::showPlaylistClicked, this, &MainWindow::showPlaylist);
+    connect(fileSource, &AudioSourceFile::showPlaylistRequested, this, &MainWindow::showPlaylist);
     connect(playlist, &PlaylistView::showPlayerClicked, this, &MainWindow::showPlayer);
-    connect(playlist, &PlaylistView::songSelected, player, &PlayerView::jump);
-    connect(playlist, &PlaylistView::addButtonClicked, player, &PlayerView::open);
+    connect(playlist, &PlaylistView::songSelected, fileSource, &AudioSourceFile::jump);
+    connect(playlist, &PlaylistView::addSelectedFilesClicked, fileSource, &AudioSourceFile::addToPlaylist);
 
-    connect(controlButtons, &ControlButtonsWidget::playClicked, player, &PlayerView::playClicked);
-    connect(controlButtons, &ControlButtonsWidget::pauseClicked, player, &PlayerView::pauseClicked);
-    connect(controlButtons, &ControlButtonsWidget::stopClicked, player, &PlayerView::stopClicked);
-    connect(controlButtons, &ControlButtonsWidget::nextClicked, player, &PlayerView::nextClicked);
-    connect(controlButtons, &ControlButtonsWidget::previousClicked, player, &PlayerView::previousClicked);
-    connect(controlButtons, &ControlButtonsWidget::openClicked, player, &PlayerView::open);
-    connect(controlButtons, &ControlButtonsWidget::repeatClicked, player, &PlayerView::repeatButtonClicked);
-    connect(controlButtons, &ControlButtonsWidget::shuffleClicked, player, &PlayerView::shuffleButtonClicked);
+    connect(controlButtons, &ControlButtonsWidget::logoClicked, this, &MainWindow::showMenu);
 
     // Prepare player main view
-    DesktopPlayerWindow *playerWindow = new DesktopPlayerWindow(this);
+    #ifdef IS_EMBEDDED
+    EmbeddedBaseWindow *playerWindow = new EmbeddedBaseWindow(this);
+    #else
+    DesktopBaseWindow *playerWindow = new DesktopBaseWindow(this);
+    #endif
+
     playerWindow->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
+
+    DesktopPlayerWindow *playerWindowContent = new DesktopPlayerWindow(this);
     QVBoxLayout *playerLayout = new QVBoxLayout;
     playerLayout->setContentsMargins(0, 0, 0, 0);
     playerLayout->addWidget(player);
-    playerWindow->ui->playerViewContainer->setLayout(playerLayout);
+    playerWindowContent->ui->playerViewContainer->setLayout(playerLayout);
     QVBoxLayout *buttonsLayout = new QVBoxLayout;
     buttonsLayout->setContentsMargins(0, 0, 0, 0);
     buttonsLayout->addWidget(controlButtons);
-    playerWindow->ui->controlButtonsContainer->setLayout(buttonsLayout);
+    playerWindowContent->ui->controlButtonsContainer->setLayout(buttonsLayout);
+
+    QHBoxLayout *playerContentLayout = new QHBoxLayout;
+    playerContentLayout->setContentsMargins(0, 0, 0, 0);
+    playerContentLayout->addWidget(playerWindowContent);
+    playerWindow->ui->body->setLayout(playerContentLayout);
 
     // Prepare playlist view
+    #ifdef IS_EMBEDDED
+    EmbeddedBaseWindow *playlistWindow = new EmbeddedBaseWindow(this);
+    #else
     DesktopBaseWindow *playlistWindow = new DesktopBaseWindow(this);
+    #endif
+
     playlistWindow->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
     QVBoxLayout *playlistLayout = new QVBoxLayout;
     playlistLayout->setContentsMargins(0, 0, 0, 0);
     playlistLayout->addWidget(playlist);
     playlistWindow->ui->body->setLayout(playlistLayout);
 
+    // Prepare menu view
+    menu = new MainMenuView(this);
+    menu->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
+    connect(menu, &MainMenuView::backClicked, this, &MainWindow::showPlayer);
+    connect(menu, &MainMenuView::sourceSelected, coordinator, &AudioSourceCoordinator::setSource);
+
     // Prepare navigation stack
     viewStack = new QStackedLayout;
     viewStack->addWidget(playerWindow);
     viewStack->addWidget(playlistWindow);
+    viewStack->addWidget(menu);
 
     // Final UI setup and show
     QVBoxLayout *centralLayout = new QVBoxLayout;
@@ -72,12 +118,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(centralWidget);
 
-    resize(831, 351);
-    this->setMaximumWidth(831);
-    this->setMaximumHeight(351);
-    this->setMinimumWidth(831);
-    this->setMinimumHeight(351);
+    resize(WINDOW_W, WINDOW_H);
+    this->setMaximumWidth(WINDOW_W);
+    this->setMaximumHeight(WINDOW_H);
+    this->setMinimumWidth(WINDOW_W);
+    this->setMinimumHeight(WINDOW_H);
+
+    #ifndef IS_EMBEDDED
     setWindowFlags(Qt::CustomizeWindowHint);
+    #endif
 }
 
 MainWindow::~MainWindow()
@@ -93,4 +142,69 @@ void MainWindow::showPlayer()
 void MainWindow::showPlaylist()
 {
     viewStack->setCurrentIndex(1);
+}
+
+void MainWindow::showMenu()
+{
+    viewStack->setCurrentIndex(2);
+}
+
+void MainWindow::showShutdownModal()
+{
+    QMessageBox msgBox;
+    msgBox.setText("Shutdown");
+    msgBox.setInformativeText("Turn off Linamp?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    msgBox.setWindowFlags(Qt::FramelessWindowHint);
+    int ret = msgBox.exec();
+
+    switch (ret) {
+    case QMessageBox::Yes:
+        shutdown();
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::shutdown()
+{
+    QString appPath = QCoreApplication::applicationDirPath();
+    QString cmd = appPath + "/shutdown.sh";
+
+    shutdownProcess = new QProcess(this);
+    shutdownProcess->start(cmd);
+}
+
+// Shows a standard file picker for adding items to the playlist
+// Not used currently
+void MainWindow::open()
+{
+    QList<QUrl> urls;
+    urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first())
+         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first())
+         << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).first());
+
+
+    QFileDialog fileDialog(this);
+    QString filters = audioFileFilters().join(" ");
+    fileDialog.setNameFilter("Audio (" + filters + ")");
+    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog.setFileMode(QFileDialog::ExistingFiles);
+    fileDialog.setWindowTitle(tr("Open Files"));
+    fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation)
+                                .value(0, QDir::homePath()));
+    fileDialog.setOption(QFileDialog::ReadOnly, true);
+    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog.setViewMode(QFileDialog::Detail);
+    fileDialog.setSidebarUrls(urls);
+
+#ifdef IS_EMBEDDED
+    fileDialog.setWindowState(Qt::WindowFullScreen);
+#endif
+
+    if (fileDialog.exec() == QDialog::Accepted)
+        fileSource->addToPlaylist(fileDialog.selectedUrls());
+
 }

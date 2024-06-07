@@ -4,6 +4,7 @@
 #include "qmediaplaylist.h"
 #include "qmediaplaylist_p.h"
 #include "qplaylistfileparser.h"
+#include "util.h"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -364,6 +365,23 @@ bool QMediaPlaylist::isEmpty() const
 }
 
 /*!
+  Returns the total duration of the playlist, by summing all track durations.
+ */
+qint64 QMediaPlaylist::totalDuration() const
+{
+    qint64 total = 0;
+    for(int i = 0; i < mediaCount(); i++) {
+        QUrl url = media(i);
+        if(m_mediaMetadata.contains(url)) {
+            QMediaMetaData meta = m_mediaMetadata.value(media(i));
+            total += meta.value(QMediaMetaData::Duration).toLongLong();
+        }
+    }
+    return total;
+}
+
+
+/*!
   Returns the media content at \a index in the playlist.
 */
 
@@ -387,6 +405,24 @@ QUrl QMediaPlaylist::queueMedia(int index) const
     return d->playqueue.at(index);
 }
 
+QMediaMetaData QMediaPlaylist::mediaMetadata(int index) const
+{
+    QUrl url = media(index);
+    if(!m_mediaMetadata.contains(url)) {
+        return QMediaMetaData{};
+    }
+    return m_mediaMetadata.value(url);
+}
+
+QMediaMetaData QMediaPlaylist::queueMediaMetadata(int index) const
+{
+    QUrl url = queueMedia(index);
+    if(!m_mediaMetadata.contains(url)) {
+        return QMediaMetaData{};
+    }
+    return m_mediaMetadata.value(url);
+}
+
 /*!
   Append the media \a content to the playlist.
 
@@ -397,6 +433,9 @@ void QMediaPlaylist::addMedia(const QUrl &content)
     Q_D(QMediaPlaylist);
     int pos = d->playlist.size();
     emit mediaAboutToBeInserted(pos, pos);
+
+    loadMetadata(content);
+
     d->playlist.append(content);
     // Do also playqueue
     d_func()->playqueue = d_func()->playlist;
@@ -420,6 +459,11 @@ void QMediaPlaylist::addMedia(const QList<QUrl> &items)
     int first = d->playlist.size();
     int last = first + items.size() - 1;
     emit mediaAboutToBeInserted(first, last);
+
+    for(const QUrl &item : items) {
+        loadMetadata(item);
+    }
+
     d_func()->playlist.append(items);
     // Do also playqueue
     d_func()->playqueue = QList(d_func()->playlist);
@@ -495,8 +539,43 @@ bool QMediaPlaylist::moveMedia(int from, int to)
     if (from < 0 || from > d->playlist.count() || to < 0 || to > d->playlist.count())
         return false;
 
+    // Nothing to do here
+    if(from == to)
+        return false;
+
+    // Get the current playing media position and update after change
+    int currentPlayingPos = d->currentPos();
+    int newPlayingPos = currentPlayingPos;
+    // If currentPlayingPos is between the movement positions, it will change
+    if(currentPlayingPos == from) {
+        // Special case, current playing item is the one moving
+        newPlayingPos = to;
+    }
+    // Case when moving down
+    if(from < to && currentPlayingPos > from && currentPlayingPos <= to) {
+        // Everything in between moves up
+        newPlayingPos = currentPlayingPos - 1;
+    }
+    // Case when moving up
+    if(from > to && currentPlayingPos >= to && currentPlayingPos < from) {
+        // Everything in between moves down
+        newPlayingPos = currentPlayingPos + 1;
+    }
+
+    // Do te moves
     d->playlist.move(from, to);
-    emit mediaChanged(from, to);
+
+    // Do also playqueue
+    d->playqueue = QList(d->playlist);
+    if(shuffleEnabled) {
+        this->shuffle();
+    }
+
+    // Set new position
+    d->setCurrentPos(newPlayingPos);
+
+    emit mediaChanged(0, d->playlist.count());
+    emit currentSelectionChanged(to); // highlight destination
     return true;
 }
 
@@ -523,10 +602,34 @@ bool QMediaPlaylist::removeMedia(int start, int end)
     start = qBound(0, start, d->playlist.size() - 1);
     end = qBound(0, end, d->playlist.size() - 1);
 
+    // Get the current playing media position and update after change
+    int currentPlayingPos = d->currentPos();
+    int newPlayingPos = currentPlayingPos;
+    // If currently playing position is between or at start or end, set at the begining
+    if(currentPlayingPos >= start && currentPlayingPos <= end) {
+        newPlayingPos = -1;
+    }
+    // If current playing position is after end, it will move up
+    if(currentPlayingPos > end) {
+        newPlayingPos = currentPlayingPos - (end - start) - 1;
+    }
+
     emit mediaAboutToBeRemoved(start, end);
     d->playlist.remove(start, end - start + 1);
-    // TODO also remove from playqueue
+
+    // Refill playqueue
+    d->playqueue = QList(d->playlist);
+    if(shuffleEnabled) {
+        this->shuffle();
+    }
+
+    vacuumMetadata();
+
+    // Set new position
+    d->setCurrentPos(newPlayingPos);
+
     emit mediaRemoved(start, end);
+    emit mediaChanged(0, d->playlist.count());
     return true;
 }
 
@@ -542,6 +645,7 @@ void QMediaPlaylist::clear()
     emit mediaAboutToBeRemoved(0, size - 1);
     d->playlist.clear();
     d->playqueue.clear();
+    vacuumMetadata();
     emit mediaRemoved(0, size - 1);
 }
 
@@ -735,7 +839,6 @@ void QMediaPlaylist::previous()
 /*!
     Activate media content from playlist at position \a playlistPosition.
 */
-
 void QMediaPlaylist::setCurrentIndex(int playlistPosition)
 {
     Q_D(QMediaPlaylist);
@@ -750,7 +853,6 @@ void QMediaPlaylist::setCurrentIndex(int playlistPosition)
 /*!
     Activate media content from playlist at position \a playlistPosition.
 */
-
 void QMediaPlaylist::setCurrentQueueIndex(int playlistPosition)
 {
     Q_D(QMediaPlaylist);
@@ -761,6 +863,36 @@ void QMediaPlaylist::setCurrentQueueIndex(int playlistPosition)
     emit currentIndexChanged(d->currentPos());
     emit currentMediaChanged(currentMedia());
 }
+
+/*!
+    Loads media metadata
+ */
+void QMediaPlaylist::loadMetadata(const QUrl &url)
+{
+    if(m_mediaMetadata.contains(url)) {
+        return;
+    }
+
+    QMediaMetaData meta = parseMetaData(url);
+
+    m_mediaMetadata.insert(url, meta);
+}
+
+/*!
+    Cleans unused metadata (for example, after removing media from the playlist)
+ */
+void QMediaPlaylist::vacuumMetadata()
+{
+    Q_D(const QMediaPlaylist);
+
+    for(const QUrl &key : m_mediaMetadata.keys()) {
+        if(!d->playlist.contains(key)) {
+            // Metadata not used, remove
+            m_mediaMetadata.remove(key);
+        }
+    }
+}
+
 
 /*!
     \fn void QMediaPlaylist::mediaInserted(int start, int end)

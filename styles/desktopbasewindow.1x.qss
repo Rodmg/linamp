@@ -1,0 +1,27 @@
+#DesktopBaseWindow {
+    border: 1px solid #0d0d14;
+    background-color: #333350;
+}
+
+#outerFrame {
+    border-top: 1px solid #5c5c63;
+    border-left: 1px solid #5c5c63;
+    border-bottom: 1px solid #25253a;
+    border-right: 1px solid #25253a;
+}
+
+#bodyOuterFrame {
+    border-top: 1px solid #25253a;
+    border-left: 1px solid #25253a;
+    border-bottom: 1px solid #5c5c63;
+    border-right: 1px solid #5c5c63;
+    background-color: #25253a;
+}
+
+#bodyInnerFrame {
+    border-top: 1px solid #5c5c63;
+    border-left: 1px solid #5c5c63;
+    border-bottom: 1px solid #25253a;
+    border-right: 1px solid #25253a;
+    background-color: #333350;
+}

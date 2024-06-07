@@ -15,6 +15,9 @@ public:
     explicit DesktopBaseWindow(QWidget *parent = nullptr);
     ~DesktopBaseWindow();
     Ui::DesktopBaseWindow *ui;
+
+private:
+    void scale();
 };
 
 #endif // DESKTOPBASEWINDOW_H
