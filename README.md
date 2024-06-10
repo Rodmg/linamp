@@ -53,7 +53,8 @@ pip install -r python/requirements.txt
 
 ### Known issues
 
-- File picker and playlist view doesn't correctly work with mouse input (touch works fine). There was a bug with touch input which got fixed by disabling certain mouse events, but this had the side effect that if you don't have a touch screen, you cannot quite use it with a mouse.
+- File picker and playlist view doesn't correctly work with mouse input, clicks are not detected (touch works fine). There was a bug with touch input which got fixed by disabling certain mouse events, but this had the side effect that if you don't have a touch screen, you cannot quite use it with a mouse. WORKAROUND: Whenever you want to click something inside the file browser or playlist, click and hold for about one second, this will trigger the click event correctly.
+- In order for the Python integration (and thus, the CD player functionality) to work and not crash, you need to run the app inside the Python venv, you can use the "start.sh" script as a helper to set everything up for you and run it. However, because Qt Creator by default will directly run the player executable outside of the venv, the cd player will crash. I'm yet to find a better way of running it inside Qt Creator, other than telling it to run the "start.sh" script instead of the executable.
 
 ### Debugging memory leaks:
 
