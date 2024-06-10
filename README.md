@@ -51,6 +51,10 @@ pip install -r python/requirements.txt
 
 **Tip:** If you want to see the app in a window instead of full screen, comment out the following line in `main.cpp`: `//window.setWindowState(Qt::WindowFullScreen);`
 
+### Known issues
+
+- File picker and playlist view doesn't correctly work with mouse input (touch works fine). There was a bug with touch input which got fixed by disabling certain mouse events, but this had the side effect that if you don't have a touch screen, you cannot quite use it with a mouse.
+
 ### Debugging memory leaks:
 
 - Install valgrind
