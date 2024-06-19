@@ -1,0 +1,41 @@
+Source: linamp
+Section: Sound
+Priority: optional
+Maintainer: Rodrigo Méndez <rmendez@makerlab.mx> 
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+ qt6-base-dev, 
+ qt6-base-dev-tools,
+ qt6-multimedia-dev,
+ qtcreator,
+ cmake,
+ libtag1-dev,
+ libasound2-dev,
+ libpulse-dev,
+ libpipewire-0.3-dev, 
+ libdbus-1-dev,
+ libiso9660-dev, 
+ libcdio-dev,
+ libcdio-utils,
+ swig,
+ python3-dev 
+Standards-Version: 4.6.2
+Homepage: https://github.com/Rodmg/linamp 
+Vcs-Browser: https://github.com/Rodmg/linamp
+Vcs-Git: https://github.com/Rodmg/linamp.git 
+
+Package: linamp
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ vlc,
+ python3-full,
+ python3-libdiscid,
+ python3-musicbrainzngs,
+ python3-cdio,
+ python3-vlc
+Description: Music player app for Linamp - Your favorite music player of the 90s, but in real life. 
+ Music player app for Linamp - Your favorite music player of the 90s, but in real life. Built
+ with QT6.

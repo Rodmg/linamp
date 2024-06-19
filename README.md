@@ -51,6 +51,12 @@ pip install -r python/requirements.txt
 
 **Tip:** If you want to see the app in a window instead of full screen, comment out the following line in `main.cpp`: `//window.setWindowState(Qt::WindowFullScreen);`
 
+### Building a Debian package
+
+Install [sbuild](https://wiki.debian.org/sbuild) using option 3 (change `unstable` to your distro, eg `bookworm` and create the `.sbuildrc` manually instead of `tee`). 
+
+Then simply run `sbuild --no-run-piuparts --lintian-opt="--suppress-tags=bad-distribution-in-changes-file"` in the cloned repository directory. The `.deb` packages will be in your home directory afterwards if everything went well. 
+
 ### Known issues
 
 - File picker and playlist view doesn't correctly work with mouse input, clicks are not detected (touch works fine). There was a bug with touch input which got fixed by disabling certain mouse events, but this had the side effect that if you don't have a touch screen, you cannot quite use it with a mouse. WORKAROUND: Whenever you want to click something inside the file browser or playlist, click and hold for about one second, this will trigger the click event correctly.

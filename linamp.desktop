@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Linamp
+Comment=Music player app for Linamp - Your favorite music player of the 90s, but in real life.
+Exec=/usr/bin/linamp-player %U
+Icon=/usr/share/icons/hicolor/72x72/apps/linamp-player.png
+Terminal=false
+#StartupWMClass=name of application
+Type=Application
+Categories=Audio

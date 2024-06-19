@@ -1,0 +1,16 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: <https://github.com/Rodmg/linamp>
+Upstream-Name: linamp
+Upstream-Contact: Rodrigo Méndez <rmendez@makerlab.mx>
+
+Files:
+ *
+Copyright:
+ 2024 Rodrigo Méndez <rmendez@makerlab.mx>
+License: See LICENSE in parent directory
+
+Files:
+ debian/*
+Copyright:
+ 2024 Taneli Leppä <rosmo@rosmo.fi>
+License: See LICENSE in parent directory 
