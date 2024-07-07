@@ -30,6 +30,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ ${python3:Depends},
  vlc,
  python3-full,
  python3-libdiscid,
@@ -37,5 +38,6 @@ Depends:
  python3-cdio,
  python3-vlc
 Description: Your favorite music player of the 90s, but in real life
- Music player app for Linamp - Your favorite music player of the 90s, but in real life. Built
- with QT6.
+ Music player app for Linamp - Your favorite music player of the 90s,
+ but in real life.
+ Built with QT6.
