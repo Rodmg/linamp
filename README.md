@@ -57,7 +57,7 @@ Install and setup [sbuild](https://wiki.debian.org/sbuild) running the following
 
 ```bash
 sudo apt-get install sbuild schroot debootstrap apt-cacher-ng devscripts piuparts
-sudo tee ~/.sbuildrc << EOF
+sudo tee ~/.sbuildrc << "EOF"
 ##############################################################################
 # PACKAGE BUILD RELATED (additionally produce _source.changes)
 ##############################################################################
