@@ -3,14 +3,13 @@ Source: <https://github.com/Rodmg/linamp>
 Upstream-Name: linamp
 Upstream-Contact: Rodrigo Méndez <rodrigo@linamp.org>
 
-Files:
- *
-Copyright:
- 2024 Rodrigo Méndez <rodrigo@linamp.org>
+Files: *
+Copyright: Copyright (C) 2024 Rodrigo Méndez <rodrigo@linamp.org>
 License: GPL-3
 
-Files:
- debian/*
-Copyright:
- 2024 Taneli Leppä <rosmo@rosmo.fi>
+Files: debian/*
+Copyright: Copyright (C) 2024 Taneli Leppä <rosmo@rosmo.fi>
 License: GPL-3 
+
+License: GPL-3
+ See LICENSE in parent directory
