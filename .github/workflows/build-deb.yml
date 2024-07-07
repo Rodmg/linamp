@@ -10,6 +10,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
       - name: Build Debian packages
         uses: jtdor/build-deb-action@v1.8.0
         with:
@@ -19,3 +23,4 @@ jobs:
           extra-build-deps: dh-python
           # Foreign architecture to setup cross-compilation for
           #host-arch: arm64
+          extra-docker-args: --platform linux/arm64
