@@ -88,9 +88,10 @@ RESOURCES += \
 DISTFILES += \
     README.md \
     install.sh \
-    python/__init__.py \
-    python/cdplayer.py \
-    python/mock_cdplayer.py \
+    python/linamp/__init__.py \
+    python/linamp/cdplayer.py \
+    python/linamp-mock/__init__.py \
+    python/linamp-mock/mock_cdplayer.py \
     python/requirements.txt \
     scale-skin.sh \
     setup.sh \

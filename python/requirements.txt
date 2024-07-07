@@ -1,4 +1,4 @@
-discid==1.2.0
+python-libdiscid==2.0.3
 musicbrainzngs==0.7.1
 pycdio==2.1.1
 python-vlc==3.0.20123

@@ -1,7 +1,7 @@
 Source: linamp
-Section: Sound
+Section: sound
 Priority: optional
-Maintainer: Rodrigo Méndez <rmendez@makerlab.mx> 
+Maintainer: Rodrigo Méndez <rodrigo@linamp.org> 
 Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
@@ -36,6 +36,6 @@ Depends:
  python3-musicbrainzngs,
  python3-cdio,
  python3-vlc
-Description: Music player app for Linamp - Your favorite music player of the 90s, but in real life. 
+Description: Your favorite music player of the 90s, but in real life
  Music player app for Linamp - Your favorite music player of the 90s, but in real life. Built
  with QT6.

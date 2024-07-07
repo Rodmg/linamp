@@ -13,8 +13,9 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
 
     auto state = PyGILState_Ensure();
 
-    PyObject *pModuleName = PyUnicode_DecodeFSDefault("cdplayer");
-    //PyObject *pModuleName = PyUnicode_DecodeFSDefault("mock_cdplayer");
+    // Import 'linamp' python module, see python folder in the root of this repo
+    PyObject *pModuleName = PyUnicode_DecodeFSDefault("linamp");
+    //PyObject *pModuleName = PyUnicode_DecodeFSDefault("linamp-mock");
     cdplayerModule = PyImport_Import(pModuleName);
     Py_DECREF(pModuleName);
 

@@ -2,9 +2,10 @@
 
 import vlc
 import cdio, pycdio
-import discid
+import libdiscid
 import musicbrainzngs
 import threading
+
 
 # Debounce function from https://github.com/salesforce/decorator-operations/blob/master/decoratorOperations/debounce_functions/debounce.py
 def debounce(wait_time):
@@ -30,6 +31,7 @@ def debounce(wait_time):
         return debounced
 
     return decorator
+
 
 def search_exact_tracklist(data):  # function to find exalctly which cd was inserted
     for x in range(0, len(data["disc"]["release-list"])):
@@ -68,7 +70,7 @@ def fetchdata():
             is_data_tracks[t - i_first_track] = True
 
     musicbrainzngs.set_useragent("Small_diy_cd_player", "0.1")
-    disc = discid.read()  # id read
+    disc = libdiscid.read()  # id read
     try:
         result = musicbrainzngs.get_releases_by_discid(
             disc.id, includes=["artists", "recordings"]
@@ -205,7 +207,7 @@ class CDPlayer:
             print(f"Unknown exception: {e}")
             return
 
-        #print(f">>>> {artists}, {track_titles}, {album}, {n_tracks}")
+        # print(f">>>> {artists}, {track_titles}, {album}, {n_tracks}")
 
         self._set_track_info(artists, track_titles, album, durations, is_data_tracks)
 
