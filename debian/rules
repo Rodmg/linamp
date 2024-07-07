@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ 
+
+override_dh_auto_build: 
+	qmake6 -makefile
+	make
+
+override_dh_auto_configure:
+	echo "Skipped"
+
+override_dh_auto_install:
+	mkdir -p debian/linamp/usr/bin
+	cp player debian/linamp/usr/bin/linamp-player
+	
+	mkdir -p debian/linamp/usr/share/applications/
+	cp linamp.desktop debian/linamp/usr/share/applications/
+	
+	mkdir -p debian/linamp/usr/share/icons/hicolor/72x72/apps/
+	cp assets/logoButton.png debian/linamp/usr/share/icons/hicolor/72x72/apps/linamp-player.png
