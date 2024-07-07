@@ -1,0 +1,22 @@
+name: Build Deb package
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build Debian packages
+      uses: jtdor/build-deb-action@v1.8.0
+      with:
+        # Name of a Docker image or path of a Dockerfile to use for the build container
+        docker-image: debian:bookworm-slim
+        # Extra packages to be installed as build dependencies
+        extra-build-deps: dh-python
+        # Foreign architecture to setup cross-compilation for
+        host-arch: arm64
