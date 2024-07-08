@@ -56,7 +56,7 @@ pip install -r python/requirements.txt
 Install and setup [sbuild](https://wiki.debian.org/sbuild) running the following commands:
 
 ```bash
-sudo apt-get install sbuild schroot debootstrap apt-cacher-ng devscripts piuparts dh-python
+sudo apt-get install sbuild schroot debootstrap apt-cacher-ng devscripts piuparts dh-python dh-cmake
 sudo tee ~/.sbuildrc << "EOF"
 ##############################################################################
 # PACKAGE BUILD RELATED (additionally produce _source.changes)

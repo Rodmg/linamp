@@ -1,18 +1,18 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --with python3
+	dh $@ --with python3 --buildsystem=cmake
 
-override_dh_auto_build: 
-	qmake6 -makefile
-	make
+# override_dh_auto_build: 
+# 	qmake6 -makefile
+# 	make
 
-override_dh_auto_configure:
-	echo "Skipped"
+# override_dh_auto_configure:
+# 	echo "Skipped"
 
 override_dh_auto_install:
 	mkdir -p debian/linamp/usr/bin
-	cp player debian/linamp/usr/bin/linamp-player
+	cp build/player debian/linamp/usr/bin/linamp-player
 
 	mkdir -p debian/linamp/usr/lib/python3/dist-packages/linamp
 	cp python/linamp/__init__.py debian/linamp/usr/lib/python3/dist-packages/linamp/__init__.py

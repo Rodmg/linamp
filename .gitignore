@@ -10,4 +10,9 @@ __pycache__/
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Build artifacts
+CMakeFiles
+build
+CMakeLists.txt.user
+
 

@@ -22,9 +22,9 @@ Build-Depends:
  python3-dev,
  dh-python
 Standards-Version: 4.6.2
-Homepage: https://github.com/Rodmg/linamp 
+Homepage: https://github.com/Rodmg/linamp
 Vcs-Browser: https://github.com/Rodmg/linamp
-Vcs-Git: https://github.com/Rodmg/linamp.git 
+Vcs-Git: https://github.com/Rodmg/linamp.git
 
 Package: linamp
 Architecture: any
