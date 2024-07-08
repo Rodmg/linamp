@@ -1,8 +1,11 @@
 name: Build Deb package
 
 on:
+  workflow_dispatch:
   push:
-    branches: ["main"]
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build:
@@ -20,7 +23,12 @@ jobs:
           # Name of a Docker image or path of a Dockerfile to use for the build container
           docker-image: debian:bookworm-slim
           # Extra packages to be installed as build dependencies
-          extra-build-deps: dh-python
+          extra-build-deps: dh-python dh-cmake
           # Foreign architecture to setup cross-compilation for
           #host-arch: arm64
           extra-docker-args: --platform linux/arm64
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: ~/linamp*
