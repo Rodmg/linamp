@@ -70,7 +70,7 @@ def fetchdata():
             is_data_tracks[t - i_first_track] = True
 
     musicbrainzngs.set_useragent("Small_diy_cd_player", "0.1")
-    disc = libdiscid.read()  # id read
+    disc = libdiscid.read(features=libdiscid.FEATURE_READ)  # id read
     try:
         result = musicbrainzngs.get_releases_by_discid(
             disc.id, includes=["artists", "recordings"]
