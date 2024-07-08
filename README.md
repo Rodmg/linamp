@@ -28,13 +28,13 @@ The instructions here are for Debian Bookworm:
 
 ```bash
 # Install Qt, Qt Multimedia and Qt Creator
-sudo apt-get install build-essential qt6-base-dev qt6-base-dev-tools qt6-multimedia-dev qtcreator -y
+sudo apt-get install build-essential qt6-base-dev qt6-base-dev-tools qt6-multimedia-dev qtcreator cmake -y
 
 # Install third party library dependencies
 sudo apt-get install libtag1-dev libasound2-dev libpulse-dev libpipewire-0.3-dev libdbus-1-dev -y
 
 # Install dependencies for Python (for CD player functionality)
-sudo apt-get install vlc libiso9660-dev libcdio-dev libcdio-utils swig python3-pip python3-full python3-dev libdiscid0 -y
+sudo apt-get install vlc libiso9660-dev libcdio-dev libcdio-utils swig python3-pip python3-full python3-dev libdiscid0 libdiscid-dev -y
 
 # Create Python venv and install Python dependencies (for CD player functionality)
 ## IMPORTANT: Make sure you are on the folder where you cloned this repo before running the following commands:
@@ -45,9 +45,27 @@ pip install -r python/requirements.txt
 
 ### Build and run
 
+**Using Qt Creator:**
+
 1. Open this project with Qt Creator (open player.pro in Qt Creator)
 2. Qt Creator should guide you setting up your paths and settings for building the proyect in your machine
 3. You should be able to click the green "Play" icon in Qt Creator to build and run the app
+
+**From the console:**
+
+```bash
+# From inside this repository:
+## Generate build configuration, you only need to run this once:
+cmake CMakeLists.txt
+## Setup python dependencies, you only need to run this once:
+./setup.sh
+
+## Compile the project
+make
+
+## Run the app
+./start.sh
+```
 
 **Tip:** If you want to see the app in a window instead of full screen, comment out the following line in `main.cpp`: `//window.setWindowState(Qt::WindowFullScreen);`
 

@@ -15,5 +15,9 @@ CMakeFiles
 build
 CMakeLists.txt.user
 *.pro.user*
-
-
+.qt
+.rcc
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+player_autogen
