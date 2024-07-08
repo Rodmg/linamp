@@ -8,7 +8,25 @@ on:
       - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
-  build:
+  build-amd64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Debian packages
+        uses: jtdor/build-deb-action@v1.8.0
+        with:
+          # Name of a Docker image or path of a Dockerfile to use for the build container
+          docker-image: debian:bookworm-slim
+          # Extra packages to be installed as build dependencies
+          extra-build-deps: dh-python dh-cmake
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: debian/artifacts/*
+
+  build-arm64:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,11 +42,9 @@ jobs:
           docker-image: debian:bookworm-slim
           # Extra packages to be installed as build dependencies
           extra-build-deps: dh-python dh-cmake
-          # Foreign architecture to setup cross-compilation for
-          #host-arch: arm64
           extra-docker-args: --platform linux/arm64
       - name: Archive build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: ~/linamp*
+          path: debian/artifacts/*
