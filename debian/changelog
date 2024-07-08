@@ -1,6 +1,7 @@
 linamp (1.1.2) UNRELEASED; urgency=medium
 
   * Trim trailing whitespace.
+  * Upgrade to newer source format 3.0 (native).
 
  -- Rod <rod@rod-macbookpro15>  Mon, 08 Jul 2024 16:19:34 -0000
 
