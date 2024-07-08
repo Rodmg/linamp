@@ -3,7 +3,7 @@ linamp (1.1.2) stable; urgency=medium
   * Trim trailing whitespace.
   * Upgrade to newer source format 3.0 (native).
 
- -- Rod <rod@rod-macbookpro15>  Mon, 08 Jul 2024 16:19:34 -0000
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Mon, 08 Jul 2024 18:19:34 -0600
 
 linamp (1.1.1) stable; urgency=medium
 

@@ -3,13 +3,6 @@
 %:
 	dh $@ --with python3 --buildsystem=cmake
 
-# override_dh_auto_build:
-# 	qmake6 -makefile
-# 	make
-
-# override_dh_auto_configure:
-# 	echo "Skipped"
-
 override_dh_auto_install:
 	mkdir -p debian/linamp/usr/bin
 	cp build/player debian/linamp/usr/bin/linamp-player
