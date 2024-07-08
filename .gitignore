@@ -14,5 +14,6 @@ pip-delete-this-directory.txt
 CMakeFiles
 build
 CMakeLists.txt.user
+*.pro.user*
 
 
