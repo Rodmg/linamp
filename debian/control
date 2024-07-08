@@ -1,11 +1,11 @@
 Source: linamp
 Section: sound
 Priority: optional
-Maintainer: Rodrigo Méndez <rodrigo@linamp.org> 
+Maintainer: Rodrigo Méndez <rodrigo@linamp.org>
 Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
- qt6-base-dev, 
+ qt6-base-dev,
  qt6-base-dev-tools,
  qt6-multimedia-dev,
  qtcreator,
@@ -13,9 +13,9 @@ Build-Depends:
  libtag1-dev,
  libasound2-dev,
  libpulse-dev,
- libpipewire-0.3-dev, 
+ libpipewire-0.3-dev,
  libdbus-1-dev,
- libiso9660-dev, 
+ libiso9660-dev,
  libcdio-dev,
  libcdio-utils,
  swig,
