@@ -1,4 +1,4 @@
-linamp (1.1.2) UNRELEASED; urgency=medium
+linamp (1.1.2) stable; urgency=medium
 
   * Trim trailing whitespace.
   * Upgrade to newer source format 3.0 (native).
