@@ -8,7 +8,7 @@ on:
       - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
-  build-amd64:
+  build-x86_64:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +23,7 @@ jobs:
       - name: Archive build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build
+          name: build-x86_64
           path: debian/artifacts/*
 
   build-arm64:
@@ -46,5 +46,5 @@ jobs:
       - name: Archive build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build
+          name: build-arm64
           path: debian/artifacts/*
