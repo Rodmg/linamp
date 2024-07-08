@@ -112,7 +112,7 @@ sudo ln -sf ~/.sbuildrc /root/.sbuildrc
 sudo sbuild-createchroot --include=eatmydata,ccache bookworm /srv/chroot/bookworm-amd64-sbuild http://127.0.0.1:3142/ftp.us.debian.org/debian
 ```
 
-Then simply run `sbuild --no-run-piuparts` in the cloned repository directory. The `.deb` packages will be in your home directory afterwards if everything went well.
+Then simply run `sbuild --no-run-piuparts --lintian-opt="--suppress-tags=bad-distribution-in-changes-file"` in the cloned repository directory. The `.deb` packages will be in your home directory afterwards if everything went well.
 
 You can install the newly built packages with the following command (replace placeholders accordingly):
 
