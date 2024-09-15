@@ -112,6 +112,7 @@ private slots:
     void onDurationChanged(qint64 duration);
     void onDecoderError(QAudioDecoder::Error error);
     void onAtEnd();
+    void onOutputStateChanged(QAudio::State newState);
 
 signals:
     void playbackStateChanged(MediaPlayer::PlaybackState state);

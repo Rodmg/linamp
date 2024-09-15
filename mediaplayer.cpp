@@ -61,6 +61,8 @@ void MediaPlayer::setupAudioOutput()
         delete m_audioOutput;
     }
     m_audioOutput = new QAudioSink(m_format, this);
+    connect(m_audioOutput, &QAudioSink::stateChanged, this, &MediaPlayer::onOutputStateChanged);
+
     m_audioOutput->setVolume(m_volume);
     emit volumeChanged(volume());
 }
@@ -291,6 +293,31 @@ void MediaPlayer::onAtEnd()
 }
 
 /////////////////////////////////////////////////////////////////////
+
+void MediaPlayer::onOutputStateChanged(QAudio::State newState)
+{
+    qDebug() << "QAudioSink state change, new state:" << newState;
+
+    QAudio::Error error = m_audioOutput->error();
+    if(error != QAudio::NoError) {
+        qDebug() << "Audio Ouput error: " << error;
+    }
+
+    switch(newState) {
+        case QAudio::IdleState:
+            if(error == QAudio::UnderrunError) {
+                // Handle race condition on initial loading
+                // Retry playing
+                qDebug() << "Retry playing!!!";
+                this->stop();
+                int timeout = 200; // msecs
+                QTimer::singleShot(timeout, this, &MediaPlayer::play);
+            }
+        break;
+        default:
+        break;
+    }
+}
 
 MediaPlayer::PlaybackState MediaPlayer::playbackState() const
 {
