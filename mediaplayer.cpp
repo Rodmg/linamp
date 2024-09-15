@@ -86,8 +86,7 @@ void MediaPlayer::clearAudioOutput()
 // AudioOutput devices (like speaker) will call this function to get new audio data
 qint64 MediaPlayer::readData(char* data, qint64 maxlen)
 {
-    qDebug() << "ReadDAta" << maxlen;
-    //QMutexLocker l(&readMutex);
+    QMutexLocker l(&readMutex);
 
     // Limit max len
     if(maxlen > MAX_AUDIO_STREAM_SAMPLE_SIZE) maxlen = MAX_AUDIO_STREAM_SAMPLE_SIZE;
@@ -99,7 +98,6 @@ qint64 MediaPlayer::readData(char* data, qint64 maxlen)
     {
         // Copy bytes from buffer into data
         bytesRead = m_output.read(data, maxlen);
-        qDebug() << ">>> Byes read" << bytesRead;
 
         // Emmit newData event, for visualization
         if (maxlen > 0)
@@ -456,8 +454,6 @@ void MediaPlayer::setPosition(qint64 position)
 
     if(target >= currentBufferSize) target = currentBufferSize - 1;
     if(target < 0) target = 0;
-
-    qDebug() << "Set position: " << target;
 
     m_output.seek(target);
 }
