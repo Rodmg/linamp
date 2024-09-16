@@ -9,6 +9,13 @@
 #include <QCoreApplication>
 #include <QTimer>
 
+/*
+ * Max number of times the player will retry playing
+ * after a buffer underrun while loading the file
+ * before stopping
+ */
+#define MP_MAX_BUFFER_UNDERRUN_RETRIES 10
+
 MediaPlayer::MediaPlayer(QObject *parent) :
     QIODevice{parent},
     m_input(&m_data),
@@ -189,6 +196,7 @@ void MediaPlayer::clear()
     m_output.close();
     isDecodingFinished = false;
     isInited = false;
+    bufferUnderrunRetries = 0;
 }
 
 // Is at the end of the file
@@ -308,12 +316,28 @@ void MediaPlayer::onOutputStateChanged(QAudio::State newState)
     switch(newState) {
         case QAudio::IdleState:
             if(error == QAudio::UnderrunError) {
+
+                if(this->bufferUnderrunRetries > MP_MAX_BUFFER_UNDERRUN_RETRIES) {
+                    this->stop();
+                    qDebug() << "Buffer underrun: max retries reached";
+                    return;
+                }
+                this->bufferUnderrunRetries++;
+
                 // Handle race condition on initial loading
                 // Retry playing
-                qDebug() << "Retry playing!!!";
+                qint64 pos = this->position();
+                qDebug() << "Retry playing from position: " << pos;
+
                 this->stop();
+
+                // Give some time for the buffer to fill
                 int timeout = 200; // msecs
-                QTimer::singleShot(timeout, this, &MediaPlayer::play);
+                QTimer::singleShot(timeout, this, [=](){
+                    this->play();
+                    // Try resuming from previous position
+                    this->setPosition(pos);
+                });
             }
         break;
         default:

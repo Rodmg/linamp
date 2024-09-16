@@ -83,6 +83,7 @@ private:
 
     bool isInited;
     bool isDecodingFinished;
+    qint8 bufferUnderrunRetries = 0;
 
     bool m_seekable = false;
     qint64 m_position = 0;
