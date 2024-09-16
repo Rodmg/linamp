@@ -13,35 +13,81 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Concurrent DBus Gui Multi
 qt_standard_project_setup()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosource-base)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosource-coordinator)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosourcebluetooth)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosourcecd)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosourcefile)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/shared)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-basewindow)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-menu)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-player)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-playlist)
 
 qt_add_executable(player WIN32 MACOSX_BUNDLE
-    src/audiosource.cpp src/audiosource.h
-    src/audiosourcebluetooth.cpp src/audiosourcebluetooth.h
-    src/audiosourcecd.cpp src/audiosourcecd.h
-    src/audiosourcecoordinator.cpp src/audiosourcecoordinator.h
-    src/audiosourcefile.cpp src/audiosourcefile.h
-    src/audiosourcewspectrumcapture.cpp src/audiosourcewspectrumcapture.h
-    src/controlbuttonswidget.cpp src/controlbuttonswidget.h src/controlbuttonswidget.ui
-    src/desktopbasewindow.cpp src/desktopbasewindow.h src/desktopbasewindow.ui
-    src/desktopplayerwindow.cpp src/desktopplayerwindow.h src/desktopplayerwindow.ui
-    src/embeddedbasewindow.cpp src/embeddedbasewindow.h src/embeddedbasewindow.ui
-    src/fft.cpp src/fft.h
-    src/filebrowsericonprovider.cpp src/filebrowsericonprovider.h
+    src/audiosource-base/audiosource.cpp
+    src/audiosource-base/audiosource.h
+    src/audiosource-base/audiosourcewspectrumcapture.cpp
+    src/audiosource-base/audiosourcewspectrumcapture.h
+    src/audiosourcebluetooth/audiosourcebluetooth.cpp
+    src/audiosourcebluetooth/audiosourcebluetooth.h
+    src/audiosourcecd/audiosourcecd.cpp
+    src/audiosourcecd/audiosourcecd.h
+    src/audiosource-coordinator/audiosourcecoordinator.cpp
+    src/audiosource-coordinator/audiosourcecoordinator.h
+    src/audiosourcefile/audiosourcefile.cpp
+    src/audiosourcefile/audiosourcefile.h
+    src/audiosourcefile/mediaplayer.cpp
+    src/audiosourcefile/mediaplayer.h
+    src/view-player/controlbuttonswidget.cpp
+    src/view-player/controlbuttonswidget.h
+    src/view-player/controlbuttonswidget.ui
+    src/view-player/scrolltext.cpp
+    src/view-player/scrolltext.h
+    src/view-player/spectrumwidget.cpp
+    src/view-player/spectrumwidget.h
+    src/view-player/playerview.cpp
+    src/view-player/playerview.h
+    src/view-player/playerview.ui
+    src/view-basewindow/desktopbasewindow.cpp
+    src/view-basewindow/desktopbasewindow.h
+    src/view-basewindow/desktopbasewindow.ui
+    src/view-basewindow/desktopplayerwindow.cpp
+    src/view-basewindow/desktopplayerwindow.h
+    src/view-basewindow/desktopplayerwindow.ui
+    src/view-basewindow/embeddedbasewindow.cpp
+    src/view-basewindow/embeddedbasewindow.h
+    src/view-basewindow/embeddedbasewindow.ui
+    src/view-basewindow/mainwindow.cpp
+    src/view-basewindow/mainwindow.h
+    src/view-basewindow/titlebar.cpp
+    src/view-basewindow/titlebar.h
+    src/view-basewindow/titlebar.ui
+    src/view-playlist/filebrowsericonprovider.cpp
+    src/view-playlist/filebrowsericonprovider.h
+    src/view-playlist/playlistmodel.cpp
+    src/view-playlist/playlistmodel.h
+    src/view-playlist/playlistview.cpp
+    src/view-playlist/playlistview.h
+    src/view-playlist/playlistview.ui
+    src/view-playlist/qmediaplaylist.cpp
+    src/view-playlist/qmediaplaylist.h
+    src/view-playlist/qmediaplaylist_p.cpp
+    src/view-playlist/qmediaplaylist_p.h
+    src/view-playlist/qplaylistfileparser.cpp
+    src/view-playlist/qplaylistfileparser.h
+    src/view-menu/mainmenuview.cpp
+    src/view-menu/mainmenuview.h
+    src/view-menu/mainmenuview.ui
+    src/shared/scale.cpp
+    src/shared/scale.h
+    src/shared/systemaudiocontrol.cpp
+    src/shared/systemaudiocontrol.h
+    src/shared/fft.cpp
+    src/shared/fft.h
+    src/shared/util.cpp
+    src/shared/util.h
     src/main.cpp
-    src/mainmenuview.cpp src/mainmenuview.h src/mainmenuview.ui
-    src/mainwindow.cpp src/mainwindow.h
-    src/mediaplayer.cpp src/mediaplayer.h
-    src/playerview.cpp src/playerview.h src/playerview.ui
-    src/playlistmodel.cpp src/playlistmodel.h
-    src/playlistview.cpp src/playlistview.h src/playlistview.ui
-    src/qmediaplaylist.cpp src/qmediaplaylist.h src/qmediaplaylist_p.cpp src/qmediaplaylist_p.h
-    src/qplaylistfileparser.cpp src/qplaylistfileparser.h
-    src/scale.cpp src/scale.h
-    src/scrolltext.cpp src/scrolltext.h
-    src/spectrumwidget.cpp src/spectrumwidget.h
-    src/systemaudiocontrol.cpp src/systemaudiocontrol.h
-    src/titlebar.cpp src/titlebar.h src/titlebar.ui
-    src/util.cpp src/util.h
     uiassets.qrc
 )
 
