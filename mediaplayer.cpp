@@ -172,9 +172,7 @@ void MediaPlayer::stop(bool stopAudioOutput)
         return;
 
     if(stopAudioOutput) m_audioOutput->stop();
-    // Clear buffers, avoids pops and clicks when playing after stopping
-    //m_audioOutput->reset();
-    //this->reset();
+    // Fully reset audio output
     clearAudioOutput();
     setupAudioOutput();
 
@@ -306,11 +304,9 @@ void MediaPlayer::onAtEnd()
 
 void MediaPlayer::onOutputStateChanged(QAudio::State newState)
 {
-    qDebug() << "QAudioSink state change, new state:" << newState;
-
     QAudio::Error error = m_audioOutput->error();
     if(error != QAudio::NoError) {
-        qDebug() << "Audio Ouput error: " << error;
+        qDebug() << "Audio Ouput Error: " << error;
     }
 
     switch(newState) {
@@ -319,7 +315,7 @@ void MediaPlayer::onOutputStateChanged(QAudio::State newState)
 
                 if(this->bufferUnderrunRetries > MP_MAX_BUFFER_UNDERRUN_RETRIES) {
                     this->stop();
-                    qDebug() << "Buffer underrun: max retries reached";
+                    qDebug() << "Media Player Buffer Underrun: max retries reached";
                     return;
                 }
                 this->bufferUnderrunRetries++;
