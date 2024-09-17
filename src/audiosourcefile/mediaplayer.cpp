@@ -172,6 +172,8 @@ void MediaPlayer::stop(bool stopAudioOutput)
         return;
 
     if(stopAudioOutput) m_audioOutput->stop();
+    // Clear buffers, avoids pops and clicks when playing after stopping
+    this->reset();
     // Fully reset audio output
     clearAudioOutput();
     setupAudioOutput();
