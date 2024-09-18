@@ -47,7 +47,7 @@ pip install -r python/requirements.txt
 
 **Using Qt Creator:**
 
-1. Open this project with Qt Creator (open player.pro in Qt Creator)
+1. Open this project with Qt Creator (open CMakeLists.txt in Qt Creator)
 2. Qt Creator should guide you setting up your paths and settings for building the proyect in your machine
 3. You should be able to click the green "Play" icon in Qt Creator to build and run the app
 

@@ -12,7 +12,6 @@
         <file>assets/prev.png</file>
         <file>assets/stop_p.png</file>
         <file>assets/stop.png</file>
-        <file>assets/background.png</file>
         <file>assets/posHandle_p.png</file>
         <file>assets/posHandle.png</file>
         <file>assets/eq_off_p.png</file>
@@ -35,10 +34,7 @@
         <file>assets/balanceHandle.png</file>
         <file>assets/volumeHandle_p.png</file>
         <file>assets/volumeHandle.png</file>
-        <file>assets/Minecraft.ttf</file>
-        <file>assets/Winamp.ttf</file>
         <file>assets/visualizationBackground.png</file>
-        <file>assets/LED_LCD_123.ttf</file>
         <file>assets/status_paused.png</file>
         <file>assets/status_stopped.png</file>
         <file>assets/status_playing.png</file>

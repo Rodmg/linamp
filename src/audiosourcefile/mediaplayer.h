@@ -83,6 +83,7 @@ private:
 
     bool isInited;
     bool isDecodingFinished;
+    qint8 bufferUnderrunRetries = 0;
 
     bool m_seekable = false;
     qint64 m_position = 0;
@@ -112,6 +113,7 @@ private slots:
     void onDurationChanged(qint64 duration);
     void onDecoderError(QAudioDecoder::Error error);
     void onAtEnd();
+    void onOutputStateChanged(QAudio::State newState);
 
 signals:
     void playbackStateChanged(MediaPlayer::PlaybackState state);

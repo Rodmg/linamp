@@ -9,6 +9,13 @@
 #include <QCoreApplication>
 #include <QTimer>
 
+/*
+ * Max number of times the player will retry playing
+ * after a buffer underrun while loading the file
+ * before stopping
+ */
+#define MP_MAX_BUFFER_UNDERRUN_RETRIES 10
+
 MediaPlayer::MediaPlayer(QObject *parent) :
     QIODevice{parent},
     m_input(&m_data),
@@ -61,6 +68,8 @@ void MediaPlayer::setupAudioOutput()
         delete m_audioOutput;
     }
     m_audioOutput = new QAudioSink(m_format, this);
+    connect(m_audioOutput, &QAudioSink::stateChanged, this, &MediaPlayer::onOutputStateChanged);
+
     m_audioOutput->setVolume(m_volume);
     emit volumeChanged(volume());
 }
@@ -164,8 +173,10 @@ void MediaPlayer::stop(bool stopAudioOutput)
 
     if(stopAudioOutput) m_audioOutput->stop();
     // Clear buffers, avoids pops and clicks when playing after stopping
-    m_audioOutput->reset();
     this->reset();
+    // Fully reset audio output
+    clearAudioOutput();
+    setupAudioOutput();
 
     setPosition(0);
     onPositionChanged();
@@ -185,6 +196,7 @@ void MediaPlayer::clear()
     m_output.close();
     isDecodingFinished = false;
     isInited = false;
+    bufferUnderrunRetries = 0;
 }
 
 // Is at the end of the file
@@ -291,6 +303,45 @@ void MediaPlayer::onAtEnd()
 }
 
 /////////////////////////////////////////////////////////////////////
+
+void MediaPlayer::onOutputStateChanged(QAudio::State newState)
+{
+    QAudio::Error error = m_audioOutput->error();
+    if(error != QAudio::NoError) {
+        qDebug() << "Audio Ouput Error: " << error;
+    }
+
+    switch(newState) {
+        case QAudio::IdleState:
+            if(error == QAudio::UnderrunError) {
+
+                if(this->bufferUnderrunRetries > MP_MAX_BUFFER_UNDERRUN_RETRIES) {
+                    this->stop();
+                    qDebug() << "Media Player Buffer Underrun: max retries reached";
+                    return;
+                }
+                this->bufferUnderrunRetries++;
+
+                // Handle race condition on initial loading
+                // Retry playing
+                qint64 pos = this->position();
+                qDebug() << "Retry playing from position: " << pos;
+
+                this->stop();
+
+                // Give some time for the buffer to fill
+                int timeout = 200; // msecs
+                QTimer::singleShot(timeout, this, [=](){
+                    this->play();
+                    // Try resuming from previous position
+                    this->setPosition(pos);
+                });
+            }
+        break;
+        default:
+        break;
+    }
+}
 
 MediaPlayer::PlaybackState MediaPlayer::playbackState() const
 {
