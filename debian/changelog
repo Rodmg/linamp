@@ -1,3 +1,11 @@
+linamp (1.2.0) bookworm; urgency=medium
+
+  * Bugfix: After boot and loading the first file into the playlist, playback fails.
+  * Bugfix: Fix issue caused by playing and sopping the same file repeatedly (it glitched and refused to play).
+  * Refactor: new folder structure for better code maintainability.
+
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Tue, 17 Sep 2024 21:54:00 -0600
+
 linamp (1.1.2) bookworm; urgency=medium
 
   * Trim trailing whitespace.
