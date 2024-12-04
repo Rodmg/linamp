@@ -19,11 +19,11 @@ float pcmToFloat(qint16 pcm)
 static void floatPcmToMono(const float *data, float *mono, int channels)
 {
     if (channels == 1) {
-        memcpy(mono, data, sizeof(float) * 512);
+        memcpy(mono, data, sizeof(float) * N);
     }
     else {
         float *set = mono;
-        while (set < &mono[512]) {
+        while (set < &mono[N]) {
             *set++ = (data[0] + data[1]) / 2;
             data += channels;
         }
@@ -185,7 +185,7 @@ void SpectrumWidget::paintEvent (QPaintEvent *)
     if(m_playing) {
         float mono[N];
         float freq[N / 2];
-        int channels = 2; // TODO get from format
+        int channels = m_format.channelCount();
         floatPcmToMono(m_data, mono, channels);
         calc_freq(mono, freq);
 
@@ -225,20 +225,31 @@ void SpectrumWidget::setData(const QByteArray &data, QAudioFormat format)
     m_format = format;
     Q_ASSERT(m_format.sampleFormat() == QAudioFormat::Int16);
 
-    const int bytesPerFrame = format.bytesPerFrame();
+    if(m_format.sampleFormat() != QAudioFormat::Int16) {
+        // Bad sample format, only Int16 is currently supported
+        return;
+    }
 
-    if(data.length() < DFT_SIZE * 4) {
+    const int bytesPerFrame = format.bytesPerFrame();
+    Q_ASSERT(bytesPerFrame == 4); // Expecting Stereo Int16
+
+    if(bytesPerFrame != 4) {
+        // Bad bytes per frame, expecting 4 (Int16 Stereo)
+        return;
+    }
+
+    if(data.length() < DFT_SIZE * bytesPerFrame) {
         // Not enough data for processing, ignore
         return;
     }
 
     const char *ptr = data.constData();
-    for (int i = 0; i < DFT_SIZE * 2; ++i) {
+    for (int i = 0; i < DFT_SIZE * bytesPerFrame; ++i) {
         const qint16 pcmSample = *reinterpret_cast<const qint16 *>(ptr);
         // Scale down to range [-1.0, 1.0]
         float floatSample = pcmToFloat(pcmSample);
         m_data[i] = floatSample;
-        ptr += bytesPerFrame;
+        ptr += 2;
     }
 }
 
