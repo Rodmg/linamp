@@ -204,7 +204,7 @@ void AudioSourceWSpectrumCapture::pwLoop()
                             &pwData);
 
     struct spa_audio_info_raw audio_info;
-    audio_info.format = SPA_AUDIO_FORMAT_S16_LE;
+    audio_info.format = SPA_AUDIO_FORMAT_S16P;
     audio_info.channels = SPECTRUM_DATA_CHANNELS;
     audio_info.rate = SPECTRUM_DATA_SAMPLE_RATE;
     params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat,
