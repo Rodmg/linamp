@@ -21,7 +21,7 @@ protected:
     void paintEvent (QPaintEvent *);
 
 private:
-    float m_data[DFT_SIZE * 2];
+    float m_data[DFT_SIZE * 4];
     float m_xscale[N_BANDS + 1];
     int m_bandValues[N_BANDS + 1];
     int m_bandDelays[N_BANDS + 1];
