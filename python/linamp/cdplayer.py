@@ -75,7 +75,7 @@ def fetchdata():
         result = musicbrainzngs.get_releases_by_discid(
             disc.id, includes=["artists", "recordings"]
         )  # get data from Musicbrainz
-    except musicbrainzngs.ResponseError:
+    except Exception:
         print(
             "disc not found or bad response, using cdtxt instead"
         )  # if not available search for cdtext
@@ -148,6 +148,15 @@ def fetchdata():
                     artists[t - i_first_track] = value
                 pass
     d.close()
+
+    # artists and track_list should be arrays of strings, make sure they are:
+    for i, artist in enumerate(artists):
+        if type(artist) is not str:
+            artists[i] = "Unknown"
+    for i, track in enumerate(track_list):
+        if type(track) is not str:
+            track_list[i] = f"Track {i + 1}"
+
     return artists, track_list, album, i_tracks, durations, is_data_tracks
 
 

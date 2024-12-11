@@ -1,3 +1,11 @@
+linamp (1.2.1) bookworm; urgency=medium
+
+  * Bugfix: Fixed glitches on spectrum analyzer for views that use audiospectrumcatpure class (CD player, Bluetooth player)
+  * Bugfix: Fixed spectrum analyzer not showing spectrum of right channel on file player
+  * Bugfix: Fix crashes on CD player when a request to musicbrainz fails
+
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Tue, 10 Dec 2024 23:22:00 -0600
+
 linamp (1.2.0) bookworm; urgency=medium
 
   * Bugfix: After boot and loading the first file into the playlist, playback fails.

@@ -8,17 +8,6 @@
 
 bool globalAudioSourceWSpectrumCaptureInstanceIsRunning = false;
 
-bool is_valid_sample(QByteArray *sample)
-{
-    // Greedy: suposing that 100 is enough
-    for(int i = 0; i < 100; i++) {
-        if(sample->at(i) != 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
 /* our data processing function is in general:
  *
  *  struct pw_buffer *b;
@@ -235,10 +224,6 @@ void AudioSourceWSpectrumCapture::emitData()
     QMutexLocker l(pwData.sampleMutex);
 
     if(pwData.sample->length() < DFT_SIZE * 4) {
-        return;
-    }
-
-    if(!is_valid_sample(pwData.sample)) {
         return;
     }
 
