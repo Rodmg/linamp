@@ -8,17 +8,6 @@
 
 bool globalAudioSourceWSpectrumCaptureInstanceIsRunning = false;
 
-bool is_valid_sample(QByteArray *sample)
-{
-    // Greedy: suposing that 100 is enough
-    for(int i = 0; i < 100; i++) {
-        if(sample->at(i) != 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
 /* our data processing function is in general:
  *
  *  struct pw_buffer *b;
@@ -204,7 +193,7 @@ void AudioSourceWSpectrumCapture::pwLoop()
                             &pwData);
 
     struct spa_audio_info_raw audio_info;
-    audio_info.format = SPA_AUDIO_FORMAT_S16_LE;
+    audio_info.format = SPA_AUDIO_FORMAT_S16P;
     audio_info.channels = SPECTRUM_DATA_CHANNELS;
     audio_info.rate = SPECTRUM_DATA_SAMPLE_RATE;
     params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat,
@@ -235,10 +224,6 @@ void AudioSourceWSpectrumCapture::emitData()
     QMutexLocker l(pwData.sampleMutex);
 
     if(pwData.sample->length() < DFT_SIZE * 4) {
-        return;
-    }
-
-    if(!is_valid_sample(pwData.sample)) {
         return;
     }
 
