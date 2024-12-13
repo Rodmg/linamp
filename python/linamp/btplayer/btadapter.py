@@ -81,6 +81,7 @@ class BTPlayerAdapter():
     device = None
     device_alias = None
     player = None
+    player_interface = None
     transport = None
 
     connected = False
@@ -165,6 +166,7 @@ class BTPlayerAdapter():
             # Setup connected state
             self.connected = True
             self.player = await self._get_player(player_path)
+            self.player_interface = self.player.get_interface(PLAYER_IFACE)
             player_properties = self.player.get_interface('org.freedesktop.DBus.Properties')
             device_path_raw = await player_properties.call_get(PLAYER_IFACE, 'Device')
             device_path = device_path_raw.value
@@ -189,6 +191,7 @@ class BTPlayerAdapter():
         else:
             self.connected = False
             self.player = None
+            self.player_interface = None
             self.device = None
             self.device_alias = None
             self.status = None
@@ -217,28 +220,28 @@ class BTPlayerAdapter():
 
 
     def play(self):
-        if not self.player:
+        if not self.player_interface:
             return
-        loop.run_until_complete(self.player.call_play())
+        loop.run_until_complete(self.player_interface.call_play())
 
     def pause(self):
-        if not self.player:
+        if not self.player_interface:
             return
-        loop.run_until_complete(self.player.call_pause())
+        loop.run_until_complete(self.player_interface.call_pause())
 
     def stop(self):
-        if not self.player:
+        if not self.player_interface:
             return
-        loop.run_until_complete(self.player.call_stop())
+        loop.run_until_complete(self.player_interface.call_stop())
 
     def next(self):
-        if not self.player:
+        if not self.player_interface:
             return
-        loop.run_until_complete(self.player.call_next())
+        loop.run_until_complete(self.player_interface.call_next())
 
     def previous(self):
-        if not self.player:
+        if not self.player_interface:
             return
-        loop.run_until_complete(self.player.call_previous())
+        loop.run_until_complete(self.player_interface.call_previous())
 
 
