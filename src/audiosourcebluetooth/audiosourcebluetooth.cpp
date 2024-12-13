@@ -33,7 +33,7 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
 
     // Timer to detect changes and load
     detectChangesTimer = new QTimer(this);
-    detectChangesTimer->setInterval(5000);
+    detectChangesTimer->setInterval(1000);
     connect(detectChangesTimer, &QTimer::timeout, this, &AudioSourceBluetooth::pollDetectChanges);
     detectChangesTimer->start();
 
@@ -94,7 +94,7 @@ void AudioSourceBluetooth::handlePollResult()
             #endif
             return;
         }
-        emit this->requestActivation(); // Request audiosource coordinator to select us
+        //emit this->requestActivation(); // Request audiosource coordinator to select us
         QFuture<void> status = QtConcurrent::run(&AudioSourceBluetooth::doLoad, this);
         loadWatcher.setFuture(status);
     } else {
@@ -195,7 +195,10 @@ void AudioSourceBluetooth::handlePrevious()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
-    PyObject_CallMethod(player, "prev", NULL);
+    PyObject *pyResult = PyObject_CallMethod(player, "prev", NULL);
+    if(pyResult == nullptr) {
+        PyErr_Print();
+    }
     PyGILState_Release(state);
     refreshStatus();
 }
@@ -204,7 +207,10 @@ void AudioSourceBluetooth::handlePlay()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
-    PyObject_CallMethod(player, "play", NULL);
+    PyObject *pyResult = PyObject_CallMethod(player, "play", NULL);
+    if(pyResult == nullptr) {
+        PyErr_Print();
+    }
     PyGILState_Release(state);
     refreshStatus();
 }
@@ -213,7 +219,10 @@ void AudioSourceBluetooth::handlePause()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
-    PyObject_CallMethod(player, "pause", NULL);
+    PyObject *pyResult = PyObject_CallMethod(player, "pause", NULL);
+    if(pyResult == nullptr) {
+        PyErr_Print();
+    }
     PyGILState_Release(state);
     refreshStatus();
 }
@@ -222,7 +231,10 @@ void AudioSourceBluetooth::handleStop()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
-    PyObject_CallMethod(player, "stop", NULL);
+    PyObject *pyResult = PyObject_CallMethod(player, "stop", NULL);
+    if(pyResult == nullptr) {
+        PyErr_Print();
+    }
     PyGILState_Release(state);
     refreshStatus();
 }
@@ -231,7 +243,10 @@ void AudioSourceBluetooth::handleNext()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
-    PyObject_CallMethod(player, "next", NULL);
+    PyObject *pyResult = PyObject_CallMethod(player, "next", NULL);
+    if(pyResult == nullptr) {
+        PyErr_Print();
+    }
     PyGILState_Release(state);
     refreshStatus();
 }
