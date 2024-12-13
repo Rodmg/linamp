@@ -13,8 +13,6 @@ class BTPlayer:
         self.shuffle = False
         self.repeat = False
 
-        self._loading = False
-
         loop.run_until_complete(self.player.setup())
 
     def _do_set_repeat(self):
@@ -26,27 +24,20 @@ class BTPlayer:
     # -------- Control Functions --------
 
     def load(self):
-        if self._loading:
-            return
-        self._loading = True
         loop.run_until_complete(self.player.find_player())
         if self.player.connected:
             self.shuffle = self.player.shuffle
             self.repeat = self.player.repeat
             track = self.player.track
             if not track:
-                self._loading = False
                 return
-            self.track_info = [{
-                "tracknumber": track.track_number,
-                "artist": track.artist,
-                "album": track.album,
-                "title": track.title,
-                "duration": track.duration
-            }]
-        self._loading = False
-
-
+            self.track_info = [(
+                track.track_number,
+                track.artist,
+                track.album,
+                track.title,
+                track.duration
+            )]
 
     def unload(self):
         self.track_info = []
