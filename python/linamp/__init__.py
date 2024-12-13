@@ -1,1 +1,2 @@
-from .cdplayer import *
+from linamp.cdplayer import *
+from linamp.btplayer import *

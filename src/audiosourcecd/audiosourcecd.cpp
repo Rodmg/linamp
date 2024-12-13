@@ -7,9 +7,8 @@
 AudioSourceCD::AudioSourceCD(QObject *parent)
     : AudioSourceWSpectrumCapture{parent}
 {
-    Py_Initialize();
-    // PyEval_InitThreads();
-    PyEval_SaveThread();
+    //Py_Initialize();
+    //PyEval_SaveThread();
 
     auto state = PyGILState_Ensure();
 
@@ -64,8 +63,8 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
 
 AudioSourceCD::~AudioSourceCD()
 {
-    PyGILState_Ensure();
-    Py_Finalize();
+    //PyGILState_Ensure();
+    //Py_Finalize();
 }
 
 void AudioSourceCD::pollDetectDiscInsertion()

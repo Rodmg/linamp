@@ -27,9 +27,18 @@ const unsigned int WINDOW_W = 277 * UI_SCALE;
 const unsigned int WINDOW_H = 117 * UI_SCALE;
 #endif
 
+#define PY_SSIZE_T_CLEAN
+#undef slots
+#include <Python.h>
+#define slots Q_SLOTS
+
 MainWindow::MainWindow(QWidget *parent)
      : QMainWindow{parent}
 {
+    // Initialize Python interpreter, required by audiosourcecd and audiosourcebt
+    Py_Initialize();
+    PyEval_SaveThread();
+
     // Setup playlist
     m_playlistModel = new PlaylistModel(this);
     m_playlist = m_playlistModel->playlist();
@@ -131,7 +140,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-
+    PyGILState_Ensure();
+    Py_Finalize();
 }
 
 void MainWindow::showPlayer()
