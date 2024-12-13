@@ -10,8 +10,6 @@ class BTPlayer:
         self.player = BTPlayerAdapter()
         # Array of tuples with format (tracknumber: int, artist, album, title, duration: int, is_data_track: bool)
         self.track_info = []
-        self.shuffle = False
-        self.repeat = False
 
         loop.run_until_complete(self.player.setup())
 
@@ -26,8 +24,6 @@ class BTPlayer:
     def load(self):
         loop.run_until_complete(self.player.find_player())
         if self.player.connected:
-            self.shuffle = self.player.shuffle
-            self.repeat = self.player.repeat
             track = self.player.track
             if not track:
                 return
@@ -43,19 +39,19 @@ class BTPlayer:
         self.track_info = []
 
     def play(self):
-        pass
+        self.player.play()
 
     def stop(self):
-        pass
+        self.player.stop()
 
     def pause(self):
-        pass
+        self.player.pause()
 
     def next(self):
-        pass
+        self.player.next()
 
     def prev(self):
-        pass
+        self.player.previous()
 
     # Jump to a specific track
     def jump(self, index):
@@ -66,11 +62,9 @@ class BTPlayer:
         pass
 
     def set_shuffle(self, enabled):
-        self.shuffle = enabled
         self._do_set_shuffle()
 
     def set_repeat(self, enabled):
-        self.repeat = enabled
         self._do_set_repeat()
 
     def eject(self):
@@ -79,16 +73,16 @@ class BTPlayer:
     # -------- Status Functions --------
 
     def get_postition(self):
-        return 0
+        return self.player.position
 
     def get_shuffle(self):
-        return self.shuffle
+        return self.player.shuffle != "off"
 
     def get_repeat(self):
-        return self.repeat
+        return self.player.repeat != "off"
 
     def get_status(self):
-        status = "no-disc"
+        status = "disconnected"
         btstatus = self.player.status
         if btstatus == "playing":
             status = "playing"

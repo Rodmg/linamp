@@ -4,6 +4,8 @@ from enum import Enum
 from dbus_next.aio import MessageBus
 from dbus_next import BusType
 
+loop = asyncio.get_event_loop()
+
 SERVICE_NAME = 'org.bluez'
 DEVICE_IFACE = SERVICE_NAME + '.Device1'
 PLAYER_IFACE = SERVICE_NAME + '.MediaPlayer1'
@@ -212,3 +214,31 @@ class BTPlayerAdapter():
             self.transport_state = None
             self.codec = None
             self.codec_configuration = None
+
+
+    def play(self):
+        if not self.player:
+            return
+        loop.run_until_complete(self.player.call_play())
+
+    def pause(self):
+        if not self.player:
+            return
+        loop.run_until_complete(self.player.call_pause())
+
+    def stop(self):
+        if not self.player:
+            return
+        loop.run_until_complete(self.player.call_stop())
+
+    def next(self):
+        if not self.player:
+            return
+        loop.run_until_complete(self.player.call_next())
+
+    def previous(self):
+        if not self.player:
+            return
+        loop.run_until_complete(self.player.call_previous())
+
+

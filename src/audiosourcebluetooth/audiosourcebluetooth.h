@@ -46,15 +46,15 @@ private:
     void refreshProgress();
     void interpolateProgress();
 
-    // Detect disc insertion thread
-    QTimer *detectDiscInsertionTimer = nullptr;
+    // Detect changes thread
+    QTimer *detectChangesTimer = nullptr;
     bool pollInProgress = false;
-    void pollDetectDiscInsertion();
-    bool doPollDetectDiscInsertion();
+    void pollDetectChanges();
+    bool doPollDetectChanges();
     void handlePollResult();
     QFutureWatcher<bool> pollResultWatcher;
 
-    // Load disc thread
+    // Load details thread
     void doLoad();
     void handleLoadEnd();
     QFutureWatcher<void> loadWatcher;

@@ -31,13 +31,13 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
 
     player = PyObject_CallNoArgs(PlayerClass);
 
-    // Timer to detect disc insertion and load
-    detectDiscInsertionTimer = new QTimer(this);
-    detectDiscInsertionTimer->setInterval(5000);
-    connect(detectDiscInsertionTimer, &QTimer::timeout, this, &AudioSourceBluetooth::pollDetectDiscInsertion);
-    detectDiscInsertionTimer->start();
+    // Timer to detect changes and load
+    detectChangesTimer = new QTimer(this);
+    detectChangesTimer->setInterval(5000);
+    connect(detectChangesTimer, &QTimer::timeout, this, &AudioSourceBluetooth::pollDetectChanges);
+    detectChangesTimer->start();
 
-    // Watch for async disc detection results
+    // Watch for async change detection results
     connect(&pollResultWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceBluetooth::handlePollResult);
 
     // Handle load end
@@ -60,11 +60,9 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
 
 AudioSourceBluetooth::~AudioSourceBluetooth()
 {
-    //PyGILState_Ensure();
-    //Py_Finalize();
 }
 
-void AudioSourceBluetooth::pollDetectDiscInsertion()
+void AudioSourceBluetooth::pollDetectChanges()
 {
     if(pollResultWatcher.isRunning() || loadWatcher.isRunning()) {
         #ifdef DEBUG_ASPY
@@ -75,9 +73,9 @@ void AudioSourceBluetooth::pollDetectDiscInsertion()
     if(pollInProgress) return;
     pollInProgress = true;
     #ifdef DEBUG_ASPY
-    qDebug() << "pollDetectDiscInsertion: polling";
+    qDebug() << "pollDetectChanges: polling";
     #endif
-    QFuture<bool> status = QtConcurrent::run(&AudioSourceBluetooth::doPollDetectDiscInsertion, this);
+    QFuture<bool> status = QtConcurrent::run(&AudioSourceBluetooth::doPollDetectChanges, this);
     //pollStatus = &status;
     pollResultWatcher.setFuture(status);
 }
@@ -88,8 +86,8 @@ void AudioSourceBluetooth::handlePollResult()
     qDebug() << ">>>>POLL RESULT";
     #endif
 
-    bool discDetected = pollResultWatcher.result();
-    if(discDetected) {
+    bool changeDetected = pollResultWatcher.result();
+    if(changeDetected) {
         if(loadWatcher.isRunning()) {
             #ifdef DEBUG_ASPY
             qDebug() << ">>>>>>>>>>>>>>>LOAD Avoided";
@@ -97,7 +95,6 @@ void AudioSourceBluetooth::handlePollResult()
             return;
         }
         emit this->requestActivation(); // Request audiosource coordinator to select us
-        emit this->messageSet("LOADING...", 5000);
         QFuture<void> status = QtConcurrent::run(&AudioSourceBluetooth::doLoad, this);
         loadWatcher.setFuture(status);
     } else {
@@ -105,27 +102,27 @@ void AudioSourceBluetooth::handlePollResult()
     }
 }
 
-bool AudioSourceBluetooth::doPollDetectDiscInsertion()
+bool AudioSourceBluetooth::doPollDetectChanges()
 {
-    bool discDetected = false;
-    if(player == nullptr) return discDetected;
+    bool changeDetected = false;
+    if(player == nullptr) return changeDetected;
 
     auto state = PyGILState_Ensure();
-    PyObject* pyDiscDetected = PyObject_CallMethod(player, "poll_changes", NULL);
+    PyObject* pyChangeDetected = PyObject_CallMethod(player, "poll_changes", NULL);
 
-    if(PyBool_Check(pyDiscDetected)) {
-        discDetected = PyObject_IsTrue(pyDiscDetected);
+    if(PyBool_Check(pyChangeDetected)) {
+        changeDetected = PyObject_IsTrue(pyChangeDetected);
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>Disct detected?:" << discDetected;
+        qDebug() << ">>>Change detected?:" << changeDetected;
         #endif
     } else {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>pollDetectDiscInsertion: Not a bool";
+        qDebug() << ">>>>pollDetectChanges: Not a bool";
         #endif
     }
-    if(pyDiscDetected) Py_DECREF(pyDiscDetected);
+    if(pyChangeDetected) Py_DECREF(pyChangeDetected);
     PyGILState_Release(state);
-    return discDetected;
+    return changeDetected;
 }
 
 void AudioSourceBluetooth::doLoad()
@@ -254,7 +251,6 @@ void AudioSourceBluetooth::handleOpen()
     emit this->messageSet("EJECTING...", 4000);
     QFuture<void> status = QtConcurrent::run(&AudioSourceBluetooth::doEject, this);
     ejectWatcher.setFuture(status);
-
 }
 
 void AudioSourceBluetooth::handleShuffle()
@@ -329,9 +325,9 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
     qDebug() << ">>>Status" << status;
     #endif
 
-    if(status == "no-disc") {
+    if(status == "disconnected") {
         QMediaMetaData metadata = QMediaMetaData{};
-        metadata.insert(QMediaMetaData::Title, "NO DISC");
+        metadata.insert(QMediaMetaData::Title, "DISCONNECTED");
         emit metadataChanged(metadata);
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
@@ -394,12 +390,12 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
             stopSpectrum();
         }
 
-        emit this->messageSet("VLC ERROR", 5000);
+        emit this->messageSet("BT ERROR", 5000);
     }
 
     this->currentStatus = status;
 
-    if(status != "no-disc" && shouldRefreshTrackInfo) {
+    if(status != "disconnected" && shouldRefreshTrackInfo) {
         refreshTrackInfo();
     }
 }
