@@ -153,7 +153,7 @@ void PlayerView::scale()
     QRect psiGeo = ui->playStatusIcon->geometry();
     ui->playStatusIcon->setGeometry(psiGeo.x()*UI_SCALE, psiGeo.y()*UI_SCALE, psiGeo.width(), psiGeo.height());
 
-    ui->progressTimeLabel->setGeometry(39*UI_SCALE, 3*UI_SCALE, 50*UI_SCALE, 20*UI_SCALE);
+    ui->progressTimeLabel->setGeometry(35*UI_SCALE, 3*UI_SCALE, 54*UI_SCALE, 20*UI_SCALE);
     QFont ptlFont = ui->progressTimeLabel->font();
     ptlFont.setWordSpacing(-2);
     ui->progressTimeLabel->setFont(ptlFont);
