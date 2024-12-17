@@ -1,7 +1,7 @@
 import asyncio
 from enum import Enum
 
-from linamp.btplayer.btadapter import BTPlayerAdapter
+from linamp.btplayer.btadapter import BTPlayerAdapter, wait_for_loop
 
 loop = asyncio.get_event_loop()
 
@@ -31,14 +31,13 @@ class BTPlayer:
         self.show_message = False
         self.message_timeout = 0
 
+        wait_for_loop()
         loop.run_until_complete(self.player.setup())
 
     # -------- Control Functions --------
 
     def load(self) -> None:
-        if loop.is_running():
-            print('WARNING: loop is running and tried to run again on load')
-            return
+        wait_for_loop()
         loop.run_until_complete(self.player.find_player())
         if self.player.connected:
             track = self.player.track

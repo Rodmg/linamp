@@ -71,7 +71,7 @@ private:
     void refreshStatus(bool shouldRefreshTrackInfo = true);
     void refreshTrackInfo(bool force = false);
 
-    quint32 currentTrackNumber = std::numeric_limits<quint32>::max();
+    QMediaMetaData currentMetadata;
 };
 
 #endif // AUDIOSOURCEBLUETOOTH_H

@@ -148,7 +148,9 @@ void AudioSourceBluetooth::doEject()
 void AudioSourceBluetooth::handleEjectEnd()
 {
     emit this->messageClear();
-    currentTrackNumber = std::numeric_limits<quint32>::max();
+    // Empty metadata
+    QMediaMetaData metadata;
+    currentMetadata = metadata;
     refreshStatus();
 }
 
@@ -438,8 +440,14 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
     PyObject *pyDuration = PyTuple_GetItem(pyTrackInfo, 4);
 
     quint32 trackNumber = PyLong_AsLong(pyTrackNumber);
+    quint32 duration = PyLong_AsLong(pyDuration);
+    QString title(PyUnicode_AsUTF8(pyTitle));
 
-    if(trackNumber == this->currentTrackNumber && !force) {
+    bool isSameTrack =  this->currentMetadata.value(QMediaMetaData::TrackNumber).toInt() == trackNumber &&
+                        this->currentMetadata.value(QMediaMetaData::Title).toString() == title &&
+                        this->currentMetadata.value(QMediaMetaData::Duration).toInt() == duration;
+
+    if(isSameTrack && !force) {
         // No need to refresh
         Py_DECREF(pyTrackInfo);
         PyGILState_Release(state);
@@ -448,8 +456,6 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
 
     QString artist(PyUnicode_AsUTF8(pyArtist));
     QString album(PyUnicode_AsUTF8(pyAlbum));
-    QString title(PyUnicode_AsUTF8(pyTitle));
-    quint32 duration = PyLong_AsLong(pyDuration);
 
     QMediaMetaData metadata;
     metadata.insert(QMediaMetaData::Title, title);
@@ -460,7 +466,7 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
     metadata.insert(QMediaMetaData::AudioBitRate, 1411 * 1000);
     metadata.insert(QMediaMetaData::AudioCodec, 44100); // Using AudioCodec as sample rate for now
 
-    this->currentTrackNumber = trackNumber;
+    this->currentMetadata = metadata;
     emit this->durationChanged(duration);
     emit this->metadataChanged(metadata);
 
