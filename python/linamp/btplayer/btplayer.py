@@ -1,119 +1,125 @@
 import asyncio
+from enum import Enum
 
 from linamp.btplayer.btadapter import BTPlayerAdapter
 
 loop = asyncio.get_event_loop()
 
+class PlayerStatus(Enum):
+    Idle = 'idle'
+    Playing = 'playing'
+    Stopped = 'stopped'
+    Paused = 'paused'
+    Error = 'error'
+    Loading = 'loading'
+
 class BTPlayer:
+
+    message: str
+    show_message: bool
+    message_timeout: number
+
+    player: BTPlayerAdapter
+    track_info: tuple[int, str, str, str, int]
 
     def __init__(self) -> None:
         self.player = BTPlayerAdapter()
-        # Array of tuples with format (tracknumber: int, artist, album, title, duration: int, is_data_track: bool)
-        self.track_info = []
+        # tuple with format (tracknumber: int, artist, album, title, duration: int)
+        self.track_info = ()
+
+        self.message = ''
+        self.show_message = False
+        self.message_timeout = 0
 
         loop.run_until_complete(self.player.setup())
 
-    def _do_set_repeat(self):
-        pass
-
-    def _do_set_shuffle(self):
-        pass
-
     # -------- Control Functions --------
 
-    def load(self):
+    def load(self) -> None:
+        if loop.is_running():
+            print('WARNING: loop is running and tried to run again on load')
+            return
         loop.run_until_complete(self.player.find_player())
         if self.player.connected:
             track = self.player.track
             if not track:
                 return
-            self.track_info = [(
+            self.track_info = (
                 track.track_number,
                 track.artist,
                 track.album,
                 track.title,
                 track.duration
-            )]
+            )
 
-    def unload(self):
-        self.track_info = []
+    def unload(self) -> None:
+        self.track_info = ()
+        self.message = ''
+        self.show_message = False
+        self.message_timeout = 0
 
-    def play(self):
+    def play(self) -> None:
         self.player.play()
 
-    def stop(self):
+    def stop(self) -> None:
         self.player.stop()
 
-    def pause(self):
+    def pause(self) -> None:
         self.player.pause()
 
-    def next(self):
+    def next(self) -> None:
         self.player.next()
 
-    def prev(self):
+    def prev(self) -> None:
         self.player.previous()
 
-    # Jump to a specific track
-    def jump(self, index):
-        pass
-
     # Go to a specific time in a track while playing
-    def seek(self, ms):
+    def seek(self, ms: int) -> None:
         pass
 
-    def set_shuffle(self, enabled):
-        self._do_set_shuffle()
+    def set_shuffle(self, enabled: bool) -> None:
+        self.player.set_shuffle(enabled)
 
-    def set_repeat(self, enabled):
-        self._do_set_repeat()
+    def set_repeat(self, enabled: bool) -> None:
+        self.player.set_repeat(enabled)
 
-    def eject(self):
+    def eject(self) -> None:
         pass
 
     # -------- Status Functions --------
 
-    def get_postition(self):
+    def get_postition(self) -> int:
         return self.player.position
 
-    def get_shuffle(self):
+    def get_shuffle(self) -> bool:
         return self.player.shuffle != "off"
 
-    def get_repeat(self):
+    def get_repeat(self) -> bool:
         return self.player.repeat != "off"
 
-    def get_status(self):
-        status = "disconnected"
+    # Returns the str representation of PlayerStatus enum
+    def get_status(self) -> str:
+        status = PlayerStatus.Idle
         btstatus = self.player.status
         if btstatus == "playing":
-            status = "playing"
+            status = PlayerStatus.Playing
         if btstatus == "stopped":
-            status = "stopped"
+            status = PlayerStatus.Stopped
         if btstatus == "paused":
-            status = "paused"
+            status = PlayerStatus.Paused
         if btstatus == "error":
-            status = "error"
+            status = PlayerStatus.Error
         if btstatus == "forward-seek":
-            status = "loading"
+            status = PlayerStatus.Loading
         if btstatus == "reverse-seek":
-            status = "loading"
-        return status
+            status = PlayerStatus.Loading
+        return status.value
 
-    def get_all_tracks_info(self):
+    def get_track_info(self) -> tuple[int, str, str, str, int]:
         return self.track_info
-
-    def get_track_info(self, index):
-        if index >= len(self.track_info) or index < 0:
-            raise Exception("Invalid track number")
-        return self.track_info[index]
-
-    def get_current_track_info(self):
-        index = 0
-        if index < 0:
-            index = 0
-        return self.get_track_info(index)
 
     # -------- Events to be called by a timer --------
 
-    def poll_changes(self):
+    def poll_events(self) -> bool:
         self.load()
         return self.player.connected

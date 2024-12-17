@@ -46,11 +46,11 @@ private:
     void refreshProgress();
     void interpolateProgress();
 
-    // Detect changes thread
-    QTimer *detectChangesTimer = nullptr;
+    // Poll events thread
+    QTimer *pollEventsTimer = nullptr;
     bool pollInProgress = false;
-    void pollDetectChanges();
-    bool doPollDetectChanges();
+    void pollEvents();
+    bool doPollEvents();
     void handlePollResult();
     QFutureWatcher<bool> pollResultWatcher;
 

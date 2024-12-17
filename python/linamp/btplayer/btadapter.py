@@ -48,7 +48,7 @@ class BTCodec(Enum):
     APTXHD = 4
 
 class BTTrackInfo():
-    def __init__(self, title = '', track_number = 0, number_of_tracks = 0, duration = 0, album = '', artist = ''):
+    def __init__(self, title: str = '', track_number: int = 0, number_of_tracks: int = 0, duration: int = 0, album: str = '', artist: str = ''):
         self.title = title
         self.track_number = track_number
         self.number_of_tracks = number_of_tracks
@@ -222,26 +222,59 @@ class BTPlayerAdapter():
     def play(self):
         if not self.player_interface:
             return
+        if loop.is_running():
+            print('WARNING: loop is running and tried to run again')
+            return
         loop.run_until_complete(self.player_interface.call_play())
 
     def pause(self):
         if not self.player_interface:
+            return
+        if loop.is_running():
+            print('WARNING: loop is running and tried to run again')
             return
         loop.run_until_complete(self.player_interface.call_pause())
 
     def stop(self):
         if not self.player_interface:
             return
+        if loop.is_running():
+            print('WARNING: loop is running and tried to run again')
+            return
         loop.run_until_complete(self.player_interface.call_stop())
 
     def next(self):
         if not self.player_interface:
+            return
+        if loop.is_running():
+            print('WARNING: loop is running and tried to run again')
             return
         loop.run_until_complete(self.player_interface.call_next())
 
     def previous(self):
         if not self.player_interface:
             return
+        if loop.is_running():
+            print('WARNING: loop is running and tried to run again')
+            return
         loop.run_until_complete(self.player_interface.call_previous())
+
+    def set_shuffle(self, enabled: bool) -> None:
+        if not self.player_interface:
+            return
+        if loop.is_running():
+            print('WARNING: loop is running and tried to run again')
+            return
+        state = 'alltracks' if enabled else 'off'
+        loop.run_until_complete(self.player_interface.set_shuffle(state))
+
+    def set_repeat(self, enabled: bool) -> None:
+        if not self.player_interface:
+            return
+        if loop.is_running():
+            print('WARNING: loop is running and tried to run again')
+            return
+        state = 'alltracks' if enabled else 'off'
+        loop.run_until_complete(self.player_interface.set_repeat(state))
 
 

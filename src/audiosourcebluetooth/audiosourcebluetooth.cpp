@@ -31,13 +31,13 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
 
     player = PyObject_CallNoArgs(PlayerClass);
 
-    // Timer to detect changes and load
-    detectChangesTimer = new QTimer(this);
-    detectChangesTimer->setInterval(1000);
-    connect(detectChangesTimer, &QTimer::timeout, this, &AudioSourceBluetooth::pollDetectChanges);
-    detectChangesTimer->start();
+    // Timer to poll for events and load
+    pollEventsTimer = new QTimer(this);
+    pollEventsTimer->setInterval(1000);
+    connect(pollEventsTimer, &QTimer::timeout, this, &AudioSourceBluetooth::pollEvents);
+    pollEventsTimer->start();
 
-    // Watch for async change detection results
+    // Watch for async events poll results
     connect(&pollResultWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceBluetooth::handlePollResult);
 
     // Handle load end
@@ -62,7 +62,7 @@ AudioSourceBluetooth::~AudioSourceBluetooth()
 {
 }
 
-void AudioSourceBluetooth::pollDetectChanges()
+void AudioSourceBluetooth::pollEvents()
 {
     if(pollResultWatcher.isRunning() || loadWatcher.isRunning()) {
         #ifdef DEBUG_ASPY
@@ -73,10 +73,9 @@ void AudioSourceBluetooth::pollDetectChanges()
     if(pollInProgress) return;
     pollInProgress = true;
     #ifdef DEBUG_ASPY
-    qDebug() << "pollDetectChanges: polling";
+    qDebug() << "pollEvents: polling";
     #endif
-    QFuture<bool> status = QtConcurrent::run(&AudioSourceBluetooth::doPollDetectChanges, this);
-    //pollStatus = &status;
+    QFuture<bool> status = QtConcurrent::run(&AudioSourceBluetooth::doPollEvents, this);
     pollResultWatcher.setFuture(status);
 }
 
@@ -102,13 +101,13 @@ void AudioSourceBluetooth::handlePollResult()
     }
 }
 
-bool AudioSourceBluetooth::doPollDetectChanges()
+bool AudioSourceBluetooth::doPollEvents()
 {
     bool changeDetected = false;
     if(player == nullptr) return changeDetected;
 
     auto state = PyGILState_Ensure();
-    PyObject* pyChangeDetected = PyObject_CallMethod(player, "poll_changes", NULL);
+    PyObject* pyChangeDetected = PyObject_CallMethod(player, "poll_events", NULL);
 
     if(PyBool_Check(pyChangeDetected)) {
         changeDetected = PyObject_IsTrue(pyChangeDetected);
@@ -117,7 +116,7 @@ bool AudioSourceBluetooth::doPollDetectChanges()
         #endif
     } else {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>pollDetectChanges: Not a bool";
+        qDebug() << ">>>>pollEvents: Not a bool";
         #endif
     }
     if(pyChangeDetected) Py_DECREF(pyChangeDetected);
@@ -340,7 +339,7 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
     qDebug() << ">>>Status" << status;
     #endif
 
-    if(status == "disconnected") {
+    if(status == "idle") {
         QMediaMetaData metadata = QMediaMetaData{};
         metadata.insert(QMediaMetaData::Title, "DISCONNECTED");
         emit metadataChanged(metadata);
@@ -410,7 +409,7 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
 
     this->currentStatus = status;
 
-    if(status != "disconnected" && shouldRefreshTrackInfo) {
+    if(status != "idle" && shouldRefreshTrackInfo) {
         refreshTrackInfo();
     }
 }
@@ -422,7 +421,7 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
     #endif
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
-    PyObject *pyTrackInfo = PyObject_CallMethod(player, "get_current_track_info", NULL);
+    PyObject *pyTrackInfo = PyObject_CallMethod(player, "get_track_info", NULL);
     if(pyTrackInfo == nullptr) {
         #ifdef DEBUG_ASPY
         qDebug() << ">>> Couldn't get track info";
