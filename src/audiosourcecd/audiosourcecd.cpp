@@ -451,7 +451,7 @@ void AudioSourceCD::refreshTrackInfo(bool force)
     metadata.insert(QMediaMetaData::TrackNumber, trackNumber);
     metadata.insert(QMediaMetaData::Duration, duration);
     metadata.insert(QMediaMetaData::AudioBitRate, 1411 * 1000);
-    metadata.insert(QMediaMetaData::AudioCodec, 44100); // Using AudioCodec as sample rate for now
+    metadata.insert(QMediaMetaData::Comment, "44100"); // Using Comment as sample rate
 
     this->currentTrackNumber = trackNumber;
     emit this->durationChanged(duration);
