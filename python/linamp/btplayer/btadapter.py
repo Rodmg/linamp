@@ -197,8 +197,8 @@ class BTPlayerAdapter():
             self.status = None
             self.track = BTTrackInfo()
             self.position = 0
-            self.repeat = False
-            self.shuffle = False
+            self.repeat = 'off'
+            self.shuffle = 'off'
             print('No Player found')
 
         if transport_path:
@@ -265,8 +265,8 @@ class BTPlayerAdapter():
         if loop.is_running():
             print('WARNING: loop is running and tried to run again')
             return
-        state = 'alltracks' if enabled else 'off'
-        loop.run_until_complete(self.player_interface.set_shuffle(state))
+        self.shuffle = 'alltracks' if enabled else 'off'
+        loop.run_until_complete(self.player_interface.set_shuffle(self.shuffle))
 
     def set_repeat(self, enabled: bool) -> None:
         if not self.player_interface:
@@ -274,7 +274,7 @@ class BTPlayerAdapter():
         if loop.is_running():
             print('WARNING: loop is running and tried to run again')
             return
-        state = 'alltracks' if enabled else 'off'
-        loop.run_until_complete(self.player_interface.set_repeat(state))
+        self.repeat = 'alltracks' if enabled else 'off'
+        loop.run_until_complete(self.player_interface.set_repeat(self.repeat))
 
 

@@ -17,7 +17,7 @@ class BTPlayer:
 
     message: str
     show_message: bool
-    message_timeout: number
+    message_timeout: int
 
     player: BTPlayerAdapter
     track_info: tuple[int, str, str, str, int]
