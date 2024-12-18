@@ -15,7 +15,6 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QFontDatabase>
-#include <QMediaFormat>
 
 PlayerView::PlayerView(QWidget *parent, ControlButtonsWidget *ctlBtns) :
     QWidget(parent),

@@ -7,9 +7,6 @@
 AudioSourceCD::AudioSourceCD(QObject *parent)
     : AudioSourceWSpectrumCapture{parent}
 {
-    //Py_Initialize();
-    //PyEval_SaveThread();
-
     auto state = PyGILState_Ensure();
 
     // Import 'linamp' python module, see python folder in the root of this repo
@@ -63,8 +60,6 @@ AudioSourceCD::AudioSourceCD(QObject *parent)
 
 AudioSourceCD::~AudioSourceCD()
 {
-    //PyGILState_Ensure();
-    //Py_Finalize();
 }
 
 void AudioSourceCD::pollDetectDiscInsertion()

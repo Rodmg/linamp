@@ -1,8 +1,5 @@
-import asyncio
 from linamp.baseplayer import BasePlayer, PlayerStatus
 from linamp.btplayer.btadapter import BTPlayerAdapter, is_empty_player_track
-
-loop = asyncio.get_event_loop()
 
 EMPTY_TRACK_INFO = (
     0,
