@@ -30,6 +30,9 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
     }
 
     player = PyObject_CallNoArgs(PlayerClass);
+    if(player == nullptr) {
+        PyErr_Print();
+    }
 
     // Timer to poll for events and load
     pollEventsTimer = new QTimer(this);
@@ -93,12 +96,16 @@ void AudioSourceBluetooth::handlePollResult()
             #endif
             return;
         }
-        //emit this->requestActivation(); // Request audiosource coordinator to select us
+        emit this->requestActivation(); // Request audiosource coordinator to select us
         QFuture<void> status = QtConcurrent::run(&AudioSourceBluetooth::doLoad, this);
         loadWatcher.setFuture(status);
     } else {
+        refreshStatus();
         pollInProgress = false;
     }
+
+    // Handle messages
+    this->refreshMessage();
 }
 
 bool AudioSourceBluetooth::doPollEvents()
@@ -264,7 +271,6 @@ void AudioSourceBluetooth::handleOpen()
         #endif
         return;
     }
-    emit this->messageSet("EJECTING...", 4000);
     QFuture<void> status = QtConcurrent::run(&AudioSourceBluetooth::doEject, this);
     ejectWatcher.setFuture(status);
 }
@@ -343,7 +349,7 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
 
     if(status == "idle") {
         QMediaMetaData metadata = QMediaMetaData{};
-        metadata.insert(QMediaMetaData::Title, "DISCONNECTED");
+        metadata.insert(QMediaMetaData::Title, "IDLE");
         emit metadataChanged(metadata);
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
@@ -406,7 +412,7 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
             stopSpectrum();
         }
 
-        emit this->messageSet("BT ERROR", 5000);
+        emit this->messageSet("ERROR", 5000);
     }
 
     this->currentStatus = status;
@@ -438,6 +444,9 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
     PyObject *pyAlbum = PyTuple_GetItem(pyTrackInfo, 2);
     PyObject *pyTitle = PyTuple_GetItem(pyTrackInfo, 3);
     PyObject *pyDuration = PyTuple_GetItem(pyTrackInfo, 4);
+    PyObject *pyCodec =  PyTuple_GetItem(pyTrackInfo, 5);
+    PyObject *pyBitrate =  PyTuple_GetItem(pyTrackInfo, 6);
+    PyObject *pySampleRate =  PyTuple_GetItem(pyTrackInfo, 7);
 
     quint32 trackNumber = PyLong_AsLong(pyTrackNumber);
     quint32 duration = PyLong_AsLong(pyDuration);
@@ -456,6 +465,9 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
 
     QString artist(PyUnicode_AsUTF8(pyArtist));
     QString album(PyUnicode_AsUTF8(pyAlbum));
+    QString codec(PyUnicode_AsUTF8(pyCodec));
+    quint32 bitrate = PyLong_AsLong(pyBitrate);
+    quint32 sampleRate = PyLong_AsLong(pySampleRate);
 
     QMediaMetaData metadata;
     metadata.insert(QMediaMetaData::Title, title);
@@ -463,9 +475,9 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
     metadata.insert(QMediaMetaData::AlbumTitle, album);
     metadata.insert(QMediaMetaData::TrackNumber, trackNumber);
     metadata.insert(QMediaMetaData::Duration, duration);
-    metadata.insert(QMediaMetaData::AudioBitRate, 0 * 1000); // TODO: Get from python code
-    metadata.insert(QMediaMetaData::AudioCodec, 1); // TODO: Get frin python code
-    metadata.insert(QMediaMetaData::Comment, "44100"); // Using Comment as sample rate
+    metadata.insert(QMediaMetaData::AudioBitRate, bitrate);
+    metadata.insert(QMediaMetaData::Comment, QString::number(sampleRate)); // Using Comment as sample rate
+    metadata.insert(QMediaMetaData::Description, codec); // Using Description as codec
 
     this->currentMetadata = metadata;
     emit this->durationChanged(duration);
@@ -533,4 +545,51 @@ void AudioSourceBluetooth::interpolateProgress()
     this->currentProgress += elapsed;
     progressInterpolateElapsedTimer.start();
     emit this->positionChanged(this->currentProgress);
+}
+
+void AudioSourceBluetooth::refreshMessage()
+{
+    qDebug() << "<<<Refresh message";
+    if(player == nullptr){
+        qDebug() << "<<<player is null";
+
+    }
+    if(player == nullptr) return;
+    auto state = PyGILState_Ensure();
+
+    qDebug() << "<<<Ensured";
+
+
+    PyObject *pyMessageData = PyObject_CallMethod(player, "get_message", NULL);
+    if(pyMessageData == nullptr) {
+        #ifdef DEBUG_ASPY
+        qDebug() << ">>> Couldn't get track message data";
+        #endif
+        PyErr_Print();
+        PyGILState_Release(state);
+        return;
+    }
+
+    qDebug() << "<<<After validation";
+
+    // format (show_message: bool, message: str, message_timeout_ms: int)
+    PyObject *pyShowMessage = PyTuple_GetItem(pyMessageData, 0);
+    PyObject *pyMessage = PyTuple_GetItem(pyMessageData, 1);
+    PyObject *pyMessageTimeout = PyTuple_GetItem(pyMessageData, 2);
+
+    quint32 showMessage = PyLong_AsLong(pyShowMessage);
+    QString message(PyUnicode_AsUTF8(pyMessage));
+    quint32 messageTimeout = PyLong_AsLong(pyMessageTimeout);
+
+    qDebug() << "Show message" << showMessage;
+    qDebug() << "Message" << message;
+     qDebug() << "timeout" << messageTimeout;
+
+    if(showMessage) {
+        PyObject_CallMethod(player, "clear_message", NULL);
+        emit this->messageSet(message, messageTimeout);
+    }
+
+    Py_DECREF(pyMessageData);
+    PyGILState_Release(state);
 }

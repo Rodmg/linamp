@@ -235,58 +235,19 @@ void PlayerView::setMetadata(QMediaMetaData metadata)
 
     // Set kbps
     int bitrate = metadata.value(QMediaMetaData::AudioBitRate).toInt();
+    QString codec = metadata.value(QMediaMetaData::Description).toString(); // Using Description as codec
     if(bitrate > 0) {
         bitrate = bitrate/1000;
         ui->kbpsLabel->setText("kbps");
-        ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
-    } else {
+        ui->kbpsValueLabel->setText(QString::number(bitrate));
+    } else if(codec.length()) {
         // No bitrate, try to use codec
-        QMediaFormat::AudioCodec codecVal = static_cast<QMediaFormat::AudioCodec>(metadata.value(QMediaMetaData::AudioCodec).toInt());
-        QString codec = "";
-        switch (codecVal) {
-            case QMediaFormat::AudioCodec::WMA:
-                codec = "WMA";
-                break;
-            case QMediaFormat::AudioCodec::AC3:
-                codec = "AC3";
-                break;
-            case QMediaFormat::AudioCodec::AAC:
-                codec = "AAC";
-                break;
-            case QMediaFormat::AudioCodec::ALAC:
-                codec = "ALAC";
-                break;
-            case QMediaFormat::AudioCodec::DolbyTrueHD:
-                codec = "DolbyTrueHD";
-                break;
-            case QMediaFormat::AudioCodec::EAC3:
-                codec = "EAC3";
-                break;
-            case QMediaFormat::AudioCodec::MP3:
-                codec = "MP3";
-                break;
-            case QMediaFormat::AudioCodec::Wave:
-                codec = "Wave";
-                break;
-            case QMediaFormat::AudioCodec::Vorbis:
-                codec = "Vorbis";
-                break;
-            case QMediaFormat::AudioCodec::FLAC:
-                codec = "FLAC";
-                break;
-            case QMediaFormat::AudioCodec::Opus:
-                codec = "Opus";
-                break;
-            case QMediaFormat::AudioCodec::Unspecified:
-                codec = "Unspecified";
-                break;
-            default:
-                codec = "Unknown";
-                break;
-        }
-
         ui->kbpsLabel->setText("codec");
         ui->kbpsValueLabel->setText(codec);
+    } else {
+        // Keep blank
+        ui->kbpsLabel->setText("kbps");
+        ui->kbpsValueLabel->setText("");
     }
 
 

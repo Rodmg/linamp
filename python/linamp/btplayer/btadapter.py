@@ -212,7 +212,7 @@ class BTPlayerAdapter():
             if 'State' in all_transport_properties:
                 self.transport_state = all_transport_properties['State'].value
             if 'Codec' in all_transport_properties:
-                self.codec = all_transport_properties['Codec'].value
+                self.codec = BTCodec(all_transport_properties['Codec'].value)
             if 'Configuration' in all_transport_properties:
                 self.codec_configuration = all_transport_properties['Configuration'].value
         else:
@@ -221,6 +221,13 @@ class BTPlayerAdapter():
             self.codec = None
             self.codec_configuration = None
 
+    def setup_sync(self):
+        wait_for_loop()
+        loop.run_until_complete(self.setup())
+
+    def find_player_sync(self):
+        wait_for_loop()
+        loop.run_until_complete(self.find_player())
 
     def play(self):
         if not self.player_interface:
@@ -266,4 +273,7 @@ class BTPlayerAdapter():
         self.repeat = 'alltracks' if enabled else 'off'
         loop.run_until_complete(self.player_interface.set_repeat(self.repeat))
 
-
+    def get_codec_str(self) -> str:
+        if not self.codec:
+            return ''
+        return self.codec.name

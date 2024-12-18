@@ -1,61 +1,74 @@
 import asyncio
-from enum import Enum
-
-from linamp.btplayer.btadapter import BTPlayerAdapter, wait_for_loop
+from linamp.baseplayer import BasePlayer, PlayerStatus
+from linamp.btplayer.btadapter import BTPlayerAdapter
 
 loop = asyncio.get_event_loop()
 
-class PlayerStatus(Enum):
-    Idle = 'idle'
-    Playing = 'playing'
-    Stopped = 'stopped'
-    Paused = 'paused'
-    Error = 'error'
-    Loading = 'loading'
+EMPTY_TRACK_INFO = (
+    0,
+    '',
+    '',
+    '',
+    0,
+    '',
+    0,
+    44100
+)
 
-class BTPlayer:
+class BTPlayer(BasePlayer):
 
     message: str
     show_message: bool
     message_timeout: int
 
     player: BTPlayerAdapter
-    track_info: tuple[int, str, str, str, int]
+    track_info: tuple[int, str, str, str, int, str, int, int]
 
     def __init__(self) -> None:
         self.player = BTPlayerAdapter()
-        # tuple with format (tracknumber: int, artist, album, title, duration: int)
-        self.track_info = ()
+        # tuple with format (tracknumber: int, artist, album, title, duration: int, codec: str, bitrate_bps: int, samplerate_hz: int)
+        self.track_info = EMPTY_TRACK_INFO
 
-        self.message = ''
-        self.show_message = False
-        self.message_timeout = 0
+        self.clear_message()
 
-        wait_for_loop()
-        loop.run_until_complete(self.player.setup())
+        self.player.setup_sync()
+
+    def _display_connection_info(self):
+        if self.player.connected:
+            self.message = f'CONNNECTED TO: {self.player.device_alias}'
+            self.show_message = True
+            self.message_timeout = 5000
+        else:
+            self.message = 'DISCONNECTED'
+            self.show_message = True
+            self.message_timeout = 5000
 
     # -------- Control Functions --------
 
     def load(self) -> None:
-        wait_for_loop()
-        loop.run_until_complete(self.player.find_player())
+        self.player.find_player_sync()
         if self.player.connected:
             track = self.player.track
             if not track:
+                self._display_connection_info()
                 return
             self.track_info = (
                 track.track_number,
                 track.artist,
                 track.album,
                 track.title,
-                track.duration
+                track.duration,
+                self.player.get_codec_str(),
+                0, # No simple way to know bitrate from BT
+                44100
             )
+        else:
+            self.track_info = EMPTY_TRACK_INFO
+            self._display_connection_info()
 
     def unload(self) -> None:
-        self.track_info = ()
-        self.message = ''
-        self.show_message = False
-        self.message_timeout = 0
+        self.track_info = EMPTY_TRACK_INFO
+        self.clear_message()
 
     def play(self) -> None:
         self.player.play()
@@ -74,7 +87,9 @@ class BTPlayer:
 
     # Go to a specific time in a track while playing
     def seek(self, ms: int) -> None:
-        pass
+        self.message = "NOT SUPPORTED"
+        self.show_message = True
+        self.message_timeout = 3000
 
     def set_shuffle(self, enabled: bool) -> None:
         self.player.set_shuffle(enabled)
@@ -83,7 +98,9 @@ class BTPlayer:
         self.player.set_repeat(enabled)
 
     def eject(self) -> None:
-        pass
+        self.message = "NOT SUPPORTED"
+        self.show_message = True
+        self.message_timeout = 3000
 
     # -------- Status Functions --------
 
@@ -114,11 +131,23 @@ class BTPlayer:
             status = PlayerStatus.Loading
         return status.value
 
-    def get_track_info(self) -> tuple[int, str, str, str, int]:
+    def get_track_info(self) -> tuple[int, str, str, str, int, str, int, int]:
         return self.track_info
+
+    # Return any message you want to show to the user. tuple with format: (show_message: bool, message: str, message_timeout_ms: int)
+    def get_message(self) -> tuple[bool, str, int]:
+        return (self.show_message, self.message, self.message_timeout)
+
+    def clear_message(self) -> None:
+        self.show_message = False
+        self.message = ''
+        self.message_timeout = 0
 
     # -------- Events to be called by a timer --------
 
     def poll_events(self) -> bool:
+        was_connected = self.player.connected
         self.load()
-        return self.player.connected
+
+        # Should tell UI to refresh if we are connected and were not connected before
+        return self.player.connected and not was_connected

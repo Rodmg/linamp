@@ -70,6 +70,7 @@ private:
 
     void refreshStatus(bool shouldRefreshTrackInfo = true);
     void refreshTrackInfo(bool force = false);
+    void refreshMessage();
 
     QMediaMetaData currentMetadata;
 };
