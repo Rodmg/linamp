@@ -187,6 +187,7 @@ void AudioSourceBluetooth::deactivate()
     progressRefreshTimer->stop();
     stopSpectrum();
     emit playbackStateChanged(MediaPlayer::StoppedState);
+    emit this->messageClear();
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(player, "stop", NULL);
