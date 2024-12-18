@@ -547,16 +547,12 @@ void AudioSourceBluetooth::interpolateProgress()
 
 void AudioSourceBluetooth::refreshMessage()
 {
-    qDebug() << "<<<Refresh message";
     if(player == nullptr){
         qDebug() << "<<<player is null";
 
     }
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
-
-    qDebug() << "<<<Ensured";
-
 
     PyObject *pyMessageData = PyObject_CallMethod(player, "get_message", NULL);
     if(pyMessageData == nullptr) {
@@ -568,8 +564,6 @@ void AudioSourceBluetooth::refreshMessage()
         return;
     }
 
-    qDebug() << "<<<After validation";
-
     // format (show_message: bool, message: str, message_timeout_ms: int)
     PyObject *pyShowMessage = PyTuple_GetItem(pyMessageData, 0);
     PyObject *pyMessage = PyTuple_GetItem(pyMessageData, 1);
@@ -578,10 +572,6 @@ void AudioSourceBluetooth::refreshMessage()
     quint32 showMessage = PyLong_AsLong(pyShowMessage);
     QString message(PyUnicode_AsUTF8(pyMessage));
     quint32 messageTimeout = PyLong_AsLong(pyMessageTimeout);
-
-    qDebug() << "Show message" << showMessage;
-    qDebug() << "Message" << message;
-     qDebug() << "timeout" << messageTimeout;
 
     if(showMessage) {
         PyObject_CallMethod(player, "clear_message", NULL);
