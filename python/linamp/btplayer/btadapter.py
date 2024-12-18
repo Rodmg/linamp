@@ -77,6 +77,10 @@ def wait_for_loop() -> None:
     while loop.is_running():
         pass
 
+def is_empty_player_track(track: BTTrackInfo) -> bool:
+    return track.duration <= 0
+
+
 class BTPlayerAdapter():
     bus = None
     manager = None
@@ -165,7 +169,7 @@ class BTPlayerAdapter():
                 transport_path = path
 
         if player_path:
-            print(f'Found player: {player_path}')
+            #print(f'Found player: {player_path}')
             # Setup connected state
             self.connected = True
             self.player = await self._get_player(player_path)
@@ -202,10 +206,10 @@ class BTPlayerAdapter():
             self.position = 0
             self.repeat = 'off'
             self.shuffle = 'off'
-            print('No Player found')
+            #print('No Player found')
 
         if transport_path:
-            print(f'Found transport: {transport_path}')
+            #print(f'Found transport: {transport_path}')
             self.transport = await self._get_transport(transport_path)
             transport_properties = self.transport.get_interface('org.freedesktop.DBus.Properties')
             all_transport_properties = await transport_properties.call_get_all(TRANSPORT_IFACE)

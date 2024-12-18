@@ -1,6 +1,6 @@
 import asyncio
 from linamp.baseplayer import BasePlayer, PlayerStatus
-from linamp.btplayer.btadapter import BTPlayerAdapter
+from linamp.btplayer.btadapter import BTPlayerAdapter, is_empty_player_track
 
 loop = asyncio.get_event_loop()
 
@@ -49,7 +49,7 @@ class BTPlayer(BasePlayer):
         self.player.find_player_sync()
         if self.player.connected:
             track = self.player.track
-            if not track:
+            if not track or is_empty_player_track(track):
                 self._display_connection_info()
                 return
             self.track_info = (

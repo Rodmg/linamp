@@ -348,9 +348,6 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
     #endif
 
     if(status == "idle") {
-        QMediaMetaData metadata = QMediaMetaData{};
-        metadata.insert(QMediaMetaData::Title, "IDLE");
-        emit metadataChanged(metadata);
         emit playbackStateChanged(MediaPlayer::StoppedState);
         emit positionChanged(0);
         emit durationChanged(0);
