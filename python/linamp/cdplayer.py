@@ -69,7 +69,7 @@ def fetchdata():
         if track.get_format() == "data":
             is_data_tracks[t - i_first_track] = True
 
-    musicbrainzngs.set_useragent("Small_diy_cd_player", "0.1")
+    musicbrainzngs.set_useragent("linamp_cdplayer", "1.0")
     disc = libdiscid.read(features=libdiscid.FEATURE_READ)  # id read
     try:
         result = musicbrainzngs.get_releases_by_discid(

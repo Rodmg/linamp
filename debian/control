@@ -37,7 +37,8 @@ Depends:
  python3-libdiscid,
  python3-musicbrainzngs,
  python3-cdio,
- python3-vlc
+ python3-vlc,
+ python3-dbus-next
 Description: Your favorite music player of the 90s, but in real life
  Music player app for Linamp - Your favorite music player of the 90s,
  but in real life.
