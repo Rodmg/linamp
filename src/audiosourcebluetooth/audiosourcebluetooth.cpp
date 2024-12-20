@@ -116,7 +116,7 @@ bool AudioSourceBluetooth::doPollEvents()
     auto state = PyGILState_Ensure();
     PyObject* pyChangeDetected = PyObject_CallMethod(player, "poll_events", NULL);
 
-    if(PyBool_Check(pyChangeDetected)) {
+    if(pyChangeDetected != nullptr && PyBool_Check(pyChangeDetected)) {
         changeDetected = PyObject_IsTrue(pyChangeDetected);
         #ifdef DEBUG_ASPY
         qDebug() << ">>>Change detected?:" << changeDetected;
@@ -320,19 +320,19 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
 
     // Get shuffle status
     PyObject *pyShuffleEnabled = PyObject_CallMethod(player, "get_shuffle", NULL);
-    if(PyBool_Check(pyShuffleEnabled)) {
+    if(pyShuffleEnabled != nullptr && PyBool_Check(pyShuffleEnabled)) {
         this->isShuffleEnabled = PyObject_IsTrue(pyShuffleEnabled);
         emit shuffleEnabledChanged(this->isShuffleEnabled);
     }
-    Py_DECREF(pyShuffleEnabled);
+    if(pyShuffleEnabled) Py_DECREF(pyShuffleEnabled);
 
     // Get repeat status
     PyObject *pyRepeatEnabled = PyObject_CallMethod(player, "get_repeat", NULL);
-    if(PyBool_Check(pyRepeatEnabled)) {
+    if(pyRepeatEnabled != nullptr && PyBool_Check(pyRepeatEnabled)) {
         this->isRepeatEnabled = PyObject_IsTrue(pyRepeatEnabled);
         emit repeatEnabledChanged(this->isRepeatEnabled);
     }
-    Py_DECREF(pyRepeatEnabled);
+    if(pyRepeatEnabled) Py_DECREF(pyRepeatEnabled);
 
     PyObject *pyStatus = PyObject_CallMethod(player, "get_status", NULL);
     if(pyStatus == nullptr) {
