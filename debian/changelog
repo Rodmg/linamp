@@ -2,7 +2,7 @@ linamp (1.3.0) bookworm; urgency=medium
 
   * Feature: Bluetooth Source, use Linamp as a Bluetooth audio receiver
 
- -- Rodrigo Méndez <rodrigo@linamp.org>  Tue, 17 Dec 2024 22:37:00 -0600
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Tue, 20 Dec 2024 22:37:00 -0600
 
 linamp (1.2.1) bookworm; urgency=medium
 
