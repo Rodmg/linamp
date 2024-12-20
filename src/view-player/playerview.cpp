@@ -152,7 +152,7 @@ void PlayerView::scale()
     QRect psiGeo = ui->playStatusIcon->geometry();
     ui->playStatusIcon->setGeometry(psiGeo.x()*UI_SCALE, psiGeo.y()*UI_SCALE, psiGeo.width(), psiGeo.height());
 
-    ui->progressTimeLabel->setGeometry(39*UI_SCALE, 3*UI_SCALE, 50*UI_SCALE, 20*UI_SCALE);
+    ui->progressTimeLabel->setGeometry(35*UI_SCALE, 3*UI_SCALE, 54*UI_SCALE, 20*UI_SCALE);
     QFont ptlFont = ui->progressTimeLabel->font();
     ptlFont.setWordSpacing(-2);
     ui->progressTimeLabel->setFont(ptlFont);
@@ -233,11 +233,25 @@ void PlayerView::setMetadata(QMediaMetaData metadata)
     setTrackInfo(trackInfo);
 
     // Set kbps
-    int bitrate = metadata.value(QMediaMetaData::AudioBitRate).toInt()/1000;
-    ui->kbpsValueLabel->setText(bitrate > 0 ? QString::number(bitrate) : "");
+    int bitrate = metadata.value(QMediaMetaData::AudioBitRate).toInt();
+    QString codec = metadata.value(QMediaMetaData::Description).toString(); // Using Description as codec
+    if(bitrate > 0) {
+        bitrate = bitrate/1000;
+        ui->kbpsLabel->setText("kbps");
+        ui->kbpsValueLabel->setText(QString::number(bitrate));
+    } else if(codec.length()) {
+        // No bitrate, try to use codec
+        ui->kbpsLabel->setText("codec");
+        ui->kbpsValueLabel->setText(codec);
+    } else {
+        // Keep blank
+        ui->kbpsLabel->setText("kbps");
+        ui->kbpsValueLabel->setText("");
+    }
+
 
     // Set kHz
-    int khz = metadata.value(QMediaMetaData::AudioCodec).toInt()/1000;
+    int khz = metadata.value(QMediaMetaData::Comment).toString().toInt()/1000;
     ui->khzValueLabel->setText(khz > 0 ? QString::number(khz) : "");
 }
 

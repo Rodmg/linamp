@@ -48,7 +48,7 @@ QMediaMetaData parseMetaData(const QUrl &url)
         qint64 sampleRate = properties->sampleRate();
 
         metadata.insert(QMediaMetaData::AudioBitRate, bitrate);
-        metadata.insert(QMediaMetaData::AudioCodec, sampleRate); // Using AudioCodec as sample rate for now
+        metadata.insert(QMediaMetaData::Comment, QString::number(sampleRate)); // Using Comment as sample rate
         metadata.insert(QMediaMetaData::Duration, duration);
     }
 
