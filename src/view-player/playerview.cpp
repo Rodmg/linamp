@@ -47,10 +47,38 @@ PlayerView::PlayerView(QWidget *parent, ControlButtonsWidget *ctlBtns) :
 
     // Set volume slider
     ui->volumeSlider->setRange(0, 100);
+    QList<QColor> volumeGradientColors{
+        QColor::fromRgb(7,191,0),
+        QColor::fromRgb(28,191,0),
+        QColor::fromRgb(59,191,0),
+        QColor::fromRgb(95,191,0),
+        QColor::fromRgb(132,191,0),
+        QColor::fromRgb(163,191,0),
+        QColor::fromRgb(183,191,0),
+        QColor::fromRgb(191,191,0),
+        QColor::fromRgb(191,183,0),
+        QColor::fromRgb(191,163,0),
+        QColor::fromRgb(191,132,0),
+        QColor::fromRgb(191,95,0),
+        QColor::fromRgb(191,59,0),
+        QColor::fromRgb(191,28,0),
+        QColor::fromRgb(191,7,0),
+        QColor::fromRgb(192,0,0),
+    };
+    ui->volumeSlider->setGradient(volumeGradientColors, Qt::Horizontal);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
 
     // Set Balance Slider
     ui->balanceSlider->setRange(-100, 100);
+    QList<QColor> balanceGradientColors;
+    // balance gradient is two concatenated volumeGradients, but one reversed so green is center
+    for(int i = volumeGradientColors.count() - 1; i >= 0; i--) {
+        balanceGradientColors.append(volumeGradientColors[i]);
+    }
+    for(int i = 0; i < volumeGradientColors.count(); i++) {
+        balanceGradientColors.append(volumeGradientColors[i]);
+    }
+    ui->balanceSlider->setGradient(balanceGradientColors, Qt::Horizontal);
     connect(ui->balanceSlider, &QSlider::valueChanged, this, &PlayerView::handleBalanceChanged);
 
     // Reset time counter

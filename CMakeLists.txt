@@ -87,6 +87,8 @@ qt_add_executable(player WIN32 MACOSX_BUNDLE
     src/shared/fft.h
     src/shared/util.cpp
     src/shared/util.h
+    src/shared/linampslider.h
+    src/shared/linampslider.cpp
     src/main.cpp
     uiassets.qrc
 )
