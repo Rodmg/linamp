@@ -139,6 +139,6 @@ class SpotifyPlayerAdapter(ServiceInterface):
 
 
 # TODO remove
-adapter = SpotifyPlayerAdapter()
-adapter.setup_sync()
-adapter.run_loop()
+# adapter = SpotifyPlayerAdapter()
+# adapter.setup_sync()
+# adapter.run_loop()

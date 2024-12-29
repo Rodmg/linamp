@@ -58,6 +58,8 @@ AudioSourcePython::AudioSourcePython(QString module, QString className, QObject 
     connect(progressInterpolateTimer, &QTimer::timeout, this, &AudioSourcePython::interpolateProgress);
 
     PyGILState_Release(state);
+
+    QtConcurrent::run(&AudioSourcePython::runPythonLoop, this);
 }
 
 AudioSourcePython::~AudioSourcePython()
@@ -546,10 +548,6 @@ void AudioSourcePython::interpolateProgress()
 
 void AudioSourcePython::refreshMessage()
 {
-    if(player == nullptr){
-        qDebug() << "<<<player is null";
-
-    }
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
 
@@ -578,5 +576,24 @@ void AudioSourcePython::refreshMessage()
     }
 
     Py_DECREF(pyMessageData);
+    PyGILState_Release(state);
+}
+
+void AudioSourcePython::runPythonLoop()
+{
+    if(player == nullptr) return;
+    auto state = PyGILState_Ensure();
+
+    PyObject *pyRunLoop = PyObject_CallMethod(player, "run_loop", NULL);
+    if(pyRunLoop == nullptr) {
+        #ifdef DEBUG_ASPY
+        qDebug() << ">>> Couldn't run Python event loop";
+        #endif
+        PyErr_Print();
+        PyGILState_Release(state);
+        return;
+    }
+
+    Py_DECREF(pyRunLoop);
     PyGILState_Release(state);
 }

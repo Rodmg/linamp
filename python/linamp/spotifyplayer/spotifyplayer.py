@@ -144,3 +144,6 @@ class SpotifyPlayer(BasePlayer):
 
         # Should tell UI to refresh if we are connected and were not connected before
         return self.player.connected and not was_connected
+
+    def run_loop(self):
+        self.player.run_loop()

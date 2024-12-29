@@ -46,6 +46,9 @@ private:
     void refreshProgress();
     void interpolateProgress();
 
+    // Python event loop thread
+    void runPythonLoop();
+
     // Poll events thread
     QTimer *pollEventsTimer = nullptr;
     bool pollInProgress = false;
