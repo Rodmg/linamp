@@ -112,6 +112,7 @@ class SpotifyPlayerAdapter(ServiceInterface):
         self.bus.export('/org/linamp/librespot', self)
         
     async def loop(self):
+        await self.setup()
         await self.bus.request_name('org.linamp.Librespot')
         await self.bus.wait_for_disconnect()
 
@@ -128,10 +129,6 @@ class SpotifyPlayerAdapter(ServiceInterface):
         print(f'Shuffle: {self.shuffle}')
         print(f'Track: {self.track}')
 
-    def setup_sync(self):
-        wait_for_loop()
-        loop.run_until_complete(self.setup())
-
     # Runs the asyncio event loop
     def run_loop(self):
         wait_for_loop()
@@ -140,5 +137,4 @@ class SpotifyPlayerAdapter(ServiceInterface):
 
 # TODO remove
 # adapter = SpotifyPlayerAdapter()
-# adapter.setup_sync()
 # adapter.run_loop()

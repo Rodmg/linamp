@@ -28,8 +28,6 @@ class SpotifyPlayer(BasePlayer):
 
         self.clear_message()
 
-        # self.player.setup_sync() TODO: should run this on a specific thread as it won't end (asyncio)
-
     def _display_connection_info(self):
         if self.player.connected:
             self.message = 'CONNNECTED'
@@ -60,7 +58,7 @@ class SpotifyPlayer(BasePlayer):
                 track.title,
                 track.duration,
                 '',
-                320,
+                320000,
                 44100
             )
         else:
