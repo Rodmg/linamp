@@ -16,6 +16,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosource-base)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosource-coordinator)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosourcebluetooth)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosourcepython)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosourcecd)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosourcefile)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/shared)
@@ -33,6 +34,8 @@ qt_add_executable(player WIN32 MACOSX_BUNDLE
     src/audiosourcebluetooth/audiosourcebluetooth.h
     src/audiosourcecd/audiosourcecd.cpp
     src/audiosourcecd/audiosourcecd.h
+    src/audiosourcepython/audiosourcepython.cpp
+    src/audiosourcepython/audiosourcepython.h
     src/audiosource-coordinator/audiosourcecoordinator.cpp
     src/audiosource-coordinator/audiosourcecoordinator.h
     src/audiosourcefile/audiosourcefile.cpp

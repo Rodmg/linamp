@@ -8,6 +8,7 @@
 #include "audiosourcecd.h"
 #include "audiosourcecoordinator.h"
 #include "audiosourcefile.h"
+#include "audiosourcepython.h"
 #include "controlbuttonswidget.h"
 #include "mainmenuview.h"
 #include "playerview.h"
@@ -32,6 +33,7 @@ public:
     AudioSourceFile *fileSource;
     AudioSourceBluetooth *btSource;
     AudioSourceCD *cdSource;
+    AudioSourcePython *spotSource;
 
 public slots:
     void showPlayer();

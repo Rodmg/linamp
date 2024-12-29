@@ -110,6 +110,8 @@ class SpotifyPlayerAdapter(ServiceInterface):
         """Initialize DBus"""
         self.bus = await MessageBus().connect()
         self.bus.export('/org/linamp/librespot', self)
+        
+    async def loop(self):
         await self.bus.request_name('org.linamp.Librespot')
         await self.bus.wait_for_disconnect()
 
@@ -130,7 +132,13 @@ class SpotifyPlayerAdapter(ServiceInterface):
         wait_for_loop()
         loop.run_until_complete(self.setup())
 
+    # Runs the asyncio event loop
+    def run_loop(self):
+        wait_for_loop()
+        loop.run_until_complete(self.loop())
+
 
 # TODO remove
 adapter = SpotifyPlayerAdapter()
 adapter.setup_sync()
+adapter.run_loop()

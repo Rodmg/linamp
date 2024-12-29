@@ -55,9 +55,11 @@ MainWindow::MainWindow(QWidget *parent)
     fileSource = new AudioSourceFile(this, m_playlistModel);
     btSource = new AudioSourceBluetooth(this);
     cdSource = new AudioSourceCD(this);
+    spotSource = new AudioSourcePython("linamp", "SpotifyPlayer", this);
     coordinator->addSource(fileSource, "FILE", true);
     coordinator->addSource(btSource, "BT", false);
     coordinator->addSource(cdSource, "CD", false);
+    coordinator->addSource(spotSource, "SPOT", false);
 
 
     // Connect events
