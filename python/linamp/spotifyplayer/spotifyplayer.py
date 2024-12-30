@@ -1,5 +1,5 @@
 from linamp.baseplayer import BasePlayer, PlayerStatus
-from linamp.btplayer.btadapter import BTPlayerAdapter, is_empty_player_track
+from linamp.spotifyplayer.spotifyadapter import SpotifyPlayerAdapter, is_empty_player_track
 
 EMPTY_TRACK_INFO = (
     0,
@@ -12,17 +12,19 @@ EMPTY_TRACK_INFO = (
     44100
 )
 
-class BTPlayer(BasePlayer):
+class SpotifyPlayer(BasePlayer):
 
     message: str
     show_message: bool
     message_timeout: int
 
-    player: BTPlayerAdapter
+    player: SpotifyPlayerAdapter
     track_info: tuple[int, str, str, str, int, str, int, int]
 
+    was_connected = False
+
     def __init__(self) -> None:
-        self.player = BTPlayerAdapter()
+        self.player = SpotifyPlayerAdapter()
         # tuple with format (tracknumber: int, artist, album, title, duration: int, codec: str, bitrate_bps: int, samplerate_hz: int)
         self.track_info = EMPTY_TRACK_INFO
 
@@ -30,7 +32,7 @@ class BTPlayer(BasePlayer):
 
     def _display_connection_info(self):
         if self.player.connected:
-            self.message = f'CONNNECTED TO: {self.player.device_alias}'
+            self.message = 'CONNNECTED'
             self.show_message = True
             self.message_timeout = 5000
         else:
@@ -38,10 +40,14 @@ class BTPlayer(BasePlayer):
             self.show_message = True
             self.message_timeout = 5000
 
+    def _not_supported(self):
+        self.message = 'NOT SUPPORTED'
+        self.show_message = True
+        self.message_timeout = 3000
+
     # -------- Control Functions --------
 
     def load(self) -> None:
-        self.player.find_player_sync()
         if self.player.connected:
             track = self.player.track
             if not track or is_empty_player_track(track):
@@ -53,8 +59,8 @@ class BTPlayer(BasePlayer):
                 track.album,
                 track.title,
                 track.duration,
-                self.player.get_codec_str(),
-                0, # No simple way to know bitrate from BT
+                '',
+                320000,
                 44100
             )
         else:
@@ -66,41 +72,37 @@ class BTPlayer(BasePlayer):
         self.clear_message()
 
     def play(self) -> None:
-        self.player.play()
+        self._not_supported()
 
     def stop(self) -> None:
-        self.player.stop()
+        self._not_supported()
 
     def pause(self) -> None:
-        self.player.pause()
+        self._not_supported()
 
     def next(self) -> None:
-        self.player.next()
+        self._not_supported()
 
     def prev(self) -> None:
-        self.player.previous()
+        self._not_supported()
 
     # Go to a specific time in a track while playing
     def seek(self, ms: int) -> None:
-        self.message = 'NOT SUPPORTED'
-        self.show_message = True
-        self.message_timeout = 3000
+        self._not_supported()
 
     def set_shuffle(self, enabled: bool) -> None:
-        self.player.set_shuffle(enabled)
+        self._not_supported()
 
     def set_repeat(self, enabled: bool) -> None:
-        self.player.set_repeat(enabled)
+        self._not_supported()
 
     def eject(self) -> None:
-        self.message = 'NOT SUPPORTED'
-        self.show_message = True
-        self.message_timeout = 3000
+        self._not_supported()
 
     # -------- Status Functions --------
 
     def get_postition(self) -> int:
-        return self.player.position
+        return self.player.get_postition()
 
     def get_shuffle(self) -> bool:
         return self.player.shuffle != 'off'
@@ -111,19 +113,15 @@ class BTPlayer(BasePlayer):
     # Returns the str representation of PlayerStatus enum
     def get_status(self) -> str:
         status = PlayerStatus.Idle
-        btstatus = self.player.status
-        if btstatus == 'playing':
+        spotstatus = self.player.status
+        if spotstatus == 'playing':
             status = PlayerStatus.Playing
-        if btstatus == 'stopped':
+        if spotstatus == 'stopped':
             status = PlayerStatus.Stopped
-        if btstatus == 'paused':
+        if spotstatus == 'paused':
             status = PlayerStatus.Paused
-        if btstatus == 'error':
+        if spotstatus == 'error':
             status = PlayerStatus.Error
-        if btstatus == 'forward-seek':
-            status = PlayerStatus.Loading
-        if btstatus == 'reverse-seek':
-            status = PlayerStatus.Loading
         return status.value
 
     def get_track_info(self) -> tuple[int, str, str, str, int, str, int, int]:
@@ -141,12 +139,14 @@ class BTPlayer(BasePlayer):
     # -------- Events to be called by a timer --------
 
     def poll_events(self) -> bool:
-        was_connected = self.player.connected
         self.load()
 
-        # Should tell UI to refresh if we are connected and were not connected before
-        return self.player.connected and not was_connected
+        should_request_focus = self.player.connected and not self.was_connected
+        self.was_connected = self.player.connected
 
-    # This will be run in a new thread when linamp starts
+        # Should tell UI to refresh if we are connected and were not connected before
+        return should_request_focus
+
+    # Runs the asyncio event loop, should be called from a new thread
     def run_loop(self):
-        self.player.setup_sync()
+        self.player.run_loop()

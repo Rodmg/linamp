@@ -112,5 +112,10 @@
         <file>assets/fb_folderIcon_selected.png</file>
         <file>assets/fb_musicIcon_selected.png</file>
         <file>assets/logoButton.png</file>
+        <file>assets/source-icon-bluetooth.png</file>
+        <file>assets/source-icon-cd.png</file>
+        <file>assets/source-icon-file.png</file>
+        <file>assets/source-icon-spotify.png</file>
+        <file>assets/menu-icon-x.png</file>
     </qresource>
 </RCC>

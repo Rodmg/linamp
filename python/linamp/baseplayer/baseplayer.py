@@ -79,7 +79,14 @@ class BasePlayer:
     def clear_message(self) -> None:
         pass
 
-    # -------- Polling functions to be called by a timer --------
+    # -------- Polling functions --------
 
+    # Called by the UI before calling getter to update the view (currently once each second)
+    # Return True if you want to request focus to this source
     def poll_events(self) -> bool:
         return False
+
+    # If your source requires asyncio or other event loop, run it here
+    # This will be run in a new thread when linamp starts
+    def run_loop(self):
+        pass

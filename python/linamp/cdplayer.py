@@ -401,7 +401,10 @@ class CDPlayer:
                     return False
             d.close()
         except Exception as e:
-            print(f"Problem finding a CD-ROM. {e}")
+            if self._detect_disc_insertion_is_first_call:
+                # Only print this once to avoid polluting the logs
+                print(f"Problem finding a CD-ROM. {e}")
+            self._detect_disc_insertion_is_first_call = False
 
         return False
 

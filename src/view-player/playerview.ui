@@ -1224,7 +1224,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QSlider" name="volumeSlider">
+             <widget class="LinampSlider" name="volumeSlider">
               <property name="minimumSize">
                <size>
                 <width>65</width>
@@ -1299,7 +1299,7 @@ QSlider::add-page:horizontal {
              </spacer>
             </item>
             <item>
-             <widget class="QSlider" name="balanceSlider">
+             <widget class="LinampSlider" name="balanceSlider">
               <property name="minimumSize">
                <size>
                 <width>38</width>
@@ -1592,6 +1592,11 @@ QSlider::groove:horizontal {
    <class>ScrollText</class>
    <extends>QLabel</extends>
    <header>scrolltext.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LinampSlider</class>
+   <extends>QSlider</extends>
+   <header>linampslider.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
