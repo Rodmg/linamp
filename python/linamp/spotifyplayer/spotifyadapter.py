@@ -108,7 +108,7 @@ class SpotifyPlayerAdapter(ServiceInterface):
     def get_postition(self) -> int:
         """Updates position if it hasn't been updated by an event"""
         now = time.time_ns()
-        then = self.last_updated_position()
+        then = self.last_updated_position
         diff_ms = (now - then)/1000000
         self._set_position(int(self.position + diff_ms))
         return self.position
