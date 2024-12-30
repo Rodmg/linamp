@@ -32,6 +32,8 @@ const unsigned int WINDOW_H = 117 * UI_SCALE;
 #include <Python.h>
 #define slots Q_SLOTS
 
+#define LINAMP_PY_MODULE "linamp"
+
 MainWindow::MainWindow(QWidget *parent)
      : QMainWindow{parent}
 {
@@ -53,9 +55,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     coordinator = new AudioSourceCoordinator(this, player);
     fileSource = new AudioSourceFile(this, m_playlistModel);
-    btSource = new AudioSourceBluetooth(this);
+    btSource = new AudioSourcePython(LINAMP_PY_MODULE, "BTPlayer", this);
     cdSource = new AudioSourceCD(this);
-    spotSource = new AudioSourcePython("linamp", "SpotifyPlayer", this);
+    spotSource = new AudioSourcePython(LINAMP_PY_MODULE, "SpotifyPlayer", this);
     coordinator->addSource(fileSource, "FILE", true);
     coordinator->addSource(btSource, "BT", false);
     coordinator->addSource(cdSource, "CD", false);

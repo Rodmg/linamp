@@ -97,11 +97,6 @@ class SpotifyPlayerAdapter(ServiceInterface):
 
             self.track = SpotifyTrackInfo(title, track_number, number_of_tracks, duration, album, artist)
 
-        
-        # TODO remove
-        self.print_state()
-
-
     def _set_position(self, pos: int):
         self.position = pos
         self.last_updated_position = time.time_ns()

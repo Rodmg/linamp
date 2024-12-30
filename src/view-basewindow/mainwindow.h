@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QStackedLayout>
 #include <QProcess>
-#include "audiosourcebluetooth.h"
 #include "audiosourcecd.h"
 #include "audiosourcecoordinator.h"
 #include "audiosourcefile.h"
@@ -31,7 +30,7 @@ public:
     MainMenuView *menu;
     AudioSourceCoordinator *coordinator;
     AudioSourceFile *fileSource;
-    AudioSourceBluetooth *btSource;
+    AudioSourcePython *btSource;
     AudioSourceCD *cdSource;
     AudioSourcePython *spotSource;
 

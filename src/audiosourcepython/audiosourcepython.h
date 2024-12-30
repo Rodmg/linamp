@@ -48,6 +48,7 @@ private:
 
     // Python event loop thread
     void runPythonLoop();
+    QFutureWatcher<void> pyLoopWatcher;
 
     // Poll events thread
     QTimer *pollEventsTimer = nullptr;

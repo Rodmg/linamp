@@ -15,7 +15,7 @@ AudioSourcePython::AudioSourcePython(QString module, QString className, QObject 
     Py_DECREF(pModuleName);
 
     if(playerModule == nullptr) {
-        qDebug() << "Couldn't load python module";
+        qDebug() << "AudioSourcePython: Couldn't load python module";
         PyGILState_Release(state);
         return;
     }
@@ -23,7 +23,7 @@ AudioSourcePython::AudioSourcePython(QString module, QString className, QObject 
     PyObject *PlayerClass = PyObject_GetAttrString(playerModule, className.toStdString().c_str());
 
     if(!PlayerClass || !PyCallable_Check(PlayerClass)) {
-        qDebug() << "Error getting Player Class";
+        qDebug() << "AudioSourcePython: Error getting Player Class";
         PyGILState_Release(state);
         return;
     }
@@ -59,7 +59,8 @@ AudioSourcePython::AudioSourcePython(QString module, QString className, QObject 
 
     PyGILState_Release(state);
 
-    QtConcurrent::run(&AudioSourcePython::runPythonLoop, this);
+    QFuture<void> pyLoopFuture = QtConcurrent::run(&AudioSourcePython::runPythonLoop, this);
+    pyLoopWatcher.setFuture(pyLoopFuture);
 }
 
 AudioSourcePython::~AudioSourcePython()
@@ -70,14 +71,14 @@ void AudioSourcePython::pollEvents()
 {
     if(pollResultWatcher.isRunning() || loadWatcher.isRunning()) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>>>>>>>>>>>>POLL Avoided";
+        qDebug() << "AudioSourcePython.pollEvents: Poll Avoided";
         #endif
         return;
     }
     if(pollInProgress) return;
     pollInProgress = true;
     #ifdef DEBUG_ASPY
-    qDebug() << "pollEvents: polling";
+    qDebug() << "AudioSourcePython.pollEvents: polling";
     #endif
     QFuture<bool> status = QtConcurrent::run(&AudioSourcePython::doPollEvents, this);
     pollResultWatcher.setFuture(status);
@@ -86,14 +87,14 @@ void AudioSourcePython::pollEvents()
 void AudioSourcePython::handlePollResult()
 {
     #ifdef DEBUG_ASPY
-    qDebug() << ">>>>POLL RESULT";
+    qDebug() << "AudioSourcePython.handlePollResult: Got Poll Result";
     #endif
 
     bool changeDetected = pollResultWatcher.result();
     if(changeDetected) {
         if(loadWatcher.isRunning()) {
             #ifdef DEBUG_ASPY
-            qDebug() << ">>>>>>>>>>>>>>>LOAD Avoided";
+            qDebug() << "AudioSourcePython.handlePollResult: Load Avoided";
             #endif
             return;
         }
@@ -120,11 +121,11 @@ bool AudioSourcePython::doPollEvents()
     if(pyChangeDetected != nullptr && PyBool_Check(pyChangeDetected)) {
         changeDetected = PyObject_IsTrue(pyChangeDetected);
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>Change detected?:" << changeDetected;
+        qDebug() << "AudioSourcePython.doPollEvents: Change detected?: " << changeDetected;
         #endif
     } else {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>pollEvents: Not a bool";
+        qDebug() << "AudioSourcePython.doPollEvents: pyChangeDetected not a bool";
         #endif
     }
     if(pyChangeDetected) Py_DECREF(pyChangeDetected);
@@ -265,11 +266,11 @@ void AudioSourcePython::handleOpen()
 {
     if(player == nullptr) return;
     #ifdef DEBUG_ASPY
-    qDebug() << "<<<<<EJECTING";
+    qDebug() << "AudioSourcePython.handleOpen: EJECTING";
     #endif
     if(ejectWatcher.isRunning()) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>>>>>>>>>>>>EJECT Avoided";
+        qDebug() << "AudioSourcePython.handleOpen: EJECT Avoided";
         #endif
         return;
     }
@@ -346,7 +347,7 @@ void AudioSourcePython::refreshStatus(bool shouldRefreshTrackInfo)
     PyGILState_Release(state);
 
     #ifdef DEBUG_ASPY
-    qDebug() << ">>>Status" << status;
+    qDebug() << "AudioSourcePython.refreshStatus: Status: " << status;
     #endif
 
     if(status == "idle") {
@@ -424,20 +425,20 @@ void AudioSourcePython::refreshStatus(bool shouldRefreshTrackInfo)
 void AudioSourcePython::refreshTrackInfo(bool force)
 {
     #ifdef DEBUG_ASPY
-    qDebug() << ">>>>>>>>>Refresh track info";
+    qDebug() << "AudioSourcePython.refreshTrackInfo: Refresh track info";
     #endif
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
     PyObject *pyTrackInfo = PyObject_CallMethod(player, "get_track_info", NULL);
     if(pyTrackInfo == nullptr) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>> Couldn't get track info";
+        qDebug() << "AudioSourcePython.refreshTrackInfo: Couldn't get track info";
         #endif
         PyErr_Print();
         PyGILState_Release(state);
         return;
     }
-    // format (tracknumber: int, artist, album, title, duration: int, is_data_track: bool)
+    // format (tracknumber: int, artist, album, title, duration: int, codec: str, bitrate: int, samplerate: int)
     PyObject *pyTrackNumber = PyTuple_GetItem(pyTrackInfo, 0);
     PyObject *pyArtist = PyTuple_GetItem(pyTrackInfo, 1);
     PyObject *pyAlbum = PyTuple_GetItem(pyTrackInfo, 2);
@@ -483,7 +484,7 @@ void AudioSourcePython::refreshTrackInfo(bool force)
     emit this->metadataChanged(metadata);
 
     #ifdef DEBUG_ASPY
-    qDebug() << ">>>>>>>>METADATA changed";
+    qDebug() << "AudioSourcePython.refreshTrackInfo: METADATA changed";
     #endif
 
     Py_DECREF(pyTrackInfo);
@@ -503,7 +504,7 @@ void AudioSourcePython::refreshProgress()
     PyObject *pyPosition = PyObject_CallMethod(player, "get_postition", NULL);
     if(pyPosition == nullptr) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>> Couldn't get track position";
+        qDebug() << "AudioSourcePython.refreshProgress: Couldn't get track position";
         #endif
         PyErr_Print();
         PyGILState_Release(state);
@@ -514,7 +515,7 @@ void AudioSourcePython::refreshProgress()
 
         int diff = (int)this->currentProgress - (int)position;
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>Time diff" << diff;
+        qDebug() << "AudioSourcePython.refreshProgress: Time diff: " << diff;
         #endif
 
         // Avoid small jumps caused by the python method latency
@@ -554,7 +555,7 @@ void AudioSourcePython::refreshMessage()
     PyObject *pyMessageData = PyObject_CallMethod(player, "get_message", NULL);
     if(pyMessageData == nullptr) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>> Couldn't get track message data";
+        qDebug() << "AudioSourcePython.refreshMessage: Couldn't get track message data";
         #endif
         PyErr_Print();
         PyGILState_Release(state);
@@ -587,7 +588,7 @@ void AudioSourcePython::runPythonLoop()
     PyObject *pyRunLoop = PyObject_CallMethod(player, "run_loop", NULL);
     if(pyRunLoop == nullptr) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>> Couldn't run Python event loop";
+        qDebug() << "AudioSourcePython.runPythonLoop: Couldn't run Python event loop";
         #endif
         PyErr_Print();
         PyGILState_Release(state);
