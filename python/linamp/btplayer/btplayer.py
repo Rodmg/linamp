@@ -28,8 +28,6 @@ class BTPlayer(BasePlayer):
 
         self.clear_message()
 
-        self.player.setup_sync()
-
     def _display_connection_info(self):
         if self.player.connected:
             self.message = f'CONNNECTED TO: {self.player.device_alias}'
@@ -148,3 +146,7 @@ class BTPlayer(BasePlayer):
 
         # Should tell UI to refresh if we are connected and were not connected before
         return self.player.connected and not was_connected
+
+    # This will be run in a new thread when linamp starts
+    def run_loop(self):
+        self.player.setup_sync()

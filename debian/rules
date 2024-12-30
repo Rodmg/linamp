@@ -8,10 +8,7 @@ override_dh_auto_install:
 	cp build/player debian/linamp/usr/bin/linamp-player
 
 	mkdir -p debian/linamp/usr/lib/python3/dist-packages/linamp
-	cp python/linamp/__init__.py debian/linamp/usr/lib/python3/dist-packages/linamp/__init__.py
-	cp python/linamp/cdplayer.py debian/linamp/usr/lib/python3/dist-packages/linamp/cdplayer.py
-	cp -r python/linamp/baseplayer debian/linamp/usr/lib/python3/dist-packages/linamp/baseplayer
-	cp -r python/linamp/btplayer debian/linamp/usr/lib/python3/dist-packages/linamp/btplayer
+	cp -r python/linamp debian/linamp/usr/lib/python3/dist-packages/linamp
 	
 	mkdir -p debian/linamp/usr/share/applications/
 	cp linamp.desktop debian/linamp/usr/share/applications/

@@ -159,6 +159,8 @@ class BTPlayerAdapter():
 
     async def find_player(self):
         """Identify current player and device"""
+        if not self.manager:
+            return
         objects = await self.manager.call_get_managed_objects()
 
         player_path = None
