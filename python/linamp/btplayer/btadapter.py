@@ -54,9 +54,6 @@ class BTTrackInfo():
         self.album = album
         self.artist = artist
 
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-
     def __str__(self):
         repr = '\n'
         repr = repr + f'  Title: {self.title}\n'
@@ -97,8 +94,11 @@ class BTPlayerAdapter():
     repeat = 'off'
     shuffle = 'off'
 
+    loop = None
+
     def __init__(self):
-        pass
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
 
     def _wait_for_loop(self) -> None:
         """Antipattern: waits the asyncio running loop to end"""
