@@ -73,12 +73,6 @@ class BTTrackInfo():
 
         return repr
 
-def wait_for_loop() -> None:
-    """Antipattern: waits the asyncio running loop to end"""
-    asyncio.set_event_loop(self.loop)
-    while self.loop.is_running():
-        pass
-
 def is_empty_player_track(track: BTTrackInfo) -> bool:
     return track.duration <= 0
 
@@ -105,6 +99,12 @@ class BTPlayerAdapter():
 
     def __init__(self):
         pass
+
+    def _wait_for_loop(self) -> None:
+        """Antipattern: waits the asyncio running loop to end"""
+        asyncio.set_event_loop(self.loop)
+        while self.loop.is_running():
+            pass
 
     async def _get_dbus_object(self, path):
         introspection = await self.bus.introspect(SERVICE_NAME, path)
@@ -228,54 +228,54 @@ class BTPlayerAdapter():
             self.codec_configuration = None
 
     def setup_sync(self):
-        wait_for_loop()
+        self._wait_for_loop()
         self.loop.run_until_complete(self.setup())
 
     def find_player_sync(self):
-        wait_for_loop()
+        self._wait_for_loop()
         self.loop.run_until_complete(self.find_player())
 
     def play(self):
         if not self.player_interface:
             return
-        wait_for_loop()
+        self._wait_for_loop()
         self.loop.run_until_complete(self.player_interface.call_play())
 
     def pause(self):
         if not self.player_interface:
             return
-        wait_for_loop()
+        self._wait_for_loop()
         self.loop.run_until_complete(self.player_interface.call_pause())
 
     def stop(self):
         if not self.player_interface:
             return
-        wait_for_loop()
+        self._wait_for_loop()
         self.loop.run_until_complete(self.player_interface.call_stop())
 
     def next(self):
         if not self.player_interface:
             return
-        wait_for_loop()
+        self._wait_for_loop()
         self.loop.run_until_complete(self.player_interface.call_next())
 
     def previous(self):
         if not self.player_interface:
             return
-        wait_for_loop()
+        self._wait_for_loop()
         self.loop.run_until_complete(self.player_interface.call_previous())
 
     def set_shuffle(self, enabled: bool) -> None:
         if not self.player_interface:
             return
-        wait_for_loop()
+        self._wait_for_loop()
         self.shuffle = 'alltracks' if enabled else 'off'
         self.loop.run_until_complete(self.player_interface.set_shuffle(self.shuffle))
 
     def set_repeat(self, enabled: bool) -> None:
         if not self.player_interface:
             return
-        wait_for_loop()
+        self._wait_for_loop()
         self.repeat = 'alltracks' if enabled else 'off'
         self.loop.run_until_complete(self.player_interface.set_repeat(self.repeat))
 
