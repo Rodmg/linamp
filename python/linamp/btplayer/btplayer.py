@@ -84,7 +84,7 @@ class BTPlayer(BasePlayer):
 
     # Go to a specific time in a track while playing
     def seek(self, ms: int) -> None:
-        self.message = "NOT SUPPORTED"
+        self.message = 'NOT SUPPORTED'
         self.show_message = True
         self.message_timeout = 3000
 
@@ -95,7 +95,7 @@ class BTPlayer(BasePlayer):
         self.player.set_repeat(enabled)
 
     def eject(self) -> None:
-        self.message = "NOT SUPPORTED"
+        self.message = 'NOT SUPPORTED'
         self.show_message = True
         self.message_timeout = 3000
 
@@ -105,26 +105,26 @@ class BTPlayer(BasePlayer):
         return self.player.position
 
     def get_shuffle(self) -> bool:
-        return self.player.shuffle != "off"
+        return self.player.shuffle != 'off'
 
     def get_repeat(self) -> bool:
-        return self.player.repeat != "off"
+        return self.player.repeat != 'off'
 
     # Returns the str representation of PlayerStatus enum
     def get_status(self) -> str:
         status = PlayerStatus.Idle
         btstatus = self.player.status
-        if btstatus == "playing":
+        if btstatus == 'playing':
             status = PlayerStatus.Playing
-        if btstatus == "stopped":
+        if btstatus == 'stopped':
             status = PlayerStatus.Stopped
-        if btstatus == "paused":
+        if btstatus == 'paused':
             status = PlayerStatus.Paused
-        if btstatus == "error":
+        if btstatus == 'error':
             status = PlayerStatus.Error
-        if btstatus == "forward-seek":
+        if btstatus == 'forward-seek':
             status = PlayerStatus.Loading
-        if btstatus == "reverse-seek":
+        if btstatus == 'reverse-seek':
             status = PlayerStatus.Loading
         return status.value
 

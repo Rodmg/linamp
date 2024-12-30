@@ -1,9 +1,9 @@
 import asyncio
+import time
 
 from dbus_next.aio import MessageBus
 from dbus_next.service import ServiceInterface, method
 
-SERVICE_NAME = 'org.freedesktop.Librespot.Event'
 DBUS_INTERFACE = 'org.linamp.LibrespotInterface'
 
 class SpotifyTrackInfo():
@@ -42,6 +42,7 @@ class SpotifyPlayerAdapter(ServiceInterface):
     status = 'stopped'
     track = SpotifyTrackInfo()
     position = 0
+    last_updated_position = None # time
     repeat = 'off'
     shuffle = 'off'
 
@@ -57,7 +58,7 @@ class SpotifyPlayerAdapter(ServiceInterface):
             self.connected = False
             self.status = 'stopped'
             self.track = SpotifyTrackInfo()
-            self.position = 0
+            self._set_position(0)
             self.repeat = 'off'
             self.shuffle = 'off'
         if event == 'shuffle_changed':
@@ -71,10 +72,10 @@ class SpotifyPlayerAdapter(ServiceInterface):
         if event == 'playing' or event == 'paused':
             self.connected = True
             self.status = event
-            self.position = int(data.get('position_ms', '0'))
+            self._set_position(int(data.get('position_ms', '0')))
         if event == 'seeked' or event == 'position_correction':
             self.connected = True
-            self.position = int(data.get('position_ms', '0'))
+            self._set_position(int(data.get('position_ms', '0')))
         if event == 'track_changed':
             self.connected = True
             item_type = data.get('item_type')
@@ -98,6 +99,19 @@ class SpotifyPlayerAdapter(ServiceInterface):
         
         # TODO remove
         self.print_state()
+
+
+    def _set_position(self, pos: int):
+        self.position = pos
+        self.last_updated_position = time.time_ns()
+
+    def get_postition(self) -> int:
+        """Updates position if it hasn't been updated by an event"""
+        now = time.time_ns()
+        then = self.last_updated_position()
+        diff_ms = (now - then)/1000000
+        self._set_position(int(self.position + diff_ms))
+        return self.position
 
     async def setup(self):
         """Initialize DBus"""
@@ -127,8 +141,3 @@ class SpotifyPlayerAdapter(ServiceInterface):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         loop.run_until_complete(self.loop())
-
-
-# TODO remove
-# adapter = SpotifyPlayerAdapter()
-# adapter.run_loop()

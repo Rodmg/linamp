@@ -100,7 +100,7 @@ class SpotifyPlayer(BasePlayer):
     # -------- Status Functions --------
 
     def get_postition(self) -> int:
-        return self.player.position
+        return self.player.get_postition()
 
     def get_shuffle(self) -> bool:
         return self.player.shuffle != 'off'
@@ -143,5 +143,6 @@ class SpotifyPlayer(BasePlayer):
         # Should tell UI to refresh if we are connected and were not connected before
         return self.player.connected and not was_connected
 
+    # Runs the asyncio event loop, should be called from a new thread
     def run_loop(self):
         self.player.run_loop()
