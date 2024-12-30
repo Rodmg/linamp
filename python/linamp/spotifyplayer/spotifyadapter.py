@@ -6,8 +6,6 @@ from dbus_next.service import ServiceInterface, method
 SERVICE_NAME = 'org.freedesktop.Librespot.Event'
 DBUS_INTERFACE = 'org.linamp.LibrespotInterface'
 
-loop = asyncio.get_event_loop()
-
 class SpotifyTrackInfo():
     def __init__(self, title: str = '', track_number: int = 0, number_of_tracks: int = 0, duration: int = 0, album: str = '', artist: str = ''):
         self.title = title
@@ -32,11 +30,6 @@ class SpotifyTrackInfo():
         repr = repr + f'  Number of Tracks: {self.number_of_tracks}\n'
 
         return repr
-
-def wait_for_loop() -> None:
-    """Antipattern: waits the asyncio running loop to end"""
-    while loop.is_running():
-        pass
 
 def is_empty_player_track(track: SpotifyTrackInfo) -> bool:
     return track.duration <= 0
@@ -129,9 +122,10 @@ class SpotifyPlayerAdapter(ServiceInterface):
         print(f'Shuffle: {self.shuffle}')
         print(f'Track: {self.track}')
 
-    # Runs the asyncio event loop
+    # Runs the asyncio event loop, should be called from a new thread
     def run_loop(self):
-        wait_for_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         loop.run_until_complete(self.loop())
 
 
