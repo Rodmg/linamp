@@ -35,6 +35,11 @@ def is_empty_player_track(track: SpotifyTrackInfo) -> bool:
     return track.duration <= 0
 
 
+# Posible values for status:
+# - stopped
+# - playing
+# - paused
+
 class SpotifyPlayerAdapter(ServiceInterface):
     bus = None
 
@@ -62,11 +67,9 @@ class SpotifyPlayerAdapter(ServiceInterface):
             self.repeat = 'off'
             self.shuffle = 'off'
         if event == 'shuffle_changed':
-            self.connected = True
             shuffle_str = data.get('shuffle', '')
             self.shuffle = 'on' if shuffle_str == 'true' else 'off'
         if event == 'repeat_changed':
-            self.connected = True
             repeat_str = data.get('repeat', '')
             self.repeat = 'on' if repeat_str == 'true' else 'off'
         if event == 'playing' or event == 'paused':
@@ -74,10 +77,8 @@ class SpotifyPlayerAdapter(ServiceInterface):
             self.status = event
             self._set_position(int(data.get('position_ms', '0')))
         if event == 'seeked' or event == 'position_correction':
-            self.connected = True
             self._set_position(int(data.get('position_ms', '0')))
         if event == 'track_changed':
-            self.connected = True
             item_type = data.get('item_type')
 
             title = data.get('name', '')
@@ -106,11 +107,13 @@ class SpotifyPlayerAdapter(ServiceInterface):
         self.last_updated_position = time.time_ns()
 
     def get_postition(self) -> int:
-        """Updates position if it hasn't been updated by an event"""
+        """Updates position when playing if it hasn't been updated by an event"""
         now = time.time_ns()
         then = self.last_updated_position
-        diff_ms = (now - then)/1000000
-        self._set_position(int(self.position + diff_ms))
+        if self.status == 'playing' and then is not None:
+            diff_ms = (now - then)/1000000
+            self._set_position(int(self.position + diff_ms))
+        
         return self.position
 
     async def setup(self):
