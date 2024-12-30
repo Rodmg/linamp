@@ -1,3 +1,12 @@
+linamp (1.4.0) bookworm; urgency=medium
+
+  * Feature: Spotify Source, use Linamp as a Spotify Connect receiver
+  * UI: New design for Sources menu
+  * UI: Volume and balance sliders background color changes according to value
+  * Refactor: Unify Bluetooth and Spotify sources code as generic audiosourcepython
+
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Mon, 30 Dec 2024 12:04:00 -0600
+
 linamp (1.3.0) bookworm; urgency=medium
 
   * Feature: Bluetooth Source, use Linamp as a Bluetooth audio receiver

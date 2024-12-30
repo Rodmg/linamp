@@ -1,5 +1,5 @@
-#ifndef AUDIOSOURCEBLUETOOTH_H
-#define AUDIOSOURCEBLUETOOTH_H
+#ifndef AUDIOSOURCEPYTHON_H
+#define AUDIOSOURCEPYTHON_H
 
 #define PY_SSIZE_T_CLEAN
 #undef slots
@@ -12,12 +12,12 @@
 
 #include "audiosourcewspectrumcapture.h"
 
-class AudioSourceBluetooth : public AudioSourceWSpectrumCapture
+class AudioSourcePython : public AudioSourceWSpectrumCapture
 {
     Q_OBJECT
 public:
-    explicit AudioSourceBluetooth(QObject *parent = nullptr);
-    ~AudioSourceBluetooth();
+    explicit AudioSourcePython(QString module, QString className, QObject *parent = nullptr);
+    ~AudioSourcePython();
 
 public slots:
     void activate();
@@ -45,6 +45,10 @@ private:
     quint32 currentProgress = 0;
     void refreshProgress();
     void interpolateProgress();
+
+    // Python event loop thread
+    void runPythonLoop();
+    QFutureWatcher<void> pyLoopWatcher;
 
     // Poll events thread
     QTimer *pollEventsTimer = nullptr;
@@ -75,4 +79,4 @@ private:
     QMediaMetaData currentMetadata;
 };
 
-#endif // AUDIOSOURCEBLUETOOTH_H
+#endif // AUDIOSOURCEPYTHON_H

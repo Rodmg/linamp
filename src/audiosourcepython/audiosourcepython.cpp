@@ -1,30 +1,29 @@
-#include "audiosourcebluetooth.h"
+#include "audiosourcepython.h"
 
 //#define DEBUG_ASPY
 
 #define ASPY_PROGRESS_INTERPOLATION_TIME 100
 
-AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
+AudioSourcePython::AudioSourcePython(QString module, QString className, QObject *parent)
     : AudioSourceWSpectrumCapture{parent}
 {
     auto state = PyGILState_Ensure();
 
-    // Import 'linamp' python module, see python folder in the root of this repo
-    PyObject *pModuleName = PyUnicode_DecodeFSDefault("linamp");
-    //PyObject *pModuleName = PyUnicode_DecodeFSDefault("linamp-mock");
+    // Import specified python module
+    PyObject *pModuleName = PyUnicode_DecodeFSDefault(module.toStdString().c_str());
     playerModule = PyImport_Import(pModuleName);
     Py_DECREF(pModuleName);
 
     if(playerModule == nullptr) {
-        qDebug() << "Couldn't load python module";
+        qDebug() << "AudioSourcePython: Couldn't load python module";
         PyGILState_Release(state);
         return;
     }
 
-    PyObject *PlayerClass = PyObject_GetAttrString(playerModule, "BTPlayer");
+    PyObject *PlayerClass = PyObject_GetAttrString(playerModule, className.toStdString().c_str());
 
     if(!PlayerClass || !PyCallable_Check(PlayerClass)) {
-        qDebug() << "Error getting Player Class";
+        qDebug() << "AudioSourcePython: Error getting Player Class";
         PyGILState_Release(state);
         return;
     }
@@ -37,67 +36,70 @@ AudioSourceBluetooth::AudioSourceBluetooth(QObject *parent)
     // Timer to poll for events and load
     pollEventsTimer = new QTimer(this);
     pollEventsTimer->setInterval(1000);
-    connect(pollEventsTimer, &QTimer::timeout, this, &AudioSourceBluetooth::pollEvents);
+    connect(pollEventsTimer, &QTimer::timeout, this, &AudioSourcePython::pollEvents);
     pollEventsTimer->start();
 
     // Watch for async events poll results
-    connect(&pollResultWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceBluetooth::handlePollResult);
+    connect(&pollResultWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourcePython::handlePollResult);
 
     // Handle load end
-    connect(&loadWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceBluetooth::handleLoadEnd);
+    connect(&loadWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourcePython::handleLoadEnd);
 
     // Handle finish ejecting
-    connect(&ejectWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceBluetooth::handleEjectEnd);
+    connect(&ejectWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourcePython::handleEjectEnd);
 
 
     // Track progress with timer
     progressRefreshTimer = new QTimer(this);
     progressRefreshTimer->setInterval(1000);
-    connect(progressRefreshTimer, &QTimer::timeout, this, &AudioSourceBluetooth::refreshProgress);
+    connect(progressRefreshTimer, &QTimer::timeout, this, &AudioSourcePython::refreshProgress);
     progressInterpolateTimer = new QTimer(this);
     progressInterpolateTimer->setInterval(ASPY_PROGRESS_INTERPOLATION_TIME);
-    connect(progressInterpolateTimer, &QTimer::timeout, this, &AudioSourceBluetooth::interpolateProgress);
+    connect(progressInterpolateTimer, &QTimer::timeout, this, &AudioSourcePython::interpolateProgress);
 
     PyGILState_Release(state);
+
+    QFuture<void> pyLoopFuture = QtConcurrent::run(&AudioSourcePython::runPythonLoop, this);
+    pyLoopWatcher.setFuture(pyLoopFuture);
 }
 
-AudioSourceBluetooth::~AudioSourceBluetooth()
+AudioSourcePython::~AudioSourcePython()
 {
 }
 
-void AudioSourceBluetooth::pollEvents()
+void AudioSourcePython::pollEvents()
 {
     if(pollResultWatcher.isRunning() || loadWatcher.isRunning()) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>>>>>>>>>>>>POLL Avoided";
+        qDebug() << "AudioSourcePython.pollEvents: Poll Avoided";
         #endif
         return;
     }
     if(pollInProgress) return;
     pollInProgress = true;
     #ifdef DEBUG_ASPY
-    qDebug() << "pollEvents: polling";
+    qDebug() << "AudioSourcePython.pollEvents: polling";
     #endif
-    QFuture<bool> status = QtConcurrent::run(&AudioSourceBluetooth::doPollEvents, this);
+    QFuture<bool> status = QtConcurrent::run(&AudioSourcePython::doPollEvents, this);
     pollResultWatcher.setFuture(status);
 }
 
-void AudioSourceBluetooth::handlePollResult()
+void AudioSourcePython::handlePollResult()
 {
     #ifdef DEBUG_ASPY
-    qDebug() << ">>>>POLL RESULT";
+    qDebug() << "AudioSourcePython.handlePollResult: Got Poll Result";
     #endif
 
     bool changeDetected = pollResultWatcher.result();
     if(changeDetected) {
         if(loadWatcher.isRunning()) {
             #ifdef DEBUG_ASPY
-            qDebug() << ">>>>>>>>>>>>>>>LOAD Avoided";
+            qDebug() << "AudioSourcePython.handlePollResult: Load Avoided";
             #endif
             return;
         }
         emit this->requestActivation(); // Request audiosource coordinator to select us
-        QFuture<void> status = QtConcurrent::run(&AudioSourceBluetooth::doLoad, this);
+        QFuture<void> status = QtConcurrent::run(&AudioSourcePython::doLoad, this);
         loadWatcher.setFuture(status);
     } else {
         refreshStatus();
@@ -108,7 +110,7 @@ void AudioSourceBluetooth::handlePollResult()
     this->refreshMessage();
 }
 
-bool AudioSourceBluetooth::doPollEvents()
+bool AudioSourcePython::doPollEvents()
 {
     bool changeDetected = false;
     if(player == nullptr) return changeDetected;
@@ -119,11 +121,11 @@ bool AudioSourceBluetooth::doPollEvents()
     if(pyChangeDetected != nullptr && PyBool_Check(pyChangeDetected)) {
         changeDetected = PyObject_IsTrue(pyChangeDetected);
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>Change detected?:" << changeDetected;
+        qDebug() << "AudioSourcePython.doPollEvents: Change detected?: " << changeDetected;
         #endif
     } else {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>pollEvents: Not a bool";
+        qDebug() << "AudioSourcePython.doPollEvents: pyChangeDetected not a bool";
         #endif
     }
     if(pyChangeDetected) Py_DECREF(pyChangeDetected);
@@ -131,28 +133,28 @@ bool AudioSourceBluetooth::doPollEvents()
     return changeDetected;
 }
 
-void AudioSourceBluetooth::doLoad()
+void AudioSourcePython::doLoad()
 {
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(player, "load", NULL);
     PyGILState_Release(state);
 }
 
-void AudioSourceBluetooth::handleLoadEnd()
+void AudioSourcePython::handleLoadEnd()
 {
     emit this->messageClear();
     refreshStatus();
     pollInProgress = false;
 }
 
-void AudioSourceBluetooth::doEject()
+void AudioSourcePython::doEject()
 {
     auto state = PyGILState_Ensure();
     PyObject_CallMethod(player, "eject", NULL);
     PyGILState_Release(state);
 }
 
-void AudioSourceBluetooth::handleEjectEnd()
+void AudioSourcePython::handleEjectEnd()
 {
     emit this->messageClear();
     // Empty metadata
@@ -162,7 +164,7 @@ void AudioSourceBluetooth::handleEjectEnd()
 }
 
 
-void AudioSourceBluetooth::activate()
+void AudioSourcePython::activate()
 {
     emit playbackStateChanged(MediaPlayer::StoppedState);
     emit positionChanged(0);
@@ -180,7 +182,7 @@ void AudioSourceBluetooth::activate()
     isActive = true;
 }
 
-void AudioSourceBluetooth::deactivate()
+void AudioSourcePython::deactivate()
 {
     isActive = false;
 
@@ -195,12 +197,12 @@ void AudioSourceBluetooth::deactivate()
 
 }
 
-void AudioSourceBluetooth::handlePl()
+void AudioSourcePython::handlePl()
 {
     emit plEnabledChanged(false);
 }
 
-void AudioSourceBluetooth::handlePrevious()
+void AudioSourcePython::handlePrevious()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
@@ -212,7 +214,7 @@ void AudioSourceBluetooth::handlePrevious()
     refreshStatus();
 }
 
-void AudioSourceBluetooth::handlePlay()
+void AudioSourcePython::handlePlay()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
@@ -224,7 +226,7 @@ void AudioSourceBluetooth::handlePlay()
     refreshStatus();
 }
 
-void AudioSourceBluetooth::handlePause()
+void AudioSourcePython::handlePause()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
@@ -236,7 +238,7 @@ void AudioSourceBluetooth::handlePause()
     refreshStatus();
 }
 
-void AudioSourceBluetooth::handleStop()
+void AudioSourcePython::handleStop()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
@@ -248,7 +250,7 @@ void AudioSourceBluetooth::handleStop()
     refreshStatus();
 }
 
-void AudioSourceBluetooth::handleNext()
+void AudioSourcePython::handleNext()
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
@@ -260,23 +262,23 @@ void AudioSourceBluetooth::handleNext()
     refreshStatus();
 }
 
-void AudioSourceBluetooth::handleOpen()
+void AudioSourcePython::handleOpen()
 {
     if(player == nullptr) return;
     #ifdef DEBUG_ASPY
-    qDebug() << "<<<<<EJECTING";
+    qDebug() << "AudioSourcePython.handleOpen: EJECTING";
     #endif
     if(ejectWatcher.isRunning()) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>>>>>>>>>>>>EJECT Avoided";
+        qDebug() << "AudioSourcePython.handleOpen: EJECT Avoided";
         #endif
         return;
     }
-    QFuture<void> status = QtConcurrent::run(&AudioSourceBluetooth::doEject, this);
+    QFuture<void> status = QtConcurrent::run(&AudioSourcePython::doEject, this);
     ejectWatcher.setFuture(status);
 }
 
-void AudioSourceBluetooth::handleShuffle()
+void AudioSourcePython::handleShuffle()
 {
     if(player == nullptr) return;
 
@@ -289,7 +291,7 @@ void AudioSourceBluetooth::handleShuffle()
     refreshStatus(false);
 }
 
-void AudioSourceBluetooth::handleRepeat()
+void AudioSourcePython::handleRepeat()
 {
     if(player == nullptr) return;
 
@@ -302,7 +304,7 @@ void AudioSourceBluetooth::handleRepeat()
     refreshStatus(false);
 }
 
-void AudioSourceBluetooth::handleSeek(int mseconds)
+void AudioSourcePython::handleSeek(int mseconds)
 {
     if(player == nullptr) return;
 
@@ -313,7 +315,7 @@ void AudioSourceBluetooth::handleSeek(int mseconds)
     refreshStatus(false);
 }
 
-void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
+void AudioSourcePython::refreshStatus(bool shouldRefreshTrackInfo)
 {
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
@@ -345,7 +347,7 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
     PyGILState_Release(state);
 
     #ifdef DEBUG_ASPY
-    qDebug() << ">>>Status" << status;
+    qDebug() << "AudioSourcePython.refreshStatus: Status: " << status;
     #endif
 
     if(status == "idle") {
@@ -420,23 +422,23 @@ void AudioSourceBluetooth::refreshStatus(bool shouldRefreshTrackInfo)
     }
 }
 
-void AudioSourceBluetooth::refreshTrackInfo(bool force)
+void AudioSourcePython::refreshTrackInfo(bool force)
 {
     #ifdef DEBUG_ASPY
-    qDebug() << ">>>>>>>>>Refresh track info";
+    qDebug() << "AudioSourcePython.refreshTrackInfo: Refresh track info";
     #endif
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
     PyObject *pyTrackInfo = PyObject_CallMethod(player, "get_track_info", NULL);
     if(pyTrackInfo == nullptr) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>> Couldn't get track info";
+        qDebug() << "AudioSourcePython.refreshTrackInfo: Couldn't get track info";
         #endif
         PyErr_Print();
         PyGILState_Release(state);
         return;
     }
-    // format (tracknumber: int, artist, album, title, duration: int, is_data_track: bool)
+    // format (tracknumber: int, artist, album, title, duration: int, codec: str, bitrate: int, samplerate: int)
     PyObject *pyTrackNumber = PyTuple_GetItem(pyTrackInfo, 0);
     PyObject *pyArtist = PyTuple_GetItem(pyTrackInfo, 1);
     PyObject *pyAlbum = PyTuple_GetItem(pyTrackInfo, 2);
@@ -482,7 +484,7 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
     emit this->metadataChanged(metadata);
 
     #ifdef DEBUG_ASPY
-    qDebug() << ">>>>>>>>METADATA changed";
+    qDebug() << "AudioSourcePython.refreshTrackInfo: METADATA changed";
     #endif
 
     Py_DECREF(pyTrackInfo);
@@ -491,7 +493,7 @@ void AudioSourceBluetooth::refreshTrackInfo(bool force)
 
 }
 
-void AudioSourceBluetooth::refreshProgress()
+void AudioSourcePython::refreshProgress()
 {
     if(player == nullptr) return;
 
@@ -502,7 +504,7 @@ void AudioSourceBluetooth::refreshProgress()
     PyObject *pyPosition = PyObject_CallMethod(player, "get_postition", NULL);
     if(pyPosition == nullptr) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>> Couldn't get track position";
+        qDebug() << "AudioSourcePython.refreshProgress: Couldn't get track position";
         #endif
         PyErr_Print();
         PyGILState_Release(state);
@@ -513,7 +515,7 @@ void AudioSourceBluetooth::refreshProgress()
 
         int diff = (int)this->currentProgress - (int)position;
         #ifdef DEBUG_ASPY
-        qDebug() << ">>>>Time diff" << diff;
+        qDebug() << "AudioSourcePython.refreshProgress: Time diff: " << diff;
         #endif
 
         // Avoid small jumps caused by the python method latency
@@ -527,7 +529,7 @@ void AudioSourceBluetooth::refreshProgress()
     PyGILState_Release(state);
 }
 
-void AudioSourceBluetooth::interpolateProgress()
+void AudioSourcePython::interpolateProgress()
 {
     if(!progressInterpolateElapsedTimer.isValid()) {
         // Handle first time
@@ -545,19 +547,15 @@ void AudioSourceBluetooth::interpolateProgress()
     emit this->positionChanged(this->currentProgress);
 }
 
-void AudioSourceBluetooth::refreshMessage()
+void AudioSourcePython::refreshMessage()
 {
-    if(player == nullptr){
-        qDebug() << "<<<player is null";
-
-    }
     if(player == nullptr) return;
     auto state = PyGILState_Ensure();
 
     PyObject *pyMessageData = PyObject_CallMethod(player, "get_message", NULL);
     if(pyMessageData == nullptr) {
         #ifdef DEBUG_ASPY
-        qDebug() << ">>> Couldn't get track message data";
+        qDebug() << "AudioSourcePython.refreshMessage: Couldn't get track message data";
         #endif
         PyErr_Print();
         PyGILState_Release(state);
@@ -579,5 +577,24 @@ void AudioSourceBluetooth::refreshMessage()
     }
 
     Py_DECREF(pyMessageData);
+    PyGILState_Release(state);
+}
+
+void AudioSourcePython::runPythonLoop()
+{
+    if(player == nullptr) return;
+    auto state = PyGILState_Ensure();
+
+    PyObject *pyRunLoop = PyObject_CallMethod(player, "run_loop", NULL);
+    if(pyRunLoop == nullptr) {
+        #ifdef DEBUG_ASPY
+        qDebug() << "AudioSourcePython.runPythonLoop: Couldn't run Python event loop";
+        #endif
+        PyErr_Print();
+        PyGILState_Release(state);
+        return;
+    }
+
+    Py_DECREF(pyRunLoop);
     PyGILState_Release(state);
 }
