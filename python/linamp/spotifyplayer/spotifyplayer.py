@@ -21,6 +21,8 @@ class SpotifyPlayer(BasePlayer):
     player: SpotifyPlayerAdapter
     track_info: tuple[int, str, str, str, int, str, int, int]
 
+    was_connected = False
+
     def __init__(self) -> None:
         self.player = SpotifyPlayerAdapter()
         # tuple with format (tracknumber: int, artist, album, title, duration: int, codec: str, bitrate_bps: int, samplerate_hz: int)
@@ -137,11 +139,13 @@ class SpotifyPlayer(BasePlayer):
     # -------- Events to be called by a timer --------
 
     def poll_events(self) -> bool:
-        was_connected = self.player.connected
         self.load()
 
+        should_request_focus = self.player.connected and not self.was_connected
+        self.was_connected = self.player.connected
+
         # Should tell UI to refresh if we are connected and were not connected before
-        return self.player.connected and not was_connected
+        return should_request_focus
 
     # Runs the asyncio event loop, should be called from a new thread
     def run_loop(self):
