@@ -1,5 +1,8 @@
 name: Build Deb package
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
   push:
@@ -7,44 +10,141 @@ on:
     tags:
       - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
+env:
+  EXTRA_BUILD_DEPS: dh-python dh-cmake
+
 jobs:
-  build-x86_64:
-    runs-on: ubuntu-22.04
+  build-x86_64-bookworm:
+    runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+      - name: Set package version for bookworm
+        run: |
+          sed -i -E '1 s/\(([^)]+)\) [^;]+;/\(\1~bookworm1\) bookworm;/' debian/changelog
       - name: Build Debian packages
         uses: jtdor/build-deb-action@v1.8.0
         with:
           # Name of a Docker image or path of a Dockerfile to use for the build container
           docker-image: debian:bookworm-slim
           # Extra packages to be installed as build dependencies
-          extra-build-deps: dh-python dh-cmake
+          extra-build-deps: ${{ env.EXTRA_BUILD_DEPS }}
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: build-x86_64
+          name: linamp-x86_64-bookworm
           path: debian/artifacts/*
 
-  build-arm64:
-    runs-on: ubuntu-22.04
+  build-x86_64-trixie:
+    runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - uses: actions/checkout@v6
+      - name: Set package version for trixie
+        run: |
+          sed -i -E '1 s/\(([^)]+)\) [^;]+;/\(\1~trixie1\) trixie;/' debian/changelog
+      - name: Build Debian packages
+        uses: jtdor/build-deb-action@v1.8.0
         with:
-          platforms: arm64
+          # Name of a Docker image or path of a Dockerfile to use for the build container
+          docker-image: debian:trixie-slim
+          # Extra packages to be installed as build dependencies
+          extra-build-deps: ${{ env.EXTRA_BUILD_DEPS }}
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: linamp-x86_64-trixie
+          path: debian/artifacts/*
+
+  build-arm64-bookworm:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set package version for bookworm
+        run: |
+          sed -i -E '1 s/\(([^)]+)\) [^;]+;/\(\1~bookworm1\) bookworm;/' debian/changelog
       - name: Build Debian packages
         uses: jtdor/build-deb-action@v1.8.0
         with:
           # Name of a Docker image or path of a Dockerfile to use for the build container
           docker-image: debian:bookworm-slim
           # Extra packages to be installed as build dependencies
-          extra-build-deps: dh-python dh-cmake
-          extra-docker-args: --platform linux/arm64
+          extra-build-deps: ${{ env.EXTRA_BUILD_DEPS }}
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: build-arm64
+          name: linamp-arm64-bookworm
           path: debian/artifacts/*
+
+  build-arm64-trixie:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set package version for trixie
+        run: |
+          sed -i -E '1 s/\(([^)]+)\) [^;]+;/\(\1~trixie1\) trixie;/' debian/changelog
+      - name: Build Debian packages
+        uses: jtdor/build-deb-action@v1.8.0
+        with:
+          # Name of a Docker image or path of a Dockerfile to use for the build container
+          docker-image: debian:trixie-slim
+          # Extra packages to be installed as build dependencies
+          extra-build-deps: ${{ env.EXTRA_BUILD_DEPS }}
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: linamp-arm64-trixie
+          path: debian/artifacts/*
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - build-x86_64-bookworm
+      - build-x86_64-trixie
+      - build-arm64-bookworm
+      - build-arm64-trixie
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: release-artifacts
+
+      - name: Verify and prepare release files
+        run: |
+          set -eu
+          expected_artifacts=4
+          actual_artifacts=$(find release-artifacts -mindepth 1 -maxdepth 1 -type d | wc -l)
+          if [ "$actual_artifacts" -ne "$expected_artifacts" ]; then
+            echo "Expected $expected_artifacts artifact directories, got $actual_artifacts"
+            exit 1
+          fi
+
+          mkdir -p release
+          for dir in release-artifacts/linamp-*; do
+            artifact_name=$(basename "$dir")
+            arch=$(echo "$artifact_name" | cut -d'-' -f2)
+            dist=$(echo "$artifact_name" | cut -d'-' -f3)
+
+            for deb in "$dir"/*.deb; do
+              [ -e "$deb" ] || continue
+              deb_name=$(basename "$deb" .deb)
+              cp "$deb" "release/${deb_name}_${dist}_${arch}.deb"
+            done
+          done
+
+          deb_count=$(find release -maxdepth 1 -type f -name '*.deb' | wc -l)
+          if [ "$deb_count" -eq 0 ]; then
+            echo "No .deb files were prepared for release"
+            exit 1
+          fi
+
+          ls -la release
+
+      - name: Publish GitHub release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.deb
