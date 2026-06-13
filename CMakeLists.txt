@@ -9,6 +9,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
 
 find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Concurrent DBus Gui Multimedia MultimediaWidgets Network Widgets)
+find_package(Python3 REQUIRED COMPONENTS Development.Embed)
+find_package(ALSA REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(PIPEWIRE REQUIRED IMPORTED_TARGET libpipewire-0.3)
+pkg_check_modules(SPA REQUIRED IMPORTED_TARGET libspa-0.2)
+pkg_check_modules(PULSEAUDIO REQUIRED IMPORTED_TARGET libpulse libpulse-simple)
+pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
 
 qt_standard_project_setup()
 
@@ -93,14 +101,13 @@ qt_add_executable(player WIN32 MACOSX_BUNDLE
     uiassets.qrc
 )
 
-target_include_directories(player PRIVATE
-    /usr/include/pipewire-0.3
-    /usr/include/python3.11
-    /usr/include/spa-0.2
-)
-
 target_link_libraries(player PRIVATE
-    # Remove: L/usr/lib/python3.11/config-3.11-x86_64-linux-gnu/
+    ALSA::ALSA
+    PkgConfig::PIPEWIRE
+    PkgConfig::SPA
+    PkgConfig::PULSEAUDIO
+    PkgConfig::TAGLIB
+    Python3::Python
     Qt::Concurrent
     Qt::Core
     Qt::DBus
@@ -109,12 +116,6 @@ target_link_libraries(player PRIVATE
     Qt::MultimediaWidgets
     Qt::Network
     Qt::Widgets
-    asound
-    pipewire-0.3
-    pulse
-    pulse-simple
-    python3.11
-    tag
 )
 
 install(TARGETS player
