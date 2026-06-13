@@ -1,4 +1,4 @@
-linamp (1.4.0) bookworm; urgency=medium
+linamp (1.4.0) unstable; urgency=medium
 
   * Feature: Spotify Source, use Linamp as a Spotify Connect receiver
   * UI: New design for Sources menu
