@@ -125,14 +125,10 @@ jobs:
 
           mkdir -p release
           for dir in release-artifacts/linamp-*; do
-            artifact_name=$(basename "$dir")
-            arch=$(echo "$artifact_name" | cut -d'-' -f2)
-            dist=$(echo "$artifact_name" | cut -d'-' -f3)
-
             for deb in "$dir"/*.deb; do
               [ -e "$deb" ] || continue
               deb_name=$(basename "$deb" .deb)
-              cp "$deb" "release/${deb_name}_${dist}_${arch}.deb"
+              cp "$deb" "release/${deb_name}.deb"
             done
           done
 
@@ -145,6 +141,6 @@ jobs:
           ls -la release
 
       - name: Publish GitHub release assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: release/*.deb
