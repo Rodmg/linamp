@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set package version for bookworm
         run: |
           sed -i -E '1 s/\(([^)]+)\) [^;]+;/\(\1~bookworm1\) bookworm;/' debian/changelog
@@ -30,7 +30,7 @@ jobs:
           # Extra packages to be installed as build dependencies
           extra-build-deps: ${{ env.EXTRA_BUILD_DEPS }}
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linamp-x86_64-bookworm
           path: debian/artifacts/*
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set package version for trixie
         run: |
           sed -i -E '1 s/\(([^)]+)\) [^;]+;/\(\1~trixie1\) trixie;/' debian/changelog
@@ -51,7 +51,7 @@ jobs:
           # Extra packages to be installed as build dependencies
           extra-build-deps: ${{ env.EXTRA_BUILD_DEPS }}
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linamp-x86_64-trixie
           path: debian/artifacts/*
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set package version for bookworm
         run: |
           sed -i -E '1 s/\(([^)]+)\) [^;]+;/\(\1~bookworm1\) bookworm;/' debian/changelog
@@ -72,7 +72,7 @@ jobs:
           # Extra packages to be installed as build dependencies
           extra-build-deps: ${{ env.EXTRA_BUILD_DEPS }}
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linamp-arm64-bookworm
           path: debian/artifacts/*
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set package version for trixie
         run: |
           sed -i -E '1 s/\(([^)]+)\) [^;]+;/\(\1~trixie1\) trixie;/' debian/changelog
@@ -93,7 +93,7 @@ jobs:
           # Extra packages to be installed as build dependencies
           extra-build-deps: ${{ env.EXTRA_BUILD_DEPS }}
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linamp-arm64-trixie
           path: debian/artifacts/*
@@ -109,7 +109,7 @@ jobs:
 
     steps:
       - name: Download all build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: release-artifacts
 
