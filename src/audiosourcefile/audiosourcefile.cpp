@@ -8,7 +8,7 @@
 
 
 AudioSourceFile::AudioSourceFile(QObject *parent, PlaylistModel *playlistModel)
-    : AudioSource{parent}
+    : AudioSourceWSpectrumCapture{parent}
 {
     m_player = new MediaPlayer(this);
 
@@ -30,9 +30,6 @@ AudioSourceFile::AudioSourceFile(QObject *parent, PlaylistModel *playlistModel)
 
     connect(m_player, &MediaPlayer::playbackStateChanged, this, &AudioSourceFile::playbackStateChanged);
 
-    // Emit data for spectrum analyzer
-    connect(m_player, &MediaPlayer::newData, this, &AudioSourceFile::handleSpectrumData);
-
 }
 
 void AudioSourceFile::activate()
@@ -45,12 +42,19 @@ void AudioSourceFile::activate()
     emit plEnabledChanged(true);
     emit shuffleEnabledChanged(shuffleEnabled);
     emit repeatEnabledChanged(repeatEnabled);
+
+    if (m_player->playbackState() == MediaPlayer::PlaybackState::PlayingState) {
+        startSpectrum();
+    } else {
+        stopSpectrum();
+    }
 }
 
 void AudioSourceFile::deactivate()
 {
     // Stop everything
     shouldBePlaying = false;
+    stopSpectrum();
     m_player->stop();
 }
 
@@ -77,18 +81,21 @@ void AudioSourceFile::handlePlay()
 {
     shouldBePlaying = true;
     m_player->play();
+    startSpectrum();
 }
 
 void AudioSourceFile::handlePause()
 {
     shouldBePlaying = false;
     m_player->pause();
+    stopSpectrum();
 }
 
 void AudioSourceFile::handleStop()
 {
     shouldBePlaying = false;
     m_player->stop();
+    stopSpectrum();
 }
 
 void AudioSourceFile::handleNext()
@@ -199,6 +206,9 @@ void AudioSourceFile::handlePlaylistPositionChanged(int)
 
     if (shouldBePlaying) {
         m_player->play();
+        startSpectrum();
+    } else {
+        stopSpectrum();
     }
 }
 
@@ -210,6 +220,7 @@ void AudioSourceFile::handlePlaylistMediaRemoved(int from, int to)
         shouldBePlaying = false;
         m_player->stop();
         m_player->clearSource();
+        stopSpectrum();
     }
 }
 
@@ -219,6 +230,7 @@ void AudioSourceFile::jump(const QModelIndex &index)
         m_playlist->setCurrentIndex(index.row());
         shouldBePlaying = true;
         m_player->play();
+        startSpectrum();
     }
 }
 
@@ -238,9 +250,4 @@ void AudioSourceFile::addToPlaylist(const QList<QUrl> &urls)
             jump(index);
         }
     }
-}
-
-void AudioSourceFile::handleSpectrumData(const QByteArray& data)
-{
-    emit dataEmitted(data, m_player->format());
 }
