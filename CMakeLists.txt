@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(player VERSION 1.0 LANGUAGES C CXX)
 
+option(LINAMP_ENABLE_CD_NATIVE "Enable native C++ CD backend scaffold" ON)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -18,6 +20,27 @@ pkg_check_modules(SPA REQUIRED IMPORTED_TARGET libspa-0.2)
 pkg_check_modules(PULSEAUDIO REQUIRED IMPORTED_TARGET libpulse libpulse-simple)
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
 
+set(CD_NATIVE_SOURCES)
+if(LINAMP_ENABLE_CD_NATIVE)
+    pkg_check_modules(CDIO_PARANOIA REQUIRED IMPORTED_TARGET libcdio_paranoia libcdio_cdda)
+    pkg_check_modules(DISCID REQUIRED IMPORTED_TARGET libdiscid)
+    list(APPEND CD_NATIVE_SOURCES
+        src/audiosourcecdnative/audiosourcecdnative.cpp
+        src/audiosourcecdnative/audiosourcecdnative.h
+        src/audiosourcecdnative/cdnativediscservice.cpp
+        src/audiosourcecdnative/cdnativediscservice.h
+        src/audiosourcecdnative/cdnativemetadataservice.cpp
+        src/audiosourcecdnative/cdnativemetadataservice.h
+        src/audiosourcecdnative/cdnativeplaybackengine.cpp
+        src/audiosourcecdnative/cdnativeplaybackengine.h
+        src/audiosourcecdnative/cdnativetrack.h
+        src/audiosourcecdnative/cdpcmiodevice.cpp
+        src/audiosourcecdnative/cdpcmiodevice.h
+        src/audiosourcecdnative/cdpcmringbuffer.cpp
+        src/audiosourcecdnative/cdpcmringbuffer.h
+    )
+endif()
+
 qt_standard_project_setup()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -32,6 +55,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-menu)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-player)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-playlist)
 
+if(LINAMP_ENABLE_CD_NATIVE)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/audiosourcecdnative)
+endif()
+
 qt_add_executable(player WIN32 MACOSX_BUNDLE
     src/audiosource-base/audiosource.cpp
     src/audiosource-base/audiosource.h
@@ -39,6 +66,7 @@ qt_add_executable(player WIN32 MACOSX_BUNDLE
     src/audiosource-base/audiosourcewspectrumcapture.h
     src/audiosourcecd/audiosourcecd.cpp
     src/audiosourcecd/audiosourcecd.h
+    ${CD_NATIVE_SOURCES}
     src/audiosourcepython/audiosourcepython.cpp
     src/audiosourcepython/audiosourcepython.h
     src/audiosource-coordinator/audiosourcecoordinator.cpp
@@ -117,6 +145,12 @@ target_link_libraries(player PRIVATE
     Qt::Network
     Qt::Widgets
 )
+
+if(LINAMP_ENABLE_CD_NATIVE)
+    target_compile_definitions(player PRIVATE LINAMP_ENABLE_CD_NATIVE=1)
+    target_link_libraries(player PRIVATE PkgConfig::CDIO_PARANOIA)
+    target_link_libraries(player PRIVATE PkgConfig::DISCID)
+endif()
 
 install(TARGETS player
     BUNDLE DESTINATION .

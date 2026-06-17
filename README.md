@@ -11,6 +11,7 @@ Music player app for Linamp - Your favorite music player of the 90s, but in real
 - vlc
 - libiso9660-dev
 - libcdio-dev
+- libcdio-paranoia-dev
 - libcdio-utils
 - swig
 - python3-pip
@@ -34,8 +35,8 @@ sudo apt-get install build-essential qt6-base-dev qt6-base-dev-tools qt6-multime
 # Install third party library dependencies
 sudo apt-get install libtag1-dev libasound2-dev libpulse-dev libpipewire-0.3-dev libdbus-1-dev -y
 
-# Install dependencies for Python (for CD player functionality)
-sudo apt-get install vlc libiso9660-dev libcdio-dev libcdio-utils swig python3-pip python3-full python3-dev python3-dbus-next libdiscid0 libdiscid-dev -y
+# Install CD player dependencies (Python + native C++ backend)
+sudo apt-get install vlc libiso9660-dev libcdio-dev libcdio-paranoia-dev libcdio-utils swig python3-pip python3-full python3-dev python3-dbus-next libdiscid0 libdiscid-dev -y
 
 # Create Python venv and install Python dependencies (for CD player functionality)
 ## IMPORTANT: Make sure you are on the folder where you cloned this repo before running the following commands:

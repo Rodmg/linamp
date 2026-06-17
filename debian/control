@@ -17,6 +17,7 @@ Build-Depends:
  libdbus-1-dev,
  libiso9660-dev,
  libcdio-dev,
+ libcdio-paranoia-dev,
  libcdio-utils,
  swig,
  python3-dev,
