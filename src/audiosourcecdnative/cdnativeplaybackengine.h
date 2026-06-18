@@ -2,7 +2,6 @@
 #define CDNATIVEPLAYBACKENGINE_H
 
 #include <QAudioSink>
-#include <QElapsedTimer>
 #include <QFuture>
 #include <QList>
 #include <QObject>
@@ -35,6 +34,7 @@ public:
     void play();
     void pause();
     void stop();
+    void prepareForEject();
 
     void next();
     void previous();
@@ -48,6 +48,9 @@ signals:
     void positionChanged(qint64 positionMs);
     void durationChanged(qint64 durationMs);
     void activeTrackChanged(int index);
+    void bufferingChanged(bool buffering);
+    void ejectPreparationFinished();
+    void playbackFinished();
 
 private:
     QList<CDNativeTrack> m_tracks;
@@ -65,28 +68,40 @@ private:
     CDPcmRingBuffer *m_ringBuffer = nullptr;
     CDPcmIODevice *m_pcmDevice = nullptr;
     QAudioSink *m_audioSink = nullptr;
+    qint64 m_positionAnchorMs = 0;
+    bool m_canResumeFromPause = false;
+    bool m_transportStartPending = false;
+    bool m_ejectPreparationPending = false;
+    bool m_transitionMutePending = false;
 
-    QElapsedTimer m_positionElapsed;
     QTimer m_positionTimer;
 
     std::atomic_bool m_readerRunning{false};
     std::atomic_bool m_readerStopRequested{false};
+    std::atomic_uint64_t m_streamGeneration{1};
     QFuture<void> m_readerFuture;
 
     void rebuildPlayOrder();
     int findOrderIndexForTrack(int trackIndex) const;
     int resolveTrackIndexForPosition(qint64 positionMs) const;
     qint64 trackStartMs(int index) const;
+    qint64 trackPlaybackDurationMs(int index) const;
+    qint64 trackLastLba(int index) const;
 
     void updatePositionTick();
+    void finishNaturalPlayback();
+    void advanceToNextShuffleTrack();
     void ensureSink();
+    void recreateSink();
     void resetSinkStream();
+    void startTransportWhenReady();
+    void finishEjectPreparationWhenReady();
     qint64 positionMsToAbsoluteLba(qint64 positionMs) const;
     qint64 discFirstLba() const;
     qint64 discLastLba() const;
 
     void startReaderLoop();
-    void stopReaderLoop();
+    void stopReaderLoop(bool waitForFinish = true);
     void readerLoop();
 };
 

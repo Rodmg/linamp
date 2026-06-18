@@ -35,6 +35,7 @@ public:
     void setSourceLabel(QString label);
 
 public slots:
+    void setDeferredSeekEnabled(bool enabled);
     void setPlaybackState(MediaPlayer::PlaybackState state);
     void setPosition(qint64 progress);
     void setSpectrumData(const QByteArray& data, QAudioFormat format);
@@ -47,11 +48,16 @@ public slots:
     void setShuffleEnabled(bool enabled);
     void setRepeatEnabled(bool enabled);
     void setMessage(QString message, qint64 timeout);
+    void setPersistentMessage(const QString &message);
     void clearMessage();
 
 signals:
     void volumeChanged(int volume);
     void balanceChanged(int balance);
+    void volumeDragStarted();
+    void volumeDragFinished(int volume);
+    void balanceDragStarted();
+    void balanceDragFinished(int balance);
     void positionChanged(qint64 progress);
     void eqClicked();
     void plClicked();
@@ -80,6 +86,8 @@ private:
     bool eqEnabled = false;
     bool shuffleEnabled = false;
     bool repeatEnabled = false;
+    bool m_isUserSeeking = false;
+    bool m_deferredSeekEnabled = false;
 
     void updateDurationInfo(qint64 currentInfo);
     void setTrackInfo(const QString &info);

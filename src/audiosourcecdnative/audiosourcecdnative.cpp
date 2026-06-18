@@ -4,6 +4,8 @@
 
 #include "cdnativeplaybackengine.h"
 
+#include <QtConcurrent>
+
 AudioSourceCDNative::AudioSourceCDNative(QObject *parent)
     : AudioSourceWSpectrumCapture(parent)
     , m_discService("/dev/cdrom")
@@ -16,11 +18,45 @@ AudioSourceCDNative::AudioSourceCDNative(QObject *parent)
     connect(&m_detectDiscTimer, &QTimer::timeout, this, &AudioSourceCDNative::pollDisc);
     m_detectDiscTimer.start();
 
-    connect(m_engine, &CDNativePlaybackEngine::positionChanged, this, &AudioSourceCDNative::positionChanged);
-    connect(m_engine, &CDNativePlaybackEngine::durationChanged, this, &AudioSourceCDNative::durationChanged);
+    connect(m_engine, &CDNativePlaybackEngine::positionChanged, this, [this](qint64 absolutePositionMs) {
+        const int trackIndex = m_engine->currentTrackIndex();
+        if (trackIndex < 0) {
+            emit positionChanged(0);
+            return;
+        }
+        const qint64 relativePosition = qMax<qint64>(0, absolutePositionMs - trackStartMs(trackIndex));
+        emit positionChanged(relativePosition);
+    });
+    connect(m_engine, &CDNativePlaybackEngine::durationChanged, this, [this](qint64) {
+        const int trackIndex = m_lastTrackIndex >= 0 ? m_lastTrackIndex : 0;
+        if (trackIndex >= 0 && trackIndex < m_tracks.size()) {
+            emit durationChanged(m_tracks.at(trackIndex).durationMs);
+        }
+    });
     connect(m_engine, &CDNativePlaybackEngine::activeTrackChanged, this, [this](int index) {
         emitTrackMetadata(index);
     });
+    connect(m_engine, &CDNativePlaybackEngine::ejectPreparationFinished, this, [this]() {
+        finalizeEject();
+    });
+    connect(m_engine, &CDNativePlaybackEngine::bufferingChanged, this, [this](bool buffering) {
+        if (!m_discLoaded || m_ejectInProgress) {
+            return;
+        }
+
+        if (buffering) {
+            emit messageSet("LOADING...", 1500);
+        } else {
+            emit messageClear();
+        }
+    });
+    connect(m_engine, &CDNativePlaybackEngine::playbackFinished, this, [this]() {
+        emit playbackStateChanged(MediaPlayer::StoppedState);
+        if (m_isActive) {
+            stopSpectrum();
+        }
+    });
+    connect(&m_ejectWatcher, &QFutureWatcher<bool>::finished, this, &AudioSourceCDNative::completeEject);
 }
 
 AudioSourceCDNative::~AudioSourceCDNative() = default;
@@ -32,8 +68,20 @@ void AudioSourceCDNative::activate()
     emit plEnabledChanged(false);
     emit shuffleEnabledChanged(m_shuffleEnabled);
     emit repeatEnabledChanged(m_repeatEnabled);
+    emit playbackStateChanged(MediaPlayer::StoppedState);
 
     pollDisc();
+
+    if (m_discLoaded) {
+        m_lastTrackIndex = -1;
+        const int index = qMax(0, m_engine->currentTrackIndex());
+        emit positionChanged(0);
+        emitTrackMetadata(index);
+    } else {
+        emit positionChanged(0);
+        emit durationChanged(0);
+        emitNoDiscMetadata();
+    }
 }
 
 void AudioSourceCDNative::deactivate()
@@ -103,9 +151,41 @@ void AudioSourceCDNative::handleNext()
 
 void AudioSourceCDNative::handleOpen()
 {
-    emit messageSet("EJECTING...", 4000);
+    if (m_ejectInProgress || m_ejectWatcher.isRunning()) {
+        return;
+    }
 
-    const bool ejected = m_discService.eject();
+    if (!m_discService.isDiscInserted()) {
+        emit messageSet("NO DISC", 3000);
+        return;
+    }
+
+    m_ejectInProgress = true;
+    emit messageSet("EJECTING...", 4000);
+    m_engine->prepareForEject();
+}
+
+void AudioSourceCDNative::finalizeEject()
+{
+    if (!m_ejectInProgress) {
+        return;
+    }
+
+    QFuture<bool> future = QtConcurrent::run([this]() {
+        return m_discService.eject();
+    });
+    m_ejectWatcher.setFuture(future);
+}
+
+void AudioSourceCDNative::completeEject()
+{
+    if (!m_ejectInProgress) {
+        return;
+    }
+
+    const bool ejected = m_ejectWatcher.result();
+    m_ejectInProgress = false;
+
     if (!ejected) {
         emit messageSet("EJECT FAILED", 3000);
         return;
@@ -134,7 +214,15 @@ void AudioSourceCDNative::handleSeek(int mseconds)
     if (!m_discLoaded) {
         return;
     }
-    m_engine->seek(mseconds);
+
+    const int activeTrack = m_engine->currentTrackIndex();
+    if (activeTrack < 0 || activeTrack >= m_tracks.size()) {
+        return;
+    }
+
+    const qint64 clampedRelative = qBound<qint64>(0, static_cast<qint64>(mseconds),
+                                                   trackPlaybackDurationMs(activeTrack));
+    m_engine->seek(trackStartMs(activeTrack) + clampedRelative);
 }
 
 void AudioSourceCDNative::pollDisc()
@@ -233,4 +321,44 @@ void AudioSourceCDNative::emitTrackMetadata(int index)
 
     emit durationChanged(track.durationMs);
     emit metadataChanged(metadata);
+}
+
+int AudioSourceCDNative::resolveTrackIndexForAbsolutePosition(qint64 absoluteMs) const
+{
+    if (m_tracks.isEmpty()) {
+        return -1;
+    }
+
+    qint64 elapsed = 0;
+    for (int i = 0; i < m_tracks.size(); ++i) {
+        const qint64 trackDuration = trackPlaybackDurationMs(i);
+        const qint64 trackEnd = elapsed + trackDuration;
+        if (absoluteMs < trackEnd || i == m_tracks.size() - 1) {
+            return i;
+        }
+        elapsed = trackEnd;
+    }
+
+    return m_tracks.size() - 1;
+}
+
+qint64 AudioSourceCDNative::trackPlaybackDurationMs(int index) const
+{
+    if (index < 0 || index >= m_tracks.size()) {
+        return 0;
+    }
+    return (m_tracks.at(index).lengthLba * 1000) / 75;
+}
+
+qint64 AudioSourceCDNative::trackStartMs(int index) const
+{
+    if (index <= 0) {
+        return 0;
+    }
+
+    qint64 elapsed = 0;
+    for (int i = 0; i < index && i < m_tracks.size(); ++i) {
+        elapsed += trackPlaybackDurationMs(i);
+    }
+    return elapsed;
 }

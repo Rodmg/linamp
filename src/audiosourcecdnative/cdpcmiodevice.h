@@ -12,6 +12,10 @@ public:
     explicit CDPcmIODevice(CDPcmRingBuffer *ringBuffer, QObject *parent = nullptr);
 
     bool isSequential() const override;
+    bool seek(qint64 pos) override;
+    bool atEnd() const override;
+    qint64 bytesAvailable() const override;
+    void notifyReadyRead();
 
 protected:
     qint64 readData(char *data, qint64 maxSize) override;

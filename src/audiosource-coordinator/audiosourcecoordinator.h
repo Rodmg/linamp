@@ -22,6 +22,12 @@ public slots:
     void setVolume(int volume);
     void setBalance(int balance);
 
+private slots:
+    void onVolumeDragStarted();
+    void onVolumeDragFinished(int volume);
+    void onBalanceDragStarted();
+    void onBalanceDragFinished(int balance);
+
 private:
     QList<AudioSource*> sources;
     QList<QString> sourceLabels;
@@ -29,6 +35,12 @@ private:
 
     SystemAudioControl *system_audio = nullptr;
     PlayerView *view = nullptr;
+
+    bool m_volumeDragging = false;
+    bool m_balanceDragging = false;
+
+    void showVolumeMessage(int volume, bool persistent);
+    void showBalanceMessage(int balance, bool persistent);
 };
 
 #endif // AUDIOSOURCECOORDINATOR_H

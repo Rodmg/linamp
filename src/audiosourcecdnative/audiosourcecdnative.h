@@ -1,6 +1,7 @@
 #ifndef AUDIOSOURCECDNATIVE_H
 #define AUDIOSOURCECDNATIVE_H
 
+#include <QFutureWatcher>
 #include <QTimer>
 
 #include "audiosourcewspectrumcapture.h"
@@ -33,6 +34,7 @@ public slots:
 private:
     bool m_isActive = false;
     bool m_discLoaded = false;
+    bool m_ejectInProgress = false;
 
     bool m_shuffleEnabled = false;
     bool m_repeatEnabled = false;
@@ -43,14 +45,21 @@ private:
     QList<CDNativeTrack> m_tracks;
 
     QTimer m_detectDiscTimer;
+    QFutureWatcher<bool> m_ejectWatcher;
     int m_lastTrackIndex = -1;
 
     void pollDisc();
     void loadDisc();
     void unloadDisc();
 
+    int resolveTrackIndexForAbsolutePosition(qint64 absoluteMs) const;
+    qint64 trackStartMs(int index) const;
+    qint64 trackPlaybackDurationMs(int index) const;
+
     void emitNoDiscMetadata();
     void emitTrackMetadata(int index);
+    void finalizeEject();
+    void completeEject();
 };
 
 #endif // AUDIOSOURCECDNATIVE_H

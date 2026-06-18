@@ -31,6 +31,10 @@ bool CDNativeDiscService::eject() const
         return false;
     }
 
+    // Some drives refuse eject while door lock is set or while spinning.
+    ioctl(fd, CDROM_LOCKDOOR, 0);
+    ioctl(fd, CDROMSTOP, 0);
+
     const int result = ioctl(fd, CDROMEJECT, 0);
     close(fd);
     return result == 0;

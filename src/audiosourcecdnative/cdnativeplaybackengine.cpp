@@ -1,7 +1,6 @@
 #include "cdnativeplaybackengine.h"
 
 #include <cdio/paranoia/cdda.h>
-#include <cdio/paranoia/paranoia.h>
 
 #include <QMediaDevices>
 #include <QRandomGenerator>
@@ -13,13 +12,19 @@
 
 namespace {
 constexpr int CD_BYTES_PER_SECTOR = 2352;
-constexpr int READER_CHUNK_SECTORS = 32;
+constexpr int READER_CHUNK_SECTORS = 20;
+constexpr int RING_BUFFER_SECTORS = 192;
+constexpr int AUDIO_SINK_BUFFER_SECTORS = 32;
+constexpr int TRANSITION_UNMUTE_DELAY_MS = 120;
 constexpr int POSITION_TICK_MS = 100;
+constexpr int INITIAL_PREROLL_BYTES = CD_BYTES_PER_SECTOR * 48;
+constexpr int TARGET_BUFFER_BYTES = CD_BYTES_PER_SECTOR * 96;
+constexpr int TRANSPORT_RETRY_MS = 10;
 }
 
 CDNativePlaybackEngine::CDNativePlaybackEngine(QObject *parent)
     : QObject(parent)
-    , m_ringBuffer(new CDPcmRingBuffer(CD_BYTES_PER_SECTOR * 512))
+    , m_ringBuffer(new CDPcmRingBuffer(CD_BYTES_PER_SECTOR * RING_BUFFER_SECTORS))
     , m_pcmDevice(new CDPcmIODevice(m_ringBuffer, this))
 {
     m_audioFormat.setSampleRate(44100);
@@ -48,22 +53,31 @@ CDNativePlaybackEngine::~CDNativePlaybackEngine()
 
 void CDNativePlaybackEngine::setTracks(const QList<CDNativeTrack> &tracks)
 {
+    m_streamGeneration.fetch_add(1);
+    m_transitionMutePending = true;
+
     m_tracks = tracks;
     m_positionMs = 0;
+    m_positionAnchorMs = 0;
+    m_canResumeFromPause = false;
     m_currentLogicalIndex = 0;
     m_currentOrderIndex = 0;
+    if (m_transportStartPending) {
+        m_transportStartPending = false;
+        emit bufferingChanged(false);
+    }
 
     qint64 total = 0;
-    for (const CDNativeTrack &track : m_tracks) {
-        total += track.durationMs;
+    for (int i = 0; i < m_tracks.size(); ++i) {
+        total += trackPlaybackDurationMs(i);
     }
     m_durationMs = total;
 
     rebuildPlayOrder();
     m_currentOrderIndex = findOrderIndexForTrack(m_currentLogicalIndex);
     emit durationChanged(m_durationMs);
-    emit positionChanged(m_positionMs);
     emit activeTrackChanged(resolveTrackIndexForPosition(m_positionMs));
+    emit positionChanged(m_positionMs);
 }
 
 QList<CDNativeTrack> CDNativePlaybackEngine::tracks() const
@@ -78,6 +92,9 @@ void CDNativePlaybackEngine::setShuffleEnabled(bool enabled)
     }
     m_shuffleEnabled.store(enabled);
     rebuildPlayOrder();
+    if (m_positionTimer.isActive()) {
+        seek(m_positionMs);
+    }
 }
 
 void CDNativePlaybackEngine::setRepeatAllEnabled(bool enabled)
@@ -102,18 +119,30 @@ void CDNativePlaybackEngine::play()
     }
 
     ensureSink();
-    m_positionElapsed.restart();
-    m_positionTimer.start();
 
-    startReaderLoop();
-
-    if (m_audioSink != nullptr) {
-        m_audioSink->start(m_pcmDevice);
+    if (m_canResumeFromPause && m_audioSink != nullptr && m_audioSink->state() == QAudio::SuspendedState) {
+        m_audioSink->resume();
+        if (m_transportStartPending) {
+            m_transportStartPending = false;
+            emit bufferingChanged(false);
+        }
+        m_canResumeFromPause = false;
+        m_positionTimer.start();
+        return;
     }
+
+    startTransportWhenReady();
 }
 
 void CDNativePlaybackEngine::pause()
 {
+    m_canResumeFromPause = true;
+
+    if (m_transportStartPending) {
+        m_transportStartPending = false;
+        emit bufferingChanged(false);
+    }
+
     if (m_audioSink != nullptr) {
         m_audioSink->suspend();
     }
@@ -122,19 +151,71 @@ void CDNativePlaybackEngine::pause()
 
 void CDNativePlaybackEngine::stop()
 {
+    m_streamGeneration.fetch_add(1);
+    m_transitionMutePending = true;
+
+    const int stopTrackIndex = resolveTrackIndexForPosition(m_positionMs);
+    const qint64 stopTrackStartMs = stopTrackIndex >= 0 ? trackStartMs(stopTrackIndex) : 0;
+
     m_positionTimer.stop();
-    m_positionMs = 0;
-    m_currentLogicalIndex = 0;
+    m_positionMs = stopTrackStartMs;
+    m_positionAnchorMs = stopTrackStartMs;
+    m_canResumeFromPause = false;
+    m_currentLogicalIndex = qMax(0, stopTrackIndex);
 
-    if (m_audioSink != nullptr) {
-        m_audioSink->stop();
-    }
+    recreateSink();
 
-    stopReaderLoop();
+    stopReaderLoop(false);
     m_ringBuffer->clear();
 
+    if (m_transportStartPending) {
+        m_transportStartPending = false;
+        emit bufferingChanged(false);
+    }
+
+    emit activeTrackChanged(m_currentLogicalIndex);
     emit positionChanged(m_positionMs);
-    emit activeTrackChanged(resolveTrackIndexForPosition(m_positionMs));
+}
+
+void CDNativePlaybackEngine::prepareForEject()
+{
+    m_streamGeneration.fetch_add(1);
+    m_transitionMutePending = true;
+
+    m_positionTimer.stop();
+    m_canResumeFromPause = false;
+
+    recreateSink();
+
+    stopReaderLoop(false);
+    m_ringBuffer->clear();
+
+    if (m_transportStartPending) {
+        m_transportStartPending = false;
+        emit bufferingChanged(false);
+    }
+
+    m_ejectPreparationPending = true;
+    finishEjectPreparationWhenReady();
+}
+
+void CDNativePlaybackEngine::finishEjectPreparationWhenReady()
+{
+    if (!m_ejectPreparationPending) {
+        return;
+    }
+
+    if (m_readerRunning.load()) {
+        QTimer::singleShot(10, this, [this]() {
+            finishEjectPreparationWhenReady();
+        });
+        return;
+    }
+
+    m_ejectPreparationPending = false;
+    QTimer::singleShot(0, this, [this]() {
+        emit ejectPreparationFinished();
+    });
 }
 
 void CDNativePlaybackEngine::next()
@@ -148,12 +229,17 @@ void CDNativePlaybackEngine::next()
         return;
     }
 
-    int nextIndex = qMin(currentIndex + 1, m_tracks.size() - 1);
+    int nextIndex;
+    if (currentIndex >= m_tracks.size() - 1) {
+        nextIndex = 0;
+    } else {
+        nextIndex = currentIndex + 1;
+    }
     if (m_shuffleEnabled.load() && !m_playOrder.isEmpty()) {
         m_currentOrderIndex = findOrderIndexForTrack(currentIndex);
         const int lastOrderIndex = m_playOrder.size() - 1;
         if (m_currentOrderIndex >= lastOrderIndex) {
-            m_currentOrderIndex = m_repeatAllEnabled.load() ? 0 : lastOrderIndex;
+            m_currentOrderIndex = 0;
         } else {
             ++m_currentOrderIndex;
         }
@@ -192,21 +278,37 @@ void CDNativePlaybackEngine::seek(qint64 mseconds)
         return;
     }
 
+    m_streamGeneration.fetch_add(1);
+    m_transitionMutePending = true;
+
     const qint64 clamped = qBound<qint64>(0, mseconds, m_durationMs);
     m_positionMs = clamped;
+    m_canResumeFromPause = false;
     m_currentLogicalIndex = qMax(0, resolveTrackIndexForPosition(m_positionMs));
     m_currentOrderIndex = findOrderIndexForTrack(m_currentLogicalIndex);
 
     // Jump/seek is intentionally non-gapless. We reset transport to the new absolute position.
     const bool wasRunning = m_positionTimer.isActive();
-    stopReaderLoop();
-    resetSinkStream();
-    if (wasRunning) {
-        startReaderLoop();
+    m_positionTimer.stop();
+
+    if (m_transportStartPending) {
+        m_transportStartPending = false;
+        emit bufferingChanged(false);
     }
 
-    emit positionChanged(m_positionMs);
+    if (m_audioSink != nullptr) {
+        // Recreate sink to ensure backend output queue is fully reset.
+        recreateSink();
+    }
+
+    stopReaderLoop(false);
+    resetSinkStream();
+    if (wasRunning) {
+        startTransportWhenReady();
+    }
+
     emit activeTrackChanged(m_currentLogicalIndex);
+    emit positionChanged(m_positionMs);
 }
 
 qint64 CDNativePlaybackEngine::position() const
@@ -221,6 +323,9 @@ qint64 CDNativePlaybackEngine::duration() const
 
 int CDNativePlaybackEngine::currentTrackIndex() const
 {
+    if (m_shuffleEnabled.load()) {
+        return m_currentLogicalIndex;
+    }
     return resolveTrackIndexForPosition(m_positionMs);
 }
 
@@ -264,7 +369,7 @@ int CDNativePlaybackEngine::resolveTrackIndexForPosition(qint64 positionMs) cons
 
     qint64 acc = 0;
     for (int i = 0; i < m_tracks.size(); ++i) {
-        const qint64 end = acc + m_tracks.at(i).durationMs;
+        const qint64 end = acc + trackPlaybackDurationMs(i);
         if (positionMs < end || i == m_tracks.size() - 1) {
             return i;
         }
@@ -282,41 +387,154 @@ qint64 CDNativePlaybackEngine::trackStartMs(int index) const
 
     qint64 acc = 0;
     for (int i = 0; i < index && i < m_tracks.size(); ++i) {
-        acc += m_tracks.at(i).durationMs;
+        acc += trackPlaybackDurationMs(i);
     }
     return acc;
 }
 
-void CDNativePlaybackEngine::updatePositionTick()
+qint64 CDNativePlaybackEngine::trackPlaybackDurationMs(int index) const
 {
-    if (!m_positionElapsed.isValid()) {
-        m_positionElapsed.restart();
+    if (index < 0 || index >= m_tracks.size()) {
+        return 0;
+    }
+    return (m_tracks.at(index).lengthLba * 1000) / 75;
+}
+
+qint64 CDNativePlaybackEngine::trackLastLba(int index) const
+{
+    if (index < 0 || index >= m_tracks.size()) {
+        return discLastLba();
+    }
+
+    const CDNativeTrack &track = m_tracks.at(index);
+    return track.startLba + qMax<qint64>(0, track.lengthLba - 1);
+}
+
+void CDNativePlaybackEngine::advanceToNextShuffleTrack()
+{
+    if (!m_shuffleEnabled.load() || m_playOrder.isEmpty()) {
         return;
     }
 
-    const qint64 elapsed = m_positionElapsed.restart();
-    m_positionMs += elapsed;
+    const int nextOrderIndex = m_currentOrderIndex + 1;
+    if (nextOrderIndex >= m_playOrder.size()) {
+        if (m_repeatAllEnabled.load()) {
+            m_currentOrderIndex = 0;
+            rebuildPlayOrder();
+        } else {
+            finishNaturalPlayback();
+            return;
+        }
+    } else {
+        m_currentOrderIndex = nextOrderIndex;
+    }
 
-    if (m_positionMs >= m_durationMs) {
+    const int nextTrack = m_playOrder.at(m_currentOrderIndex);
+    const qint64 nextPos = trackStartMs(nextTrack);
+
+    m_streamGeneration.fetch_add(1);
+    m_transitionMutePending = true;
+    m_positionMs = nextPos;
+    m_positionAnchorMs = nextPos;
+    m_canResumeFromPause = false;
+    m_currentLogicalIndex = nextTrack;
+
+    const bool wasRunning = m_positionTimer.isActive();
+    m_positionTimer.stop();
+
+    if (m_transportStartPending) {
+        m_transportStartPending = false;
+        emit bufferingChanged(false);
+    }
+
+    if (m_audioSink != nullptr) {
+        recreateSink();
+    }
+
+    stopReaderLoop(false);
+    resetSinkStream();
+    if (wasRunning) {
+        startTransportWhenReady();
+    }
+
+    emit activeTrackChanged(m_currentLogicalIndex);
+    emit positionChanged(m_positionMs);
+}
+
+void CDNativePlaybackEngine::finishNaturalPlayback()
+{
+    m_positionTimer.stop();
+    if (m_audioSink != nullptr) {
+        m_audioSink->stop();
+    }
+    stopReaderLoop();
+
+    m_streamGeneration.fetch_add(1);
+    m_transitionMutePending = true;
+    m_positionMs = 0;
+    m_positionAnchorMs = 0;
+    m_canResumeFromPause = false;
+    m_currentLogicalIndex = 0;
+    m_currentOrderIndex = findOrderIndexForTrack(0);
+
+    recreateSink();
+    m_ringBuffer->clear();
+
+    if (m_transportStartPending) {
+        m_transportStartPending = false;
+        emit bufferingChanged(false);
+    }
+
+    emit activeTrackChanged(m_currentLogicalIndex);
+    emit positionChanged(m_positionMs);
+    emit playbackFinished();
+}
+
+void CDNativePlaybackEngine::updatePositionTick()
+{
+    if (m_audioSink != nullptr) {
+        const qint64 processedMs = qMax<qint64>(0, m_audioSink->processedUSecs() / 1000);
+        m_positionMs = qBound<qint64>(0, m_positionAnchorMs + processedMs, m_durationMs);
+    }
+
+    if (m_shuffleEnabled.load() && !m_tracks.isEmpty()) {
+        const qint64 trackStart = trackStartMs(m_currentLogicalIndex);
+        const qint64 trackEnd = trackStart + trackPlaybackDurationMs(m_currentLogicalIndex);
+        m_positionMs = qMin(m_positionMs, trackEnd);
+
+        const bool readerFinished = !m_readerRunning.load();
+        const bool bufferDrained = m_ringBuffer->size() == 0;
+        const bool trackPlaybackComplete = m_positionMs >= trackEnd
+            || (bufferDrained && m_positionMs > trackStart);
+        if (readerFinished && trackPlaybackComplete) {
+            advanceToNextShuffleTrack();
+            return;
+        }
+    } else if (m_positionMs >= m_durationMs) {
         if (m_repeatAllEnabled.load() && m_durationMs > 0) {
             m_positionMs = 0;
-            stopReaderLoop();
-            resetSinkStream();
-            startReaderLoop();
-        } else {
-            m_positionMs = m_durationMs;
+            m_positionAnchorMs = 0;
             m_positionTimer.stop();
+
             if (m_audioSink != nullptr) {
-                m_audioSink->stop();
+                m_audioSink->suspend();
             }
-            stopReaderLoop();
+
+            stopReaderLoop(false);
+            resetSinkStream();
+            startTransportWhenReady();
+        } else {
+            finishNaturalPlayback();
+            return;
         }
     }
 
-    const int activeTrack = resolveTrackIndexForPosition(m_positionMs);
-    if (activeTrack != m_currentLogicalIndex) {
-        m_currentLogicalIndex = activeTrack;
-        emit activeTrackChanged(m_currentLogicalIndex);
+    if (!m_shuffleEnabled.load()) {
+        const int activeTrack = resolveTrackIndexForPosition(m_positionMs);
+        if (activeTrack != m_currentLogicalIndex) {
+            m_currentLogicalIndex = activeTrack;
+            emit activeTrackChanged(m_currentLogicalIndex);
+        }
     }
 
     emit positionChanged(m_positionMs);
@@ -329,21 +547,91 @@ void CDNativePlaybackEngine::ensureSink()
     }
 
     m_audioSink = new QAudioSink(QMediaDevices::defaultAudioOutput(), m_audioFormat, this);
-    m_audioSink->setBufferSize(CD_BYTES_PER_SECTOR * 256);
+    m_audioSink->setBufferSize(CD_BYTES_PER_SECTOR * AUDIO_SINK_BUFFER_SECTORS);
+    m_audioSink->setVolume(m_transitionMutePending ? 0.0f : 1.0f);
+}
+
+void CDNativePlaybackEngine::recreateSink()
+{
+    if (m_audioSink != nullptr) {
+        m_audioSink->reset();
+        m_audioSink->suspend();
+        m_audioSink->deleteLater();
+        m_audioSink = nullptr;
+    }
+
+    ensureSink();
 }
 
 void CDNativePlaybackEngine::resetSinkStream()
 {
     m_ringBuffer->clear();
+    recreateSink();
+}
 
-    if (m_audioSink == nullptr) {
+void CDNativePlaybackEngine::startTransportWhenReady()
+{
+    if (m_tracks.isEmpty()) {
         return;
     }
 
-    const bool wasRunning = m_positionTimer.isActive();
-    m_audioSink->stop();
-    if (wasRunning) {
+    if (!m_transportStartPending) {
+        m_transportStartPending = true;
+        emit bufferingChanged(true);
+    }
+
+    if (m_readerRunning.load() && m_readerStopRequested.load()) {
+        QTimer::singleShot(TRANSPORT_RETRY_MS, this, [this]() {
+            startTransportWhenReady();
+        });
+        return;
+    }
+
+    // Non-blocking stop requests may let the old reader write a bit more data
+    // before it exits. Once it has actually stopped, clear again to prevent
+    // stale PCM from bleeding into the next start/track.
+    if (!m_readerRunning.load() && m_readerStopRequested.load()) {
+        m_ringBuffer->clear();
+    }
+
+    startReaderLoop();
+
+    if (m_ringBuffer->size() < INITIAL_PREROLL_BYTES) {
+        if (m_readerRunning.load()) {
+            QTimer::singleShot(TRANSPORT_RETRY_MS, this, [this]() {
+                startTransportWhenReady();
+            });
+            return;
+        }
+        if (m_ringBuffer->size() == 0) {
+            QTimer::singleShot(TRANSPORT_RETRY_MS, this, [this]() {
+                startTransportWhenReady();
+            });
+            return;
+        }
+    }
+
+    if (m_audioSink != nullptr && m_audioSink->state() != QAudio::ActiveState) {
+        m_positionAnchorMs = m_positionMs;
         m_audioSink->start(m_pcmDevice);
+
+        if (m_transitionMutePending) {
+            QTimer::singleShot(TRANSITION_UNMUTE_DELAY_MS, this, [this]() {
+                if (m_audioSink != nullptr) {
+                    m_audioSink->setVolume(1.0f);
+                }
+                m_transitionMutePending = false;
+            });
+        }
+    }
+
+    if (m_transportStartPending) {
+        m_transportStartPending = false;
+        emit bufferingChanged(false);
+    }
+
+    if (!m_positionTimer.isActive()) {
+        m_positionTimer.start();
     }
 }
 
@@ -360,19 +648,26 @@ void CDNativePlaybackEngine::startReaderLoop()
     });
 }
 
-void CDNativePlaybackEngine::stopReaderLoop()
+void CDNativePlaybackEngine::stopReaderLoop(bool waitForFinish)
 {
     if (!m_readerRunning.load()) {
         return;
     }
 
     m_readerStopRequested.store(true);
+
+    if (!waitForFinish) {
+        return;
+    }
+
     m_readerFuture.waitForFinished();
     m_readerRunning.store(false);
 }
 
 void CDNativePlaybackEngine::readerLoop()
 {
+    const uint64_t streamGeneration = m_streamGeneration.load();
+
     const QByteArray deviceName = m_devicePath.toLocal8Bit();
     char *messages = nullptr;
     cdrom_drive_t *drive = cdio_cddap_identify(deviceName.constData(), CDDA_MESSAGE_LOGIT, &messages);
@@ -389,66 +684,77 @@ void CDNativePlaybackEngine::readerLoop()
         return;
     }
 
-    cdrom_paranoia_t *paranoia = cdio_paranoia_init(drive);
-    if (paranoia == nullptr) {
-        cdio_cddap_close(drive);
-        m_readerRunning.store(false);
-        return;
-    }
-
-    cdio_paranoia_modeset(paranoia, PARANOIA_MODE_OVERLAP | PARANOIA_MODE_VERIFY);
+    // Keep the drive at a conservative speed to avoid aggressive spin-up/down.
+    cdio_cddap_speed_set(drive, 4);
 
     const qint64 startLba = discFirstLba();
-    const qint64 endLba = discLastLba();
+    const int currentTrackIndex = m_currentLogicalIndex;
+    const bool shuffle = m_shuffleEnabled.load();
+    const qint64 endLba = shuffle ? trackLastLba(currentTrackIndex) : discLastLba();
     const qint64 requestedStart = positionMsToAbsoluteLba(m_positionMs);
     const qint64 initialLba = qBound(startLba, requestedStart, endLba);
     qint64 currentLba = initialLba;
 
-    cdio_paranoia_set_range(paranoia, static_cast<long>(startLba), static_cast<long>(endLba));
-    cdio_paranoia_seek(paranoia, static_cast<int32_t>(currentLba), SEEK_SET);
+    QByteArray readBuffer(READER_CHUNK_SECTORS * CD_BYTES_PER_SECTOR, Qt::Uninitialized);
+    const bool repeatAll = m_repeatAllEnabled.load() && !shuffle;
 
-    const int highWatermark = m_ringBuffer->capacity() * 3 / 4;
-    const int lowWatermark = m_ringBuffer->capacity() / 2;
-    const bool repeatAll = m_repeatAllEnabled.load();
-
-    while (!m_readerStopRequested.load()) {
-        if (m_ringBuffer->size() >= highWatermark) {
-            QThread::msleep(5);
+    while (!m_readerStopRequested.load() && streamGeneration == m_streamGeneration.load()) {
+        if (m_ringBuffer->size() >= TARGET_BUFFER_BYTES) {
+            QThread::msleep(3);
             continue;
         }
 
         if (currentLba > endLba) {
+            if (shuffle) {
+                break;
+            }
             if (repeatAll) {
                 currentLba = startLba;
-                cdio_paranoia_seek(paranoia, static_cast<int32_t>(currentLba), SEEK_SET);
             } else {
                 QThread::msleep(5);
                 continue;
             }
         }
 
-        int sectorsRead = 0;
-        while (sectorsRead < READER_CHUNK_SECTORS
-               && !m_readerStopRequested.load()
-               && m_ringBuffer->size() < highWatermark
-               && currentLba <= endLba) {
-            int16_t *frame = cdio_paranoia_read_limited(paranoia, nullptr, 20);
-            if (frame == nullptr) {
-                QThread::msleep(2);
-                continue;
-            }
+        const qint64 remainingSectors = endLba - currentLba + 1;
+        if (remainingSectors <= 0) {
+            QThread::msleep(2);
+            continue;
+        }
 
-            m_ringBuffer->write(reinterpret_cast<const char *>(frame), CD_BYTES_PER_SECTOR);
+        const int writableBytes = m_ringBuffer->capacity() - m_ringBuffer->size();
+        const int writableSectors = writableBytes / CD_BYTES_PER_SECTOR;
+        const int sectorsToRead = qMin(READER_CHUNK_SECTORS,
+                                       qMin(static_cast<int>(remainingSectors), writableSectors));
+
+        if (sectorsToRead <= 0) {
+            QThread::msleep(2);
+            continue;
+        }
+
+        const long sectorsRead = cdio_cddap_read(drive,
+                                                 readBuffer.data(),
+                                                 static_cast<lsn_t>(currentLba),
+                                                 static_cast<long>(sectorsToRead));
+        if (sectorsRead <= 0) {
+            // Skip ahead over bad/slow sectors similarly to VLC's resilient behavior.
             ++currentLba;
-            ++sectorsRead;
+            QThread::msleep(1);
+            continue;
         }
 
-        if (m_ringBuffer->size() < lowWatermark) {
-            QThread::msleep(1);
+        const int bytesRead = static_cast<int>(sectorsRead) * CD_BYTES_PER_SECTOR;
+        if (streamGeneration != m_streamGeneration.load()) {
+            break;
         }
+
+        const int bytesWritten = m_ringBuffer->write(readBuffer.constData(), bytesRead);
+        if (bytesWritten > 0) {
+            m_pcmDevice->notifyReadyRead();
+        }
+        currentLba += sectorsRead;
     }
 
-    cdio_paranoia_free(paranoia);
     cdio_cddap_close(drive);
     m_readerRunning.store(false);
 }
@@ -467,13 +773,15 @@ qint64 CDNativePlaybackEngine::positionMsToAbsoluteLba(qint64 positionMs) const
     }
 
     qint64 remaining = qMax<qint64>(0, positionMs);
-    for (const CDNativeTrack &track : m_tracks) {
-        if (remaining < track.durationMs) {
+    for (int i = 0; i < m_tracks.size(); ++i) {
+        const CDNativeTrack &track = m_tracks.at(i);
+        const qint64 trackDurationMs = trackPlaybackDurationMs(i);
+        if (remaining < trackDurationMs) {
             const qint64 offsetLba = (remaining * 75) / 1000;
             const qint64 lastLbaInTrack = track.startLba + qMax<qint64>(0, track.lengthLba - 1);
             return qMin(track.startLba + offsetLba, lastLbaInTrack);
         }
-        remaining -= track.durationMs;
+        remaining -= trackDurationMs;
     }
 
     return discLastLba();
