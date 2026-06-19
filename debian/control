@@ -15,11 +15,10 @@ Build-Depends:
  libpulse-dev,
  libpipewire-0.3-dev,
  libdbus-1-dev,
- libiso9660-dev,
  libcdio-dev,
  libcdio-paranoia-dev,
  libcdio-utils,
- swig,
+ libdiscid-dev,
  python3-dev,
  dh-python
 Standards-Version: 4.6.2
@@ -33,13 +32,9 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  ${python3:Depends},
- vlc,
  python3-full,
- python3-libdiscid,
- python3-musicbrainzngs,
- python3-cdio,
- python3-vlc,
- python3-dbus-next
+ python3-dbus-next,
+ libdiscid0
 Description: Your favorite music player of the 90s, but in real life
  Music player app for Linamp - Your favorite music player of the 90s,
  but in real life.

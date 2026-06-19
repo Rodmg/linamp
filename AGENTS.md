@@ -1,11 +1,11 @@
 # AGENTS
 
-This repository contains Linamp, a Qt 6 music player for Linux with file playback, CD playback through Python integration, and a retro Winamp-style UI.
+This repository contains Linamp, a Qt 6 music player for Linux with file playback, native CD playback, and a retro Winamp-style UI.
 
 ## Project Focus
 
 - Keep changes small and localized. Prefer fixing the owning module instead of layering new glue around it.
-- Preserve the current stack: Qt 6 Widgets and Multimedia in C++, with Python used only for the CD player path unless the task explicitly requires broader Python work.
+- Preserve the current stack: Qt 6 Widgets and Multimedia in C++, with Python used only for BT and Spotify sources unless the task explicitly requires broader Python work.
 - Do not invent new build, test, or release workflows. Follow the commands and constraints already documented in this repository.
 
 ## Repository Layout
@@ -13,14 +13,14 @@ This repository contains Linamp, a Qt 6 music player for Linux with file playbac
 - `src/audiosource-base/`: common audio source interfaces and spectrum capture support.
 - `src/audiosource-coordinator/`: coordinates which audio source is active.
 - `src/audiosourcefile/`: file playback and metadata handling.
-- `src/audiosourcecd/`: CD playback logic.
-- `src/audiosourcepython/`: embedded Python bridge used by the CD source.
+- `src/audiosourcecdnative/`: native C++ CD playback logic.
+- `src/audiosourcepython/`: embedded Python bridge used by BT and Spotify sources.
 - `src/view-player/`: playback controls, spectrum, and player-facing widgets.
 - `src/view-playlist/`: playlist, file browser, and playlist parsing.
 - `src/view-basewindow/`: desktop and embedded window shells.
 - `src/view-menu/`: menu UI.
 - `src/shared/`: shared utilities such as scaling, FFT, sliders, and system audio control.
-- `python/`: Python requirements and supporting code for CD playback.
+- `python/`: Python requirements and supporting code for BT and Spotify playback.
 - `styles/` and `assets/`: QSS styling and UI assets.
 
 ## Build And Run
@@ -36,9 +36,9 @@ make
 
 Notes:
 
-- `./setup.sh` prepares the Python environment needed for CD playback.
-- Run the app with `./start.sh` when CD functionality matters. Running the binary directly outside the virtual environment can crash the CD player path.
-- Qt Creator is supported, but if you need CD playback there, configure it to launch `start.sh` instead of the built executable directly.
+- `./setup.sh` prepares the Python environment needed for BT and Spotify playback.
+- Run the app with `./start.sh` when BT or Spotify functionality matters. Running the binary directly outside the virtual environment can crash those sources.
+- Qt Creator is supported, but if you need BT or Spotify playback there, configure it to launch `start.sh` instead of the built executable directly.
 
 ## Architecture Notes
 
@@ -69,5 +69,5 @@ make
 ## Known Constraints
 
 - Mouse interaction in the file browser and playlist has a known limitation; click-and-hold may be required on non-touch systems.
-- CD playback depends on the Python virtual environment and related system packages described in `README.md`.
+- CD playback uses the native C++ backend and requires libcdio-paranoia and libdiscid system packages described in `README.md`.
 - Packaging exists through the Debian files and README instructions, but release packaging should stay out of scope unless the task explicitly asks for it.

@@ -4,10 +4,7 @@
 #include <QMainWindow>
 #include <QStackedLayout>
 #include <QProcess>
-#include "audiosourcecd.h"
-#ifdef LINAMP_ENABLE_CD_NATIVE
 #include "audiosourcecdnative.h"
-#endif
 #include "audiosourcecoordinator.h"
 #include "audiosourcefile.h"
 #include "audiosourcepython.h"
@@ -34,10 +31,7 @@ public:
     AudioSourceCoordinator *coordinator;
     AudioSourceFile *fileSource;
     AudioSourcePython *btSource;
-    AudioSourceCD *cdSource;
-#ifdef LINAMP_ENABLE_CD_NATIVE
-    AudioSourceCDNative *cdNativeSource;
-#endif
+    AudioSourceCDNative *cdSource;
     AudioSourcePython *spotSource;
 
 public slots:

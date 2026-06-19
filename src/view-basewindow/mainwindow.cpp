@@ -37,7 +37,7 @@ const unsigned int WINDOW_H = 117 * UI_SCALE;
 MainWindow::MainWindow(QWidget *parent)
      : QMainWindow{parent}
 {
-    // Initialize Python interpreter, required by audiosourcecd and audiosourcebt
+    // Initialize Python interpreter, required by BT and Spotify sources
     Py_Initialize();
     PyEval_SaveThread();
 
@@ -56,20 +56,11 @@ MainWindow::MainWindow(QWidget *parent)
     coordinator = new AudioSourceCoordinator(this, player);
     fileSource = new AudioSourceFile(this, m_playlistModel);
     btSource = new AudioSourcePython(LINAMP_PY_MODULE, "BTPlayer", this);
-#ifdef LINAMP_ENABLE_CD_NATIVE
-    cdSource = nullptr;
-    cdNativeSource = new AudioSourceCDNative(this);
-#else
-    cdSource = new AudioSourceCD(this);
-#endif
+    cdSource = new AudioSourceCDNative(this);
     spotSource = new AudioSourcePython(LINAMP_PY_MODULE, "SpotifyPlayer", this);
     coordinator->addSource(fileSource, "FILE", true);
     coordinator->addSource(btSource, "BT", false);
-#ifdef LINAMP_ENABLE_CD_NATIVE
-    coordinator->addSource(cdNativeSource, "CD", false);
-#else
     coordinator->addSource(cdSource, "CD", false);
-#endif
     coordinator->addSource(spotSource, "SPOT", false);
 
 
