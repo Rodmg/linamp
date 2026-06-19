@@ -10,6 +10,8 @@
 #include <QUrl>
 #include <QMimeData>
 
+#include <utility>
+
 PlaylistModel::PlaylistModel(QObject *parent) : QAbstractItemModel(parent)
 {
     m_playlist.reset(new QMediaPlaylist);
@@ -251,7 +253,7 @@ bool PlaylistModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     }
 
     insertRows(row, rows, QModelIndex());
-    for (const QString &originalIdx : qAsConst(newItems))
+    for (const QString &originalIdx : std::as_const(newItems))
     {
         int newIndex = row;
 

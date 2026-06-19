@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QMetaObject>
 #include <QThread>
-#include <QtConcurrent>
+#include <QThreadPool>
 
 namespace {
 constexpr int APPLY_INTERVAL_MS = 32;
@@ -166,7 +166,7 @@ void SystemAudioControl::performApplyAsync()
     const int applyVolume = volume;
     const int applyBalance = balance;
 
-    QtConcurrent::run([this, applyVolume, applyBalance]() {
+    QThreadPool::globalInstance()->start([this, applyVolume, applyBalance]() {
         {
             QMutexLocker locker(&m_mixerMutex);
             if (!m_shuttingDown.load() && initSuccess) {
@@ -204,7 +204,7 @@ void SystemAudioControl::onPollTimer()
         return;
     }
 
-    QtConcurrent::run([this]() {
+    QThreadPool::globalInstance()->start([this]() {
         const int oldVolume = volume;
         const int oldBalance = balance;
 
