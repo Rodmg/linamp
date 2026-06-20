@@ -1,3 +1,11 @@
+linamp (1.5.0) unstable; urgency=medium
+
+  * Updated to work on Debian trixie
+  * Refactor: Rewrote CD player audio source to native C++
+  * Feature: Gapless playback on CD player
+
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Sat, 20 Jun 2026 12:00:00 -0600
+
 linamp (1.4.0) unstable; urgency=medium
 
   * Feature: Spotify Source, use Linamp as a Spotify Connect receiver
