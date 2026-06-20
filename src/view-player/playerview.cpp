@@ -43,7 +43,31 @@ PlayerView::PlayerView(QWidget *parent, ControlButtonsWidget *ctlBtns) :
 
     // duration slider and label
     ui->posBar->setRange(0, 0);
-    connect(ui->posBar, &QSlider::sliderMoved, this, &PlayerView::positionChanged);
+    connect(ui->posBar, &QSlider::sliderPressed, this, [this]() {
+        if (!m_deferredSeekEnabled) {
+            return;
+        }
+        m_isUserSeeking = true;
+    });
+    connect(ui->posBar, &QSlider::sliderMoved, this, [this](int value) {
+        if (!m_deferredSeekEnabled) {
+            emit positionChanged(value);
+            return;
+        }
+
+        // Preview time while dragging, but do not seek yet.
+        updateDurationInfo(value / 1000);
+    });
+    connect(ui->posBar, &QSlider::sliderReleased, this, [this]() {
+        if (!m_deferredSeekEnabled) {
+            return;
+        }
+
+        m_isUserSeeking = false;
+        const int value = ui->posBar->value();
+        updateDurationInfo(value / 1000);
+        emit positionChanged(value);
+    });
 
     // Set volume slider
     ui->volumeSlider->setRange(0, 100);
@@ -66,6 +90,10 @@ PlayerView::PlayerView(QWidget *parent, ControlButtonsWidget *ctlBtns) :
         QColor::fromRgb(192,0,0),
     };
     ui->volumeSlider->setGradient(volumeGradientColors, Qt::Horizontal);
+    connect(ui->volumeSlider, &QSlider::sliderPressed, this, &PlayerView::volumeDragStarted);
+    connect(ui->volumeSlider, &QSlider::sliderReleased, this, [this]() {
+        emit volumeDragFinished(ui->volumeSlider->value());
+    });
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &PlayerView::volumeChanged);
 
     // Set Balance Slider
@@ -79,6 +107,10 @@ PlayerView::PlayerView(QWidget *parent, ControlButtonsWidget *ctlBtns) :
         balanceGradientColors.append(volumeGradientColors[i]);
     }
     ui->balanceSlider->setGradient(balanceGradientColors, Qt::Horizontal);
+    connect(ui->balanceSlider, &QSlider::sliderPressed, this, &PlayerView::balanceDragStarted);
+    connect(ui->balanceSlider, &QSlider::sliderReleased, this, [this]() {
+        emit balanceDragFinished(ui->balanceSlider->value());
+    });
     connect(ui->balanceSlider, &QSlider::valueChanged, this, &PlayerView::handleBalanceChanged);
 
     // Reset time counter
@@ -197,6 +229,14 @@ void PlayerView::scale()
     ui->inputLabel->setFont(ilFont);
 }
 
+void PlayerView::setDeferredSeekEnabled(bool enabled)
+{
+    m_deferredSeekEnabled = enabled;
+    if (!enabled) {
+        m_isUserSeeking = false;
+    }
+}
+
 void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
 {
     QString imageSrc;
@@ -226,8 +266,19 @@ void PlayerView::setPlaybackState(MediaPlayer::PlaybackState state)
 
 void PlayerView::setPosition(qint64 progress)
 {
-    if (!ui->posBar->isSliderDown())
+    if (m_deferredSeekEnabled) {
+        if (m_isUserSeeking || ui->posBar->isSliderDown()) {
+            return;
+        }
+
         ui->posBar->setValue(progress);
+        updateDurationInfo(progress / 1000);
+        return;
+    }
+
+    if (!ui->posBar->isSliderDown()) {
+        ui->posBar->setValue(progress);
+    }
 
     updateDurationInfo(progress / 1000);
 }
@@ -291,12 +342,16 @@ void PlayerView::setDuration(qint64 duration)
 
 void PlayerView::setVolume(int volume)
 {
-    ui->volumeSlider->setValue(volume);
+    if (!ui->volumeSlider->isSliderDown()) {
+        ui->volumeSlider->setValue(volume);
+    }
 }
 
 void PlayerView::setBalance(int balance)
 {
-    ui->balanceSlider->setValue(balance);
+    if (!ui->balanceSlider->isSliderDown()) {
+        ui->balanceSlider->setValue(balance);
+    }
 }
 
 void PlayerView::setEqEnabled(bool enabled)
@@ -328,6 +383,12 @@ void PlayerView::setMessage(QString message, qint64 timeout)
     ui->songInfoLabel->setText(message);
     messageTimer->setSingleShot(true);
     messageTimer->start(timeout);
+}
+
+void PlayerView::setPersistentMessage(const QString &message)
+{
+    messageTimer->stop();
+    ui->songInfoLabel->setText(message);
 }
 
 void PlayerView::clearMessage()

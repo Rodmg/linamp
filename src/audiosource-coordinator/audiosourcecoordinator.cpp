@@ -9,11 +9,14 @@ AudioSourceCoordinator::AudioSourceCoordinator(QObject *parent, PlayerView *play
     view->setVolume(system_audio->getVolume());
     connect(system_audio, &SystemAudioControl::volumeChanged, view, &PlayerView::setVolume);
     connect(view, &PlayerView::volumeChanged, this, &AudioSourceCoordinator::setVolume);
+    connect(view, &PlayerView::volumeDragStarted, this, &AudioSourceCoordinator::onVolumeDragStarted);
+    connect(view, &PlayerView::volumeDragFinished, this, &AudioSourceCoordinator::onVolumeDragFinished);
 
     view->setBalance(system_audio->getBalance());
     connect(system_audio, &SystemAudioControl::balanceChanged, view, &PlayerView::setBalance);
     connect(view, &PlayerView::balanceChanged, this, &AudioSourceCoordinator::setBalance);
-
+    connect(view, &PlayerView::balanceDragStarted, this, &AudioSourceCoordinator::onBalanceDragStarted);
+    connect(view, &PlayerView::balanceDragFinished, this, &AudioSourceCoordinator::onBalanceDragFinished);
 }
 
 void AudioSourceCoordinator::setSource(int newSource)
@@ -57,6 +60,8 @@ void AudioSourceCoordinator::setSource(int newSource)
     }
 
     currentSource = newSource;
+    view->setDeferredSeekEnabled(sourceLabels[currentSource] == "CD");
+
     // connect slots to new source
     connect(view, &PlayerView::positionChanged, sources[currentSource], &AudioSource::handleSeek);
     connect(view, &PlayerView::previousClicked, sources[currentSource], &AudioSource::handlePrevious);
@@ -90,21 +95,67 @@ void AudioSourceCoordinator::setSource(int newSource)
 void AudioSourceCoordinator::setVolume(int volume)
 {
     system_audio->setVolume(volume);
-    view->setMessage(QString("VOLUME: %1%").arg(volume), 500);
+    showVolumeMessage(volume, m_volumeDragging);
 }
 
 void AudioSourceCoordinator::setBalance(int balance)
 {
     system_audio->setBalance(balance);
+    showBalanceMessage(balance, m_balanceDragging);
+}
+
+void AudioSourceCoordinator::onVolumeDragStarted()
+{
+    m_volumeDragging = true;
+    showVolumeMessage(system_audio->getVolume(), true);
+}
+
+void AudioSourceCoordinator::onVolumeDragFinished(int volume)
+{
+    m_volumeDragging = false;
+    system_audio->setVolume(volume);
+    showVolumeMessage(volume, false);
+}
+
+void AudioSourceCoordinator::onBalanceDragStarted()
+{
+    m_balanceDragging = true;
+    showBalanceMessage(system_audio->getBalance(), true);
+}
+
+void AudioSourceCoordinator::onBalanceDragFinished(int balance)
+{
+    m_balanceDragging = false;
+    system_audio->setBalance(balance);
+    showBalanceMessage(balance, false);
+}
+
+void AudioSourceCoordinator::showVolumeMessage(int volume, bool persistent)
+{
+    const QString message = QString("VOLUME: %1%").arg(volume);
+    if (persistent) {
+        view->setPersistentMessage(message);
+    } else {
+        view->setMessage(message, 500);
+    }
+}
+
+void AudioSourceCoordinator::showBalanceMessage(int balance, bool persistent)
+{
     QString message;
-    if(balance == 0) {
+    if (balance == 0) {
         message = "BALANCE: CENTER";
     } else {
         message = QString("BALANCE: %1% %2")
-                      .arg(abs(balance))
+                      .arg(qAbs(balance))
                       .arg(balance < 0 ? "LEFT" : "RIGHT");
     }
-    view->setMessage(message, 500);
+
+    if (persistent) {
+        view->setPersistentMessage(message);
+    } else {
+        view->setMessage(message, 500);
+    }
 }
 
 void AudioSourceCoordinator::addSource(AudioSource *source, QString label, bool activate)

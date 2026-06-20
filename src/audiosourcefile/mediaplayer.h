@@ -4,18 +4,12 @@
 
 #include "qmediametadata.h"
 #include "qurl.h"
-#include <QIODevice>
-#include <QBuffer>
-#include <QAudioDecoder>
 #include <QAudioFormat>
-#include <QFile>
-#include <QAudioSink>
-#include <QMutex>
+#include <QObject>
 
-// Class for decode audio files like MP3 and push decoded audio data to QOutputDevice (like speaker) and also signal newData().
-// For decoding it uses QAudioDecoder which uses QAudioFormat for decode audio file for desire format, then put decoded data to buffer.
-// based on: https://github.com/Znurre/QtMixer
-class MediaPlayer : public QIODevice
+class MediaPlayerBackend;
+
+class MediaPlayer : public QObject
 {
     Q_OBJECT
 
@@ -61,44 +55,48 @@ public:
     QString errorString() const;
     QAudioFormat format();
 
-protected:
-    qint64 readData(char* data, qint64 maxlen) override;
-    qint64 writeData(const char* data, qint64 len) override;
+    ~MediaPlayer() override;
 
 private:
-    QBuffer m_input;
-    QBuffer m_output;
-    QByteArray m_data;
-    QAudioFormat m_format;
-    QAudioDecoder *m_decoder = nullptr;
-    QAudioSink *m_audioOutput = nullptr;
-    QUrl m_source;
-    QMediaMetaData m_metaData = QMediaMetaData{};
-    QMutex initMutex;
-    QMutex readMutex;
+    MediaPlayerBackend *m_backend = nullptr;
 
+    QAudioFormat m_format;
+    QMediaMetaData m_metaData = QMediaMetaData{};
     Error m_error = NoError;
     MediaStatus m_status = MediaStatus::NoMedia;
     PlaybackState m_state = PlaybackState::StoppedState;
 
-    bool isInited;
-    bool isDecodingFinished;
-    qint8 bufferUnderrunRetries = 0;
-
-    bool m_seekable = false;
     qint64 m_position = 0;
+    qint64 m_duration = 0;
+    float m_bufferProgress = 0.0;
     float m_volume = 1.0; // range: 0.0 - 1.0
+    QString m_errorString;
+    bool m_hasSource = false;
+    QUrl m_sourceUrl;
 
-    bool init(const QAudioFormat& format);
-    void setupDecoder();
-    void setupAudioOutput();
-    void clearDecoder();
-    void clearAudioOutput();
-    void clear();
-    bool atEnd() const override;
-    void loadMetaData();
-    void setError(Error error);
-    void setMediaStatus(MediaStatus status);
+    static bool isMissingTitle(const QMediaMetaData &metaData);
+    static bool isMissingAlbumTitle(const QMediaMetaData &metaData);
+    static bool isMissingAlbumArtist(const QMediaMetaData &metaData);
+    static bool isMissingGenre(const QMediaMetaData &metaData);
+    static bool isMissingTrackNumber(const QMediaMetaData &metaData);
+    static bool isMissingDate(const QMediaMetaData &metaData);
+    static bool isMissingBitrate(const QMediaMetaData &metaData);
+    static bool isMissingSampleRate(const QMediaMetaData &metaData);
+    static bool isMissingDuration(const QMediaMetaData &metaData);
+
+    static PlaybackState mapPlaybackState(int state);
+    static MediaStatus mapMediaStatus(int status);
+    static Error mapError(int error);
+
+private slots:
+    void handleBackendPlaybackStateChanged(int state);
+    void handleBackendMediaStatusChanged(int status);
+    void handleBackendDurationChanged(qint64 duration);
+    void handleBackendPositionChanged(qint64 position);
+    void handleBackendBufferProgressChanged(float progress);
+    void handleBackendVolumeChanged(float volume);
+    void handleBackendMetaDataChanged(const QMediaMetaData &metaData);
+    void handleBackendErrorChanged(int error, const QString &errorString);
 
 public slots:
     void setSource(const QUrl &source);
@@ -106,19 +104,9 @@ public slots:
     void setPosition(qint64 position);
     void setVolume(float volume);
 
-private slots:
-    void bufferReady();
-    void finished();
-    void onPositionChanged();
-    void onDurationChanged(qint64 duration);
-    void onDecoderError(QAudioDecoder::Error error);
-    void onAtEnd();
-    void onOutputStateChanged(QAudio::State newState);
-
 signals:
     void playbackStateChanged(MediaPlayer::PlaybackState state);
     void mediaStatusChanged(MediaPlayer::MediaStatus status);
-    void newData(const QByteArray& data);
     void durationChanged(qint64 duration);
     void positionChanged(qint64 position);
     void bufferProgressChanged(float progress);

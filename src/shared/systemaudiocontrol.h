@@ -2,7 +2,10 @@
 #define SYSTEMAUDIOCONTROL_H
 
 #include <QObject>
+#include <QMutex>
 #include <QTimer>
+#include <atomic>
+
 #include <alsa/asoundlib.h>
 
 class SystemAudioControl: public QObject {
@@ -21,12 +24,22 @@ signals:
     void volumeChanged(int volume);
     void balanceChanged(int balance);
 
-private:
-    snd_mixer_t *handle;
-    snd_mixer_selem_id_t *sid;
-    snd_mixer_elem_t *elem;
+private slots:
+    void onApplyTimer();
+    void onPollTimer();
 
-    QTimer *pollTimer = nullptr;
+private:
+    snd_mixer_t *handle = nullptr;
+    snd_mixer_selem_id_t *sid = nullptr;
+    snd_mixer_elem_t *elem = nullptr;
+
+    QTimer *m_applyTimer = nullptr;
+    QTimer *m_pollTimer = nullptr;
+    QMutex m_mixerMutex;
+
+    std::atomic_bool m_shuttingDown{false};
+    std::atomic_bool m_applyInFlight{false};
+    std::atomic_bool m_applyPending{false};
 
     bool initSuccess = false;
 
@@ -34,9 +47,10 @@ private:
     int balance = 0; // -100 to 100
 
     void init();
-    void applyAlsaSettings();
-    void loadAlsaSettings();
-
+    void scheduleApply();
+    void performApplyAsync();
+    void applyAlsaSettingsLocked(int applyVolume, int applyBalance);
+    void loadAlsaSettingsLocked();
 };
 
 #endif // SYSTEMAUDIOCONTROL_H

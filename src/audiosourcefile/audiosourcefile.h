@@ -2,14 +2,13 @@
 #define AUDIOSOURCEFILE_H
 
 #include <QObject>
-#include <QAudioOutput>
 
-#include "audiosource.h"
+#include "audiosourcewspectrumcapture.h"
 #include "qmediaplaylist.h"
 #include "playlistmodel.h"
 #include "mediaplayer.h"
 
-class AudioSourceFile : public AudioSource
+class AudioSourceFile : public AudioSourceWSpectrumCapture
 {
     Q_OBJECT
 public:
@@ -43,7 +42,6 @@ private slots:
     void handleMediaError();
     void handlePlaylistPositionChanged(int);
     void handlePlaylistMediaRemoved(int, int);
-    void handleSpectrumData(const QByteArray& data);
 
 
 private:

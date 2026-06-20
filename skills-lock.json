@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "qt-cpp-review": {
+      "source": "theqtcompanyrnd/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/qt-cpp-review/SKILL.md",
+      "computedHash": "b1e0f87faf4fb912c93e4dca74790071be22627c334e52662da6fffc4ec8d0b7"
+    }
+  }
+}

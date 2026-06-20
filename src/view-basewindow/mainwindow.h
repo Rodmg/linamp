@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QStackedLayout>
 #include <QProcess>
-#include "audiosourcecd.h"
+#include "audiosourcecdnative.h"
 #include "audiosourcecoordinator.h"
 #include "audiosourcefile.h"
 #include "audiosourcepython.h"
@@ -31,7 +31,7 @@ public:
     AudioSourceCoordinator *coordinator;
     AudioSourceFile *fileSource;
     AudioSourcePython *btSource;
-    AudioSourceCD *cdSource;
+    AudioSourceCDNative *cdSource;
     AudioSourcePython *spotSource;
 
 public slots:

@@ -8,16 +8,14 @@ Music player app for Linamp - Your favorite music player of the 90s, but in real
 - taglib 1.11.1 or newer
 - libasound2-dev
 - libpipewire-0.3-dev
-- vlc
-- libiso9660-dev
 - libcdio-dev
+- libcdio-paranoia-dev
 - libcdio-utils
-- swig
+- libdiscid-dev
 - python3-pip
 - python3-full
 - python3-dev
 - python3-dbus-next
-- libdiscid0
 
 ## Development
 
@@ -34,10 +32,10 @@ sudo apt-get install build-essential qt6-base-dev qt6-base-dev-tools qt6-multime
 # Install third party library dependencies
 sudo apt-get install libtag1-dev libasound2-dev libpulse-dev libpipewire-0.3-dev libdbus-1-dev -y
 
-# Install dependencies for Python (for CD player functionality)
-sudo apt-get install vlc libiso9660-dev libcdio-dev libcdio-utils swig python3-pip python3-full python3-dev python3-dbus-next libdiscid0 libdiscid-dev -y
+# Install native CD player dependencies
+sudo apt-get install libcdio-dev libcdio-paranoia-dev libcdio-utils libdiscid-dev -y
 
-# Create Python venv and install Python dependencies (for CD player functionality)
+# Create Python venv and install Python dependencies (for BT and Spotify sources)
 ## IMPORTANT: Make sure you are on the folder where you cloned this repo before running the following commands:
 python3 -m venv venv
 source venv/bin/activate
@@ -124,7 +122,7 @@ sudo apt install ./linamp_[version]_[arch].deb
 ### Known issues
 
 - File picker and playlist view doesn't correctly work with mouse input, clicks are not detected (touch works fine). There was a bug with touch input which got fixed by disabling certain mouse events, but this had the side effect that if you don't have a touch screen, you cannot quite use it with a mouse. WORKAROUND: Whenever you want to click something inside the file browser or playlist, click and hold for about one second, this will trigger the click event correctly.
-- In order for the Python integration (and thus, the CD player functionality) to work and not crash, you need to run the app inside the Python venv, you can use the "start.sh" script as a helper to set everything up for you and run it. However, because Qt Creator by default will directly run the player executable outside of the venv, the cd player will crash. I'm yet to find a better way of running it inside Qt Creator, other than telling it to run the "start.sh" script instead of the executable.
+- In order for the Python integration (BT and Spotify sources) to work and not crash, you need to run the app inside the Python venv. Use the "start.sh" script as a helper to set everything up for you and run it. However, because Qt Creator by default will directly run the player executable outside of the venv, those sources will crash. I'm yet to find a better way of running it inside Qt Creator, other than telling it to run the "start.sh" script instead of the executable.
 
 ### Debugging memory leaks:
 
