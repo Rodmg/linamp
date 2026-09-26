@@ -1,3 +1,11 @@
+linamp (1.6.0) unstable; urgency=medium
+
+  * Feature: 10-band graphic equalizer with system-wide PipeWire filter-chain
+  * Feature: Equalizer presets (built-in and custom save, update, and delete)
+  * UI: Equalizer view with response graph, preamp and band faders, and ON toggle
+
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Sat, 26 Sep 2026 12:00:00 -0600
+
 linamp (1.5.0) unstable; urgency=medium
 
   * Updated to work on Debian trixie

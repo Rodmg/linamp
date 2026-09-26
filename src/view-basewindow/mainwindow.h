@@ -9,9 +9,11 @@
 #include "audiosourcefile.h"
 #include "audiosourcepython.h"
 #include "controlbuttonswidget.h"
+#include "equalizerview.h"
 #include "mainmenuview.h"
 #include "playerview.h"
 #include "playlistview.h"
+#include "systemequalizer.h"
 #include "qmediaplaylist.h"
 #include "playlistmodel.h"
 
@@ -28,6 +30,8 @@ public:
     ControlButtonsWidget *controlButtons;
     PlaylistView *playlist;
     MainMenuView *menu;
+    EqualizerView *equalizerView;
+    SystemEqualizer *equalizer;
     AudioSourceCoordinator *coordinator;
     AudioSourceFile *fileSource;
     AudioSourcePython *btSource;
@@ -38,6 +42,7 @@ public slots:
     void showPlayer();
     void showPlaylist();
     void showMenu();
+    void showEqualizer();
     void showShutdownModal();
     void open();
 

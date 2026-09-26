@@ -25,3 +25,4 @@ Testing
 CMakeCache.txt.prev
 .cmake
 
+.DS_Store

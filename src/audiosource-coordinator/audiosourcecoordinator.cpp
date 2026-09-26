@@ -51,7 +51,6 @@ void AudioSourceCoordinator::setSource(int newSource)
         disconnect(sources[currentSource], &AudioSource::dataEmitted, view, &PlayerView::setSpectrumData);
         disconnect(sources[currentSource], &AudioSource::metadataChanged, view, &PlayerView::setMetadata);
         disconnect(sources[currentSource], &AudioSource::durationChanged, view, &PlayerView::setDuration);
-        disconnect(sources[currentSource], &AudioSource::eqEnabledChanged, view, &PlayerView::setEqEnabled);
         disconnect(sources[currentSource], &AudioSource::plEnabledChanged, view, &PlayerView::setPlEnabled);
         disconnect(sources[currentSource], &AudioSource::shuffleEnabledChanged, view, &PlayerView::setShuffleEnabled);
         disconnect(sources[currentSource], &AudioSource::repeatEnabledChanged, view, &PlayerView::setRepeatEnabled);
@@ -79,7 +78,6 @@ void AudioSourceCoordinator::setSource(int newSource)
     connect(sources[currentSource], &AudioSource::dataEmitted, view, &PlayerView::setSpectrumData);
     connect(sources[currentSource], &AudioSource::metadataChanged, view, &PlayerView::setMetadata);
     connect(sources[currentSource], &AudioSource::durationChanged, view, &PlayerView::setDuration);
-    connect(sources[currentSource], &AudioSource::eqEnabledChanged, view, &PlayerView::setEqEnabled);
     connect(sources[currentSource], &AudioSource::plEnabledChanged, view, &PlayerView::setPlEnabled);
     connect(sources[currentSource], &AudioSource::shuffleEnabledChanged, view, &PlayerView::setShuffleEnabled);
     connect(sources[currentSource], &AudioSource::repeatEnabledChanged, view, &PlayerView::setRepeatEnabled);

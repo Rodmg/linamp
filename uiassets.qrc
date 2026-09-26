@@ -18,6 +18,14 @@
         <file>assets/eq_off.png</file>
         <file>assets/eq_on_p.png</file>
         <file>assets/eq_on.png</file>
+        <file>assets/eq_toggle_off_p.png</file>
+        <file>assets/eq_toggle_off.png</file>
+        <file>assets/eq_toggle_on_p.png</file>
+        <file>assets/eq_toggle_on.png</file>
+        <file>assets/eq_presets.png</file>
+        <file>assets/eq_presets_p.png</file>
+        <file>assets/eq_handle.png</file>
+        <file>assets/eq_handle_p.png</file>
         <file>assets/pl_off_p.png</file>
         <file>assets/pl_off.png</file>
         <file>assets/pl_on_p.png</file>
@@ -117,5 +125,6 @@
         <file>assets/source-icon-file.png</file>
         <file>assets/source-icon-spotify.png</file>
         <file>assets/menu-icon-x.png</file>
+        <file>assets/eq-presets-builtin.json</file>
     </qresource>
 </RCC>
