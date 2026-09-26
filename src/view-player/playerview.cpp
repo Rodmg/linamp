@@ -120,6 +120,10 @@ PlayerView::PlayerView(QWidget *parent, ControlButtonsWidget *ctlBtns) :
     setPlaybackState(MediaPlayer::StoppedState);
 
     connect(ui->playlistButton, &QCheckBox::clicked, this, &PlayerView::plClicked);
+    connect(ui->eqButton, &QCheckBox::clicked, this, [this](bool) {
+        ui->eqButton->setChecked(eqEnabled);
+        emit eqClicked();
+    });
 
     // Setup spectrum widget
     QVBoxLayout *spectrumLayout = new QVBoxLayout;

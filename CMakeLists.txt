@@ -34,6 +34,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-basewindow)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-menu)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-player)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-playlist)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/view-equalizer)
 
 qt_add_executable(player WIN32 MACOSX_BUNDLE
     src/audiosource-base/audiosource.cpp
@@ -101,10 +102,21 @@ qt_add_executable(player WIN32 MACOSX_BUNDLE
     src/view-menu/mainmenuview.cpp
     src/view-menu/mainmenuview.h
     src/view-menu/mainmenuview.ui
+    src/view-equalizer/equalizergraph.cpp
+    src/view-equalizer/equalizergraph.h
+    src/view-equalizer/equalizerpresetview.cpp
+    src/view-equalizer/equalizerpresetview.h
+    src/view-equalizer/equalizerview.cpp
+    src/view-equalizer/equalizerview.h
     src/shared/scale.cpp
     src/shared/scale.h
     src/shared/systemaudiocontrol.cpp
     src/shared/systemaudiocontrol.h
+    src/shared/systemequalizer.cpp
+    src/shared/systemequalizer.h
+    src/shared/equalizerbands.h
+    src/shared/equalizerpreset.cpp
+    src/shared/equalizerpreset.h
     src/shared/fft.cpp
     src/shared/fft.h
     src/shared/util.cpp

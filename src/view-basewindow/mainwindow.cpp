@@ -50,6 +50,11 @@ MainWindow::MainWindow(QWidget *parent)
     player = new PlayerView(this, controlButtons);
     player->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
 
+    equalizer = new SystemEqualizer(this);
+    player->setEqEnabled(equalizer->isEnabled());
+    connect(equalizer, &SystemEqualizer::enabledChanged, player, &PlayerView::setEqEnabled);
+    connect(player, &PlayerView::eqClicked, this, &MainWindow::showEqualizer);
+
     playlist = new PlaylistView(this, m_playlistModel);
     playlist->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
 
@@ -115,11 +120,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(menu, &MainMenuView::backClicked, this, &MainWindow::showPlayer);
     connect(menu, &MainMenuView::sourceSelected, coordinator, &AudioSourceCoordinator::setSource);
 
+    equalizerView = new EqualizerView(equalizer, this);
+    equalizerView->setAttribute(Qt::WidgetAttribute::WA_StyledBackground, true);
+    connect(equalizerView, &EqualizerView::backClicked, this, &MainWindow::showPlayer);
+
     // Prepare navigation stack
     viewStack = new QStackedLayout;
     viewStack->addWidget(playerWindow);
     viewStack->addWidget(playlistWindow);
     viewStack->addWidget(menu);
+    viewStack->addWidget(equalizerView);
 
     // Final UI setup and show
     QVBoxLayout *centralLayout = new QVBoxLayout;
@@ -161,6 +171,11 @@ void MainWindow::showPlaylist()
 void MainWindow::showMenu()
 {
     viewStack->setCurrentIndex(2);
+}
+
+void MainWindow::showEqualizer()
+{
+    viewStack->setCurrentIndex(3);
 }
 
 void MainWindow::showShutdownModal()
