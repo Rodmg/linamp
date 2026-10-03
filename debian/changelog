@@ -1,3 +1,9 @@
+linamp (1.6.1) unstable; urgency=medium
+
+  * Bugfix: In some cases, the PipeWire sink volume for the EQ filter was set low, causing low volume overall.
+
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Fri, 02 Oct 2026 21:46:00 -0600
+
 linamp (1.6.0) unstable; urgency=medium
 
   * Feature: 10-band graphic equalizer with system-wide PipeWire filter-chain

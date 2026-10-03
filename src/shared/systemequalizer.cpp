@@ -22,6 +22,7 @@
 namespace {
 
 const char *kEqNodeName = "linamp-eq";
+const char *kEqOutputName = "linamp-eq-output";
 const char *kDefaultSinkKey = "default.audio.sink";
 const char *kConfiguredSinkKey = "default.configured.audio.sink";
 constexpr int kPwTimeoutMs = 3000;
@@ -60,6 +61,7 @@ public:
     pw_registry *registry = nullptr;
     pw_metadata *metadata = nullptr;
     pw_node *node = nullptr;
+    pw_node *outputNode = nullptr;
     pw_impl_module *module = nullptr;
 
     spa_hook coreListener = {};
@@ -75,6 +77,7 @@ public:
     bool syncDone = false;
     int syncSeq = 0;
     uint32_t eqNodeId = 0;
+    uint32_t eqOutputNodeId = 0;
 
     QString defaultSinkName;
     QString hardwareSink;
@@ -149,6 +152,10 @@ public:
                 pw->eqNodeId = id;
                 pw_thread_loop_signal(pw->loop, false);
             }
+            if (name != nullptr && spa_streq(name, kEqOutputName)) {
+                pw->eqOutputNodeId = id;
+                pw_thread_loop_signal(pw->loop, false);
+            }
             if (name != nullptr && mediaClass != nullptr && spa_streq(mediaClass, "Audio/Sink")
                 && !spa_streq(name, kEqNodeName)) {
                 const QString sinkName = QString::fromUtf8(name);
@@ -166,6 +173,10 @@ public:
             pw->eqNodeId = 0;
             pw->node = nullptr;
             pw->owner->m_ready = false;
+        }
+        if (pw->eqOutputNodeId == id) {
+            pw->eqOutputNodeId = 0;
+            pw->outputNode = nullptr;
         }
     }
 
@@ -306,6 +317,57 @@ public:
             return false;
         }
         return true;
+    }
+
+    // WirePlumber starts a new sink at about -24 dB. Keep both EQ nodes at
+    // unity so that attenuation is not stacked on the ALSA volume.
+    bool setUnityVolume(pw_node *target)
+    {
+        if (target == nullptr) {
+            return false;
+        }
+
+        const float volumes[2] = { 1.0f, 1.0f };
+        uint8_t buffer[512];
+        spa_pod_builder builder;
+        spa_pod_builder_init(&builder, buffer, sizeof(buffer));
+
+        spa_pod_frame objectFrame;
+        spa_pod_builder_push_object(&builder, &objectFrame, SPA_TYPE_OBJECT_Props, SPA_PARAM_Props);
+        spa_pod_builder_prop(&builder, SPA_PROP_mute, 0);
+        spa_pod_builder_bool(&builder, false);
+        spa_pod_builder_prop(&builder, SPA_PROP_volume, 0);
+        spa_pod_builder_float(&builder, 1.0f);
+        spa_pod_builder_prop(&builder, SPA_PROP_channelVolumes, 0);
+        spa_pod_builder_array(&builder, sizeof(float), SPA_TYPE_Float, 2, volumes);
+
+        auto *pod = static_cast<spa_pod *>(spa_pod_builder_pop(&builder, &objectFrame));
+        if (pod == nullptr) {
+            qWarning() << "PipeWire EQ failed to build the volume pod";
+            return false;
+        }
+        const int rc = pw_node_set_param(target, SPA_PARAM_Props, 0, pod);
+        if (rc < 0) {
+            qWarning() << "PipeWire EQ failed to set unity volume:" << strerror(-rc);
+            return false;
+        }
+        return true;
+    }
+
+    void bindOutputNode()
+    {
+        if (outputNode != nullptr || eqOutputNodeId == 0 || registry == nullptr) {
+            return;
+        }
+        outputNode = static_cast<pw_node *>(pw_registry_bind(
+            registry, eqOutputNodeId, PW_TYPE_INTERFACE_Node, PW_VERSION_NODE, 0));
+    }
+
+    void setUnityVolumes()
+    {
+        bindOutputNode();
+        setUnityVolume(node);
+        setUnityVolume(outputNode);
     }
 };
 
@@ -511,6 +573,7 @@ void SystemEqualizer::applyAll()
 
     pw_thread_loop_lock(m_pw->loop);
     m_pw->setParams(params);
+    m_pw->setUnityVolumes();
     pw_thread_loop_unlock(m_pw->loop);
 }
 
@@ -626,14 +689,15 @@ bool SystemEqualizer::startPipeWire()
     }
     pw->claimedDefault = true;
     pw->sync();
+    pw->setUnityVolumes();
 
     pw_thread_loop_unlock(pw->loop);
 
     m_ready = true;
     applyAll();
-    QTimer::singleShot(250, this, [this] {
-        applyAll();
-    });
+    // WirePlumber applies its default volume asynchronously, after the node appears.
+    QTimer::singleShot(250, this, [this] { applyAll(); });
+    QTimer::singleShot(1000, this, [this] { applyAll(); });
     qDebug() << "PipeWire EQ ready, hardware sink" << pw->hardwareSink << "enabled" << m_enabled;
     return true;
 }
