@@ -1,4 +1,7 @@
 #include "audiosourcecoordinator.h"
+#include "systemequalizer.h"
+
+#include <QTimer>
 
 AudioSourceCoordinator::AudioSourceCoordinator(QObject *parent, PlayerView *playerView)
     : QObject{parent}
@@ -158,14 +161,25 @@ void AudioSourceCoordinator::showBalanceMessage(int balance, bool persistent)
 
 void AudioSourceCoordinator::addSource(AudioSource *source, QString label, bool activate)
 {
-    // Instantiate sources
     sources.append(source);
     sourceLabels.append(label);
     quint32 idx = sources.length() - 1;
     connect(source, &AudioSource::requestActivation, [=]() {
         this->setSource(idx);
-    } );
-    if(activate) {
+    });
+    connect(source, &AudioSource::playbackStateChanged, this, [this](MediaPlayer::PlaybackState state) {
+        if (state != MediaPlayer::PlayingState) {
+            return;
+        }
+        system_audio->reapply();
+        QTimer::singleShot(400, this, [this] { system_audio->reapply(); });
+    });
+    if (activate) {
         setSource(idx);
     }
+}
+
+void AudioSourceCoordinator::setEqualizer(SystemEqualizer *equalizer)
+{
+    system_audio->setEqualizer(equalizer);
 }

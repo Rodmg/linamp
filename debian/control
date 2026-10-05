@@ -34,7 +34,8 @@ Depends:
  ${python3:Depends},
  python3-full,
  python3-dbus-next,
- libdiscid0
+ libdiscid0,
+ qt6-wayland
 Description: Your favorite music player of the 90s, but in real life
  Music player app for Linamp - Your favorite music player of the 90s,
  but in real life.

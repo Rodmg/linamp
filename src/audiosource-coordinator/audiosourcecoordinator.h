@@ -6,6 +6,8 @@
 #include "systemaudiocontrol.h"
 #include "playerview.h"
 
+class SystemEqualizer;
+
 class AudioSourceCoordinator : public QObject
 {
     Q_OBJECT
@@ -13,6 +15,7 @@ public:
     explicit AudioSourceCoordinator(QObject *parent = nullptr, PlayerView *playerView = nullptr);
 
     void addSource(AudioSource *source, QString label, bool activate = false);
+    void setEqualizer(SystemEqualizer *equalizer);
 
 signals:
     void sourceChanged(int source);

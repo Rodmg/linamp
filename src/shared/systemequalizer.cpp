@@ -3,11 +3,13 @@
 
 #include <QDebug>
 #include <QElapsedTimer>
+#include <QHash>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStringList>
 
 #include <cerrno>
+#include <cmath>
 #include <cstring>
 #include <functional>
 
@@ -44,6 +46,29 @@ QString bandGainKey(int index)
     return QString("b%1:Gain").arg(index);
 }
 
+int clampUi(int value, int min, int max)
+{
+    return value < min ? min : (value > max ? max : value);
+}
+
+float uiToLinear(int value)
+{
+    const float t = clampUi(value, 0, 100) / 100.0f;
+    return t * t * t;
+}
+
+void volumeToChannels(int volume, int balance, float *left, float *right)
+{
+    const float peak = uiToLinear(volume);
+    if (balance <= 0) {
+        *left = peak;
+        *right = peak * (100 + clampUi(balance, -100, 100)) / 100.0f;
+    } else {
+        *right = peak;
+        *left = peak * (100 - clampUi(balance, -100, 100)) / 100.0f;
+    }
+}
+
 }
 
 class SystemEqualizer::Pw {
@@ -60,28 +85,40 @@ public:
     pw_core *core = nullptr;
     pw_registry *registry = nullptr;
     pw_metadata *metadata = nullptr;
+    // Volume uses its own client. The filter-chain client must not also
+    // proxy the hardware sink; doing that wedged PipeWire once audio started.
+    pw_core *volumeCore = nullptr;
+    pw_registry *volumeRegistry = nullptr;
+
     pw_node *node = nullptr;
     pw_node *outputNode = nullptr;
+    pw_node *hardwareNode = nullptr;
     pw_impl_module *module = nullptr;
 
     spa_hook coreListener = {};
     spa_hook registryListener = {};
     spa_hook metadataListener = {};
+    spa_hook volumeCoreListener = {};
 
     bool loopStarted = false;
     bool coreListenerAdded = false;
     bool registryListenerAdded = false;
     bool metadataListenerAdded = false;
+    bool volumeCoreListenerAdded = false;
     bool pwInit = false;
 
     bool syncDone = false;
     int syncSeq = 0;
+    bool volumeSyncDone = false;
+    int volumeSyncSeq = 0;
     uint32_t eqNodeId = 0;
     uint32_t eqOutputNodeId = 0;
+    uint32_t hardwareNodeId = 0;
 
     QString defaultSinkName;
     QString hardwareSink;
     QStringList sinkNames;
+    QHash<QString, uint32_t> sinkIds;
     bool hardwareSinkChosen = false;
     bool claimedDefault = false;
 
@@ -101,6 +138,17 @@ public:
         Q_UNUSED(data);
         Q_UNUSED(seq);
         qWarning() << "PipeWire EQ error id" << id << "res" << res << (message != nullptr ? message : "");
+    }
+
+    static void onVolumeCoreDone(void *data, uint32_t id, int seq)
+    {
+        auto *pw = static_cast<Pw *>(data);
+        if (id == PW_ID_CORE && seq == pw->volumeSyncSeq) {
+            pw->volumeSyncDone = true;
+        }
+        if (pw->loop != nullptr) {
+            pw_thread_loop_signal(pw->loop, false);
+        }
     }
 
     static int onMetadataProperty(void *data, uint32_t subject, const char *key, const char *type, const char *value)
@@ -159,6 +207,7 @@ public:
             if (name != nullptr && mediaClass != nullptr && spa_streq(mediaClass, "Audio/Sink")
                 && !spa_streq(name, kEqNodeName)) {
                 const QString sinkName = QString::fromUtf8(name);
+                pw->sinkIds.insert(sinkName, id);
                 if (!pw->sinkNames.contains(sinkName)) {
                     pw->sinkNames.append(sinkName);
                 }
@@ -171,21 +220,34 @@ public:
         auto *pw = static_cast<Pw *>(data);
         if (pw->eqNodeId == id) {
             pw->eqNodeId = 0;
-            pw->node = nullptr;
-            pw->owner->m_ready = false;
+            pw->destroyNode(&pw->node);
+            if (pw->owner != nullptr) {
+                pw->owner->m_ready = false;
+            }
         }
         if (pw->eqOutputNodeId == id) {
             pw->eqOutputNodeId = 0;
-            pw->outputNode = nullptr;
+            pw->destroyNode(&pw->outputNode);
+        }
+        if (pw->hardwareNodeId == id) {
+            pw->destroyNode(&pw->hardwareNode);
+            pw->hardwareNodeId = 0;
+        }
+        for (auto it = pw->sinkIds.begin(); it != pw->sinkIds.end(); ) {
+            if (it.value() == id) {
+                it = pw->sinkIds.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
 
-    bool waitUntil(const std::function<bool()> &pred)
+    bool waitUntil(const std::function<bool()> &pred, int timeoutMs = kPwTimeoutMs)
     {
         QElapsedTimer timer;
         timer.start();
         while (!pred()) {
-            if (timer.elapsed() > kPwTimeoutMs) {
+            if (timer.elapsed() > timeoutMs) {
                 return false;
             }
             pw_thread_loop_timed_wait(loop, 1);
@@ -201,6 +263,16 @@ public:
         syncDone = false;
         syncSeq = pw_core_sync(core, PW_ID_CORE, 0);
         return waitUntil([this] { return syncDone; });
+    }
+
+    bool syncVolume()
+    {
+        if (volumeCore == nullptr) {
+            return false;
+        }
+        volumeSyncDone = false;
+        volumeSyncSeq = pw_core_sync(volumeCore, PW_ID_CORE, 0);
+        return waitUntil([this] { return volumeSyncDone; });
     }
 
     QString chooseHardwareSink() const
@@ -274,10 +346,12 @@ public:
                    "    node.name = \"linamp-eq\"\n"
                    "    node.description = \"Linamp Equalizer\"\n"
                    "    media.class = Audio/Sink\n"
+                   "    state.restore-props = \"false\"\n"
                    "}\n"
                    "playback.props = {\n"
                    "    node.name = \"linamp-eq-output\"\n"
                    "    node.passive = true\n"
+                   "    state.restore-props = \"false\"\n"
                    "    %3\n"
                    "}\n")
             .arg(nodes, links, targetLine);
@@ -319,8 +393,8 @@ public:
         return true;
     }
 
-    // WirePlumber starts a new sink at about -24 dB. Keep both EQ nodes at
-    // unity so that attenuation is not stacked on the ALSA volume.
+    // Raise a node that WirePlumber left at its new-output default. Does not
+    // touch mute, so a mute set elsewhere stays in place.
     bool setUnityVolume(pw_node *target)
     {
         if (target == nullptr) {
@@ -334,8 +408,6 @@ public:
 
         spa_pod_frame objectFrame;
         spa_pod_builder_push_object(&builder, &objectFrame, SPA_TYPE_OBJECT_Props, SPA_PARAM_Props);
-        spa_pod_builder_prop(&builder, SPA_PROP_mute, 0);
-        spa_pod_builder_bool(&builder, false);
         spa_pod_builder_prop(&builder, SPA_PROP_volume, 0);
         spa_pod_builder_float(&builder, 1.0f);
         spa_pod_builder_prop(&builder, SPA_PROP_channelVolumes, 0);
@@ -354,6 +426,15 @@ public:
         return true;
     }
 
+    void destroyNode(pw_node **target)
+    {
+        if (target == nullptr || *target == nullptr) {
+            return;
+        }
+        pw_proxy_destroy(reinterpret_cast<pw_proxy *>(*target));
+        *target = nullptr;
+    }
+
     void bindOutputNode()
     {
         if (outputNode != nullptr || eqOutputNodeId == 0 || registry == nullptr) {
@@ -361,13 +442,153 @@ public:
         }
         outputNode = static_cast<pw_node *>(pw_registry_bind(
             registry, eqOutputNodeId, PW_TYPE_INTERFACE_Node, PW_VERSION_NODE, 0));
+        if (outputNode != nullptr) {
+            sync();
+        }
     }
 
-    void setUnityVolumes()
+    void correctInitialVolumes()
     {
         bindOutputNode();
+        qDebug() << "PipeWire EQ restoring unity sink volume";
         setUnityVolume(node);
         setUnityVolume(outputNode);
+    }
+
+    void bindHardware()
+    {
+        if (hardwareNode != nullptr || context == nullptr) {
+            return;
+        }
+        const uint32_t id = sinkIds.value(hardwareSink, 0);
+        if (id == 0) {
+            return;
+        }
+        if (volumeCore == nullptr) {
+            volumeCore = pw_context_connect(context, nullptr, 0);
+            if (volumeCore == nullptr) {
+                qWarning() << "PipeWire volume client failed to connect:" << strerror(errno);
+                return;
+            }
+            static const pw_core_events events = {
+                .version = PW_VERSION_CORE_EVENTS,
+                .done = &Pw::onVolumeCoreDone,
+                .error = &Pw::onCoreError,
+            };
+            pw_core_add_listener(volumeCore, &volumeCoreListener, &events, this);
+            volumeCoreListenerAdded = true;
+            volumeRegistry = pw_core_get_registry(volumeCore, PW_VERSION_REGISTRY, 0);
+            if (volumeRegistry == nullptr || !syncVolume()) {
+                qWarning() << "PipeWire volume client failed to sync";
+                return;
+            }
+        }
+        hardwareNode = static_cast<pw_node *>(pw_registry_bind(
+            volumeRegistry, id, PW_TYPE_INTERFACE_Node, PW_VERSION_NODE, 0));
+        if (hardwareNode == nullptr) {
+            qWarning() << "PipeWire volume failed to bind" << hardwareSink;
+            return;
+        }
+        hardwareNodeId = id;
+        syncVolume();
+        // Do not subscribe to Props. Playback emits volume updates, and a
+        // listener that writes back spins this loop and wedges PipeWire.
+        qDebug() << "PipeWire volume controlling hardware sink" << hardwareSink;
+    }
+
+    bool setHardwareChannelVolumes(float left, float right)
+    {
+        bindHardware();
+        if (hardwareNode == nullptr) {
+            return false;
+        }
+        // Applied gain is volume * channelVolumes. Slider goes in volume.
+        const float peak = left >= right ? left : right;
+        float channels[2];
+        if (peak <= 1.0e-6f) {
+            channels[0] = 1.0f;
+            channels[1] = 1.0f;
+        } else {
+            channels[0] = left / peak;
+            channels[1] = right / peak;
+        }
+        uint8_t buffer[512];
+        spa_pod_builder builder;
+        spa_pod_builder_init(&builder, buffer, sizeof(buffer));
+        spa_pod_frame objectFrame;
+        spa_pod_builder_push_object(&builder, &objectFrame, SPA_TYPE_OBJECT_Props, SPA_PARAM_Props);
+        spa_pod_builder_prop(&builder, SPA_PROP_volume, 0);
+        spa_pod_builder_float(&builder, peak);
+        spa_pod_builder_prop(&builder, SPA_PROP_channelVolumes, 0);
+        spa_pod_builder_array(&builder, sizeof(float), SPA_TYPE_Float, 2, channels);
+        auto *pod = static_cast<spa_pod *>(spa_pod_builder_pop(&builder, &objectFrame));
+        if (pod == nullptr) {
+            return false;
+        }
+        const int rc = pw_node_set_param(hardwareNode, SPA_PARAM_Props, 0, pod);
+        if (rc < 0) {
+            qWarning() << "PipeWire volume set-param failed:" << strerror(-rc);
+            return false;
+        }
+        return true;
+    }
+
+    // Tear down while the thread loop is still running so the daemon
+    // actually receives the unexport. Stopping the loop first leaves
+    // linamp-eq as a zombie default sink and wedges PipeWire.
+    void shutdown()
+    {
+        restoreDefault();
+
+        destroyNode(&hardwareNode);
+        hardwareNodeId = 0;
+        if (volumeCoreListenerAdded) {
+            spa_hook_remove(&volumeCoreListener);
+            volumeCoreListenerAdded = false;
+        }
+        if (volumeRegistry != nullptr) {
+            pw_proxy_destroy(reinterpret_cast<pw_proxy *>(volumeRegistry));
+            volumeRegistry = nullptr;
+        }
+        if (volumeCore != nullptr) {
+            pw_core_disconnect(volumeCore);
+            volumeCore = nullptr;
+        }
+
+        destroyNode(&node);
+        destroyNode(&outputNode);
+
+        if (metadataListenerAdded) {
+            spa_hook_remove(&metadataListener);
+            metadataListenerAdded = false;
+        }
+        if (metadata != nullptr) {
+            pw_proxy_destroy(reinterpret_cast<pw_proxy *>(metadata));
+            metadata = nullptr;
+        }
+
+        if (module != nullptr) {
+            pw_impl_module_schedule_destroy(module);
+            module = nullptr;
+            waitUntil([this] { return eqNodeId == 0 && eqOutputNodeId == 0; });
+        }
+
+        if (registryListenerAdded) {
+            spa_hook_remove(&registryListener);
+            registryListenerAdded = false;
+        }
+        if (registry != nullptr) {
+            pw_proxy_destroy(reinterpret_cast<pw_proxy *>(registry));
+            registry = nullptr;
+        }
+        if (coreListenerAdded) {
+            spa_hook_remove(&coreListener);
+            coreListenerAdded = false;
+        }
+        if (core != nullptr) {
+            pw_core_disconnect(core);
+            core = nullptr;
+        }
     }
 };
 
@@ -388,6 +609,7 @@ SystemEqualizer::SystemEqualizer(QObject *parent)
 
 SystemEqualizer::~SystemEqualizer()
 {
+    m_ready = false;
     if (m_applyTimer != nullptr) {
         m_applyTimer->stop();
     }
@@ -398,34 +620,22 @@ SystemEqualizer::~SystemEqualizer()
     Pw *pw = m_pw;
     if (pw->loop != nullptr && pw->loopStarted) {
         pw_thread_loop_lock(pw->loop);
-        pw->restoreDefault();
+        pw->shutdown();
         pw_thread_loop_unlock(pw->loop);
         pw_thread_loop_stop(pw->loop);
     }
 
-    if (pw->registryListenerAdded) {
-        spa_hook_remove(&pw->registryListener);
-    }
-    if (pw->metadataListenerAdded) {
-        spa_hook_remove(&pw->metadataListener);
-    }
-    if (pw->coreListenerAdded) {
-        spa_hook_remove(&pw->coreListener);
-    }
-    if (pw->registry != nullptr) {
-        pw_proxy_destroy(reinterpret_cast<pw_proxy *>(pw->registry));
-    }
-    if (pw->core != nullptr) {
-        pw_core_disconnect(pw->core);
-    }
     if (pw->context != nullptr) {
         pw_context_destroy(pw->context);
+        pw->context = nullptr;
     }
     if (pw->loop != nullptr) {
         pw_thread_loop_destroy(pw->loop);
+        pw->loop = nullptr;
     }
     if (pw->pwInit) {
         pw_deinit();
+        pw->pwInit = false;
     }
     delete pw;
     m_pw = nullptr;
@@ -434,6 +644,11 @@ SystemEqualizer::~SystemEqualizer()
 bool SystemEqualizer::isEnabled() const
 {
     return m_ready && m_enabled;
+}
+
+QString SystemEqualizer::hardwareSink() const
+{
+    return m_hardwareSink;
 }
 
 double SystemEqualizer::preampDb() const
@@ -497,6 +712,19 @@ void SystemEqualizer::flush()
     if (m_ready) {
         applyAll();
     }
+}
+
+void SystemEqualizer::setHardwareVolume(int volume, int balance)
+{
+    if (m_pw == nullptr || m_pw->loop == nullptr) {
+        return;
+    }
+    float left = 1.0f;
+    float right = 1.0f;
+    volumeToChannels(volume, balance, &left, &right);
+    pw_thread_loop_lock(m_pw->loop);
+    m_pw->setHardwareChannelVolumes(left, right);
+    pw_thread_loop_unlock(m_pw->loop);
 }
 
 void SystemEqualizer::applyPending()
@@ -573,7 +801,16 @@ void SystemEqualizer::applyAll()
 
     pw_thread_loop_lock(m_pw->loop);
     m_pw->setParams(params);
-    m_pw->setUnityVolumes();
+    pw_thread_loop_unlock(m_pw->loop);
+}
+
+void SystemEqualizer::correctInitialSinkVolume()
+{
+    if (!m_ready || m_pw == nullptr || m_pw->loop == nullptr) {
+        return;
+    }
+    pw_thread_loop_lock(m_pw->loop);
+    m_pw->correctInitialVolumes();
     pw_thread_loop_unlock(m_pw->loop);
 }
 
@@ -649,6 +886,11 @@ bool SystemEqualizer::startPipeWire()
         return false;
     }
 
+    if (pw->eqNodeId != 0 || pw->eqOutputNodeId != 0) {
+        qDebug() << "PipeWire EQ waiting for leftover equalizer nodes to leave";
+        pw->waitUntil([pw] { return pw->eqNodeId == 0 && pw->eqOutputNodeId == 0; });
+    }
+
     if (pw->eqNodeId == 0) {
         const QByteArray args = pw->moduleArgs().toUtf8();
         qDebug() << "PipeWire EQ loading filter-chain, playback target" << pw->hardwareSink;
@@ -660,10 +902,13 @@ bool SystemEqualizer::startPipeWire()
             return false;
         }
         qDebug() << "PipeWire EQ filter-chain module loaded";
-        if (!pw->waitUntil([pw] { return pw->eqNodeId != 0; })) {
-            qWarning() << "PipeWire EQ timed out waiting for the linamp-eq sink";
-            pw_thread_loop_unlock(pw->loop);
-            return false;
+        if (!pw->waitUntil([pw] { return pw->eqNodeId != 0 && pw->eqOutputNodeId != 0; })) {
+            qWarning() << "PipeWire EQ timed out waiting for equalizer nodes, sink" << pw->eqNodeId
+                       << "output" << pw->eqOutputNodeId;
+            if (pw->eqNodeId == 0) {
+                pw_thread_loop_unlock(pw->loop);
+                return false;
+            }
         }
     } else {
         qDebug() << "PipeWire EQ reusing existing linamp-eq sink";
@@ -689,15 +934,20 @@ bool SystemEqualizer::startPipeWire()
     }
     pw->claimedDefault = true;
     pw->sync();
-    pw->setUnityVolumes();
+    pw->correctInitialVolumes();
+    pw->bindHardware();
 
     pw_thread_loop_unlock(pw->loop);
 
     m_ready = true;
+    m_hardwareSink = pw->hardwareSink;
     applyAll();
-    // WirePlumber applies its default volume asynchronously, after the node appears.
-    QTimer::singleShot(250, this, [this] { applyAll(); });
-    QTimer::singleShot(1000, this, [this] { applyAll(); });
+    // WirePlumber can lower a new node after it appears. One-shot writes
+    // only; do not subscribe, or playback volume events loop forever.
+    QTimer::singleShot(250, this, [this] { correctInitialSinkVolume(); });
+    QTimer::singleShot(1000, this, [this] { correctInitialSinkVolume(); });
+    QTimer::singleShot(2500, this, [this] { correctInitialSinkVolume(); });
     qDebug() << "PipeWire EQ ready, hardware sink" << pw->hardwareSink << "enabled" << m_enabled;
+    emit hardwareSinkChanged(m_hardwareSink);
     return true;
 }
