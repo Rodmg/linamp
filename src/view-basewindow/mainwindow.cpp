@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
     playlist->setAttribute(Qt::WidgetAttribute::WA_StyledBackground,  true);
 
     coordinator = new AudioSourceCoordinator(this, player);
+    coordinator->setEqualizer(equalizer);
     fileSource = new AudioSourceFile(this, m_playlistModel);
     btSource = new AudioSourcePython(LINAMP_PY_MODULE, "BTPlayer", this);
     cdSource = new AudioSourceCDNative(this);

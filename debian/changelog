@@ -1,3 +1,14 @@
+linamp (1.6.2) unstable; urgency=medium
+
+  * Bugfix: Volume and balance control the hardware sound card while the
+    equalizer filter stays at unity gain for system-wide playback through
+    linamp-eq.
+  * Bugfix: Unload the PipeWire EQ filter on exit so restarting the player no
+    longer hangs PipeWire.
+  * Bugfix: Depend on qt6-wayland so the packaged player can start under cage.
+
+ -- Rodrigo Méndez <rodrigo@linamp.org>  Mon, 05 Oct 2026 20:09:00 -0600
+
 linamp (1.6.1) unstable; urgency=medium
 
   * Bugfix: In some cases, the PipeWire sink volume for the EQ filter was set low, causing low volume overall.
